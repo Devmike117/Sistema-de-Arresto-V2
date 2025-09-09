@@ -1,0 +1,1 @@
+# Endpoint de registro
