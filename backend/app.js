@@ -8,9 +8,17 @@ app.use(express.json());
 
 // Importar rutas
 const registerRoutes = require('./routes/register');
+const filesRoutes = require('./routes/files');
+const personsRoutes = require('./routes/persons');
+const statsRoutes = require('./routes/stats');
+
+
 
 // Usar rutas
 app.use('/api/register', registerRoutes);
+app.use('/api/files', filesRoutes);
+app.use('/api/persons', personsRoutes);
+app.use('/api/stats', statsRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
