@@ -1,1 +1,0 @@
-# Endpoint de reconocimiento facial
