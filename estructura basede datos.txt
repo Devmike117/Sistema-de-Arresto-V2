@@ -1,0 +1,48 @@
+-- Tabla Personas
+CREATE TABLE Persons (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100),
+    middle_name VARCHAR(100),
+    last_name VARCHAR(100),
+    dob DATE,
+    gender VARCHAR(10),
+    nationality VARCHAR(50),
+    address VARCHAR(255),
+    phone_number VARCHAR(20),
+    id_number VARCHAR(50),
+    photo_path VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabla Arrestos
+CREATE TABLE Arrests (
+    id SERIAL PRIMARY KEY,
+    person_id INTEGER REFERENCES Persons(id),
+    arrest_date TIMESTAMP DEFAULT NOW(),
+    offense VARCHAR(255),
+    location VARCHAR(255),
+    arresting_officer VARCHAR(100),
+    case_number VARCHAR(50),
+    bail_status BOOLEAN,
+    notes TEXT
+);
+
+-- Tabla FacialData
+CREATE TABLE FacialData (
+    id SERIAL PRIMARY KEY,
+    person_id INTEGER REFERENCES Persons(id),
+    embedding BYTEA,
+    image_path VARCHAR(255),
+    capture_date TIMESTAMP DEFAULT NOW(),
+    camera_id VARCHAR(50)
+);
+
+-- Tabla Fingerprints
+CREATE TABLE Fingerprints (
+    id SERIAL PRIMARY KEY,
+    person_id INTEGER REFERENCES Persons(id),
+    template BYTEA,
+    scan_date TIMESTAMP DEFAULT NOW(),
+    finger VARCHAR(20)
+);
