@@ -1,24 +1,244 @@
-// Formulario de registro
-import React from 'react';
+import React, { useState } from 'react';
 
-function RegisterForm() {
+// RegisterForm.jsx
+// Componente React listo para usarse con Tailwind CSS.
+// Envía multipart/form-data a POST /api/register (tu backend).
+
+export default function RegisterForm() {
+  const [form, setForm] = useState({
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    dob: '',
+    gender: 'Masculino',
+    nationality: '',
+    address: '',
+    phone_number: '',
+    id_number: '',
+    notes: '',
+    offense: '',
+    location: '',
+    arresting_officer: '',
+    case_number: '',
+    bail_status: false
+  });
+
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [fingerprintFile, setFingerprintFile] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  function handleChange(e) {
+    const { name, value, type, checked } = e.target;
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  function handlePhotoChange(e) {
+    const file = e.target.files[0];
+    setPhotoFile(file || null);
+    if (file) setPhotoPreview(URL.createObjectURL(file));
+    else setPhotoPreview(null);
+  }
+
+  function handleFingerprintChange(e) {
+    const file = e.target.files[0];
+    setFingerprintFile(file || null);
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setMessage(null);
+
+    // Validaciones básicas
+    if (!form.first_name || !form.last_name || !form.offense) {
+      setMessage({ type: 'error', text: 'Completa nombre, apellido y motivo del arresto.' });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+
+      // Campos de texto
+      Object.keys(form).forEach(key => {
+        // convert boolean to string for multipart
+        const val = typeof form[key] === 'boolean' ? String(form[key]) : form[key] || '';
+        formData.append(key, val);
+      });
+
+      // Archivos
+      if (photoFile) formData.append('photo', photoFile);
+      // Si tu backend tiene otro nombre para huella, cámbialo aquí
+      if (fingerprintFile) formData.append('fingerprint', fingerprintFile);
+
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: `Registrado correctamente. ID: ${data.personId}` });
+        // limpiar formulario
+        setForm({
+          first_name: '',
+          middle_name: '',
+          last_name: '',
+          dob: '',
+          gender: 'Masculino',
+          nationality: '',
+          address: '',
+          phone_number: '',
+          id_number: '',
+          notes: '',
+          offense: '',
+          location: '',
+          arresting_officer: '',
+          case_number: '',
+          bail_status: false
+        });
+        setPhotoFile(null);
+        setPhotoPreview(null);
+        setFingerprintFile(null);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Error en el servidor' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'Error al enviar. Revisa la consola.' });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <form>
-      <label>Nombre:</label>
-      <input type="text" name="nombre" />
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow">
+      <h2 className="text-2xl font-semibold mb-4">Registro de persona arrestada</h2>
 
-      <label>Edad:</label>
-      <input type="number" name="edad" />
+      {message && (
+        <div className={`mb-4 p-3 rounded ${message.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          {message.text}
+        </div>
+      )}
 
-      <label>Género:</label>
-      <select name="genero">
-        <option value="masculino">Masculino</option>
-        <option value="femenino">Femenino</option>
-      </select>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-sm">Nombre</label>
+            <input name="first_name" value={form.first_name} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">Segundo nombre</label>
+            <input name="middle_name" value={form.middle_name} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">Apellido</label>
+            <input name="last_name" value={form.last_name} onChange={handleChange} className="mt-1 input" />
+          </div>
+        </div>
 
-      <button type="submit">Registrar</button>
-    </form>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-sm">Fecha de nacimiento</label>
+            <input type="date" name="dob" value={form.dob} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">Género</label>
+            <select name="gender" value={form.gender} onChange={handleChange} className="mt-1 input">
+              <option>Masculino</option>
+              <option>Femenino</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm">Nacionalidad</label>
+            <input name="nationality" value={form.nationality} onChange={handleChange} className="mt-1 input" />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm">Dirección</label>
+          <input name="address" value={form.address} onChange={handleChange} className="mt-1 input" />
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-sm">Teléfono</label>
+            <input name="phone_number" value={form.phone_number} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">ID (INE / Pasaporte)</label>
+            <input name="id_number" value={form.id_number} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center">
+              <input type="checkbox" name="bail_status" checked={form.bail_status} onChange={handleChange} className="mr-2" />
+              <span className="text-sm">Liberado bajo fianza</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-sm">Delito</label>
+            <input name="offense" value={form.offense} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">Lugar</label>
+            <input name="location" value={form.location} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">Oficial</label>
+            <input name="arresting_officer" value={form.arresting_officer} onChange={handleChange} className="mt-1 input" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm">No. de caso</label>
+            <input name="case_number" value={form.case_number} onChange={handleChange} className="mt-1 input" />
+          </div>
+          <div>
+            <label className="block text-sm">Observaciones</label>
+            <input name="notes" value={form.notes} onChange={handleChange} className="mt-1 input" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 items-start">
+          <div>
+            <label className="block text-sm">Foto (frontal)</label>
+            <input type="file" accept="image/*" onChange={handlePhotoChange} className="mt-1" />
+
+            {photoPreview && (
+              <img src={photoPreview} alt="preview" className="mt-2 w-40 h-48 object-cover rounded" />
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm">Huella (opcional: subir archivo o usar SDK)</label>
+            <input type="file" accept="image/*,.iso,.wsq" onChange={handleFingerprintChange} className="mt-1" />
+            <p className="text-xs text-gray-500 mt-1">Si usas un escáner con SDK, en vez de subir archivo usa la integración del SDK que envíe la plantilla biométrica al backend.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 mt-4">
+          <button disabled={loading} className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">{loading ? 'Enviando...' : 'Registrar'}</button>
+          <button type="button" onClick={() => {
+            setForm({
+              first_name: '', middle_name: '', last_name: '', dob: '', gender: 'Masculino', nationality: '', address: '', phone_number: '', id_number: '', notes: '', offense: '', location: '', arresting_officer: '', case_number: '', bail_status: false
+            });
+            setPhotoFile(null); setPhotoPreview(null); setFingerprintFile(null); setMessage(null);
+          }} className="px-4 py-2 rounded border">Limpiar</button>
+        </div>
+      </form>
+
+      <style jsx>{`
+        .input { width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; }
+      `}</style>
+    </div>
   );
 }
-
-export default RegisterForm;
