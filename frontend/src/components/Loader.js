@@ -16,10 +16,10 @@ export default function Loader({ onFinish }) {
         if (prev >= 100) {
           clearInterval(textInterval);
           clearInterval(progressInterval);
-          setFadeOut(true); // activa la animación de desvanecimiento
+          setFadeOut(true); 
           setTimeout(() => {
-            if (onFinish) onFinish(); // desmonta después de la transición
-          }, 800); // coincide con la duración en CSS
+            if (onFinish) onFinish(); 
+          }, 800); 
           return 100;
         }
         return prev + 1.5;

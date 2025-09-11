@@ -52,7 +52,7 @@ function App() {
       justifyContent: "center",
       alignItems: "center",
       height: "100vh",
-      backgroundImage: "url('/bienvenida.png')", // ← imagen de fondo
+      backgroundImage: "url('/bienvenida.png')", 
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat",
@@ -60,7 +60,7 @@ function App() {
       textAlign: "center"
     }}>
       <div style={{
-        backgroundColor: "rgba(0, 0, 0, 0.6)", // ← capa oscura para contraste
+        backgroundColor: "rgba(0, 0, 0, 0.6)", 
         padding: "2rem",
         borderRadius: "12px"
       }}>
