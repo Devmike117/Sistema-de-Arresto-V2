@@ -1,10 +1,8 @@
+// src/components/RegisterForm.js
 import React, { useState } from 'react';
 import './register-form.css';
-// RegisterForm.jsx
-// Componente React listo para usarse con Tailwind CSS.
-// Envía multipart/form-data a POST /api/register (tu backend).
 
-export default function RegisterForm() {
+export default function RegisterForm({ onNext }) {
   const [form, setForm] = useState({
     first_name: '',
     middle_name: '',
@@ -23,11 +21,6 @@ export default function RegisterForm() {
     bail_status: false
   });
 
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [fingerprintFile, setFingerprintFile] = useState(null);
-
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
   function handleChange(e) {
@@ -35,97 +28,40 @@ export default function RegisterForm() {
     setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   }
 
-  function handlePhotoChange(e) {
-    const file = e.target.files[0];
-    setPhotoFile(file || null);
-    if (file) setPhotoPreview(URL.createObjectURL(file));
-    else setPhotoPreview(null);
-  }
-
-  function handleFingerprintChange(e) {
-    const file = e.target.files[0];
-    setFingerprintFile(file || null);
-  }
-
-  async function handleSubmit(e) {
+  function handleSave(e) {
     e.preventDefault();
-    setMessage(null);
 
-    // Validaciones básicas
+    // Validaciones mínimas
     if (!form.first_name || !form.last_name || !form.offense) {
       setMessage({ type: 'error', text: 'Completa nombre, apellido y motivo del arresto.' });
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-
-      // Campos de texto
-      Object.keys(form).forEach(key => {
-        // convert boolean to string for multipart
-        const val = typeof form[key] === 'boolean' ? String(form[key]) : form[key] || '';
-        formData.append(key, val);
-      });
-
-      // Archivos
-      if (photoFile) formData.append('photo', photoFile);
-      // Si tu backend tiene otro nombre para huella, cámbialo aquí
-      if (fingerprintFile) formData.append('fingerprint', fingerprintFile);
-
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage({ type: 'success', text: `Registrado correctamente. ID: ${data.personId}` });
-        // limpiar formulario
-        setForm({
-          first_name: '',
-          middle_name: '',
-          last_name: '',
-          dob: '',
-          gender: 'Masculino',
-          nationality: '',
-          address: '',
-          phone_number: '',
-          id_number: '',
-          notes: '',
-          offense: '',
-          location: '',
-          arresting_officer: '',
-          case_number: '',
-          bail_status: false
-        });
-        setPhotoFile(null);
-        setPhotoPreview(null);
-        setFingerprintFile(null);
-      } else {
-        setMessage({ type: 'error', text: data.error || 'Error en el servidor' });
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: 'Error al enviar. Revisa la consola.' });
-    } finally {
-      setLoading(false);
+    // Aquí solo guardamos en memoria o pasamos los datos al padre
+    if (onNext) {
+      onNext(form); // Envía datos a otra pantalla (ej: foto + huella)
     }
+
+    setMessage({ type: 'success', text: 'Datos personales guardados, ahora captura foto y huellas.' });
   }
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-semibold mb-4">Registro de persona arrestada</h2>
+      <h2 className="text-2xl font-semibold mb-4">Datos de la persona</h2>
 
       {message && (
-        <div className={`mb-4 p-3 rounded ${message.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        <div
+          className={`mb-4 p-3 rounded ${
+            message.type === 'error'
+              ? 'bg-red-100 text-red-700'
+              : 'bg-green-100 text-green-700'
+          }`}
+        >
           {message.text}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+      <form onSubmit={handleSave} className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Nombre</label>
@@ -208,36 +144,46 @@ export default function RegisterForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 items-start">
-          <div>
-            <label className="block text-sm">Foto (frontal)</label>
-            <input type="file" accept="image/*" onChange={handlePhotoChange} className="mt-1" />
-
-            {photoPreview && (
-              <img src={photoPreview} alt="preview" className="mt-2 w-40 h-48 object-cover rounded" />
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm">Huella (opcional: subir archivo o usar SDK)</label>
-            <input type="file" accept="image/*,.iso,.wsq" onChange={handleFingerprintChange} className="mt-1" />
-            <p className="text-xs text-gray-500 mt-1">Si usas un escáner con SDK, en vez de subir archivo usa la integración del SDK que envíe la plantilla biométrica al backend.</p>
-          </div>
-        </div>
-
         <div className="flex items-center gap-3 mt-4">
-          <button disabled={loading} className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">{loading ? 'Enviando...' : 'Registrar'}</button>
-          <button type="button" onClick={() => {
-            setForm({
-              first_name: '', middle_name: '', last_name: '', dob: '', gender: 'Masculino', nationality: '', address: '', phone_number: '', id_number: '', notes: '', offense: '', location: '', arresting_officer: '', case_number: '', bail_status: false
-            });
-            setPhotoFile(null); setPhotoPreview(null); setFingerprintFile(null); setMessage(null);
-          }} className="px-4 py-2 rounded border">Limpiar</button>
+          <button type="submit" className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+            Guardar y continuar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setForm({
+                first_name: '',
+                middle_name: '',
+                last_name: '',
+                dob: '',
+                gender: 'Masculino',
+                nationality: '',
+                address: '',
+                phone_number: '',
+                id_number: '',
+                notes: '',
+                offense: '',
+                location: '',
+                arresting_officer: '',
+                case_number: '',
+                bail_status: false
+              });
+              setMessage(null);
+            }}
+            className="px-4 py-2 rounded border"
+          >
+            Limpiar
+          </button>
         </div>
       </form>
 
       <style jsx>{`
-        .input { width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; }
+        .input {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.375rem;
+        }
       `}</style>
     </div>
   );

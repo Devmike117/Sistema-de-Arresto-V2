@@ -1,47 +1,117 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// GET /api/persons → listar todas las personas
-router.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM Persons ORDER BY created_at DESC');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Error al obtener las personas' });
+// Crear carpetas si no existen
+const photoDir = path.join(__dirname, '../uploads/photos');
+const fingerprintDir = path.join(__dirname, '../uploads/fingerprints');
+if (!fs.existsSync(photoDir)) fs.mkdirSync(photoDir, { recursive: true });
+if (!fs.existsSync(fingerprintDir)) fs.mkdirSync(fingerprintDir, { recursive: true });
+
+// Configuración de Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'photo') cb(null, photoDir);
+    else if (file.fieldname === 'fingerprint') cb(null, fingerprintDir);
+    else cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
+const upload = multer({ storage });
 
-// GET /api/persons/:id → obtener persona y sus arrestos
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
+/**
+ * Paso 1: Crear persona (sin foto ni huellas)
+ */
+router.post('/create-person', async (req, res) => {
+  const client = await pool.connect();
   try {
-    // Datos de la persona
-    const personResult = await pool.query('SELECT * FROM Persons WHERE id = $1', [id]);
-    if (personResult.rows.length === 0) return res.status(404).json({ error: 'Persona no encontrada' });
+    const {
+      first_name, middle_name, last_name, dob, gender, nationality,
+      address, phone_number, id_number, notes
+    } = req.body;
 
-    const person = personResult.rows[0];
+    await client.query('BEGIN');
 
-    // Arrestos de la persona
-    const arrestsResult = await pool.query('SELECT * FROM Arrests WHERE person_id = $1 ORDER BY arrest_date DESC', [id]);
+    const result = await client.query(
+      `INSERT INTO Persons (
+        first_name, middle_name, last_name, dob, gender, nationality,
+        address, phone_number, id_number, notes
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      RETURNING id`,
+      [first_name, middle_name, last_name, dob, gender, nationality,
+       address, phone_number, id_number, notes]
+    );
 
-    // Facial data
-    const facialResult = await pool.query('SELECT * FROM FacialData WHERE person_id = $1', [id]);
-
-    // Huellas
-    const fingerprintResult = await pool.query('SELECT * FROM Fingerprints WHERE person_id = $1', [id]);
-
-    res.json({
-      person,
-      arrests: arrestsResult.rows,
-      facialData: facialResult.rows,
-      fingerprints: fingerprintResult.rows
+    await client.query('COMMIT');
+    res.status(201).json({
+      success: true,
+      message: 'Persona creada',
+      personId: result.rows[0].id
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Error al obtener la persona' });
+    await client.query('ROLLBACK');
+    console.error('Error en /create-person:', err.message);
+    res.status(500).json({ success: false, error: 'Error al crear persona' });
+  } finally {
+    client.release();
   }
 });
+
+/**
+ * Paso 2: Subir foto y huellas ligadas a una persona
+ */
+router.post(
+  '/upload-biometric/:personId',
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'fingerprint', maxCount: 1 }
+  ]),
+  async (req, res) => {
+    const client = await pool.connect();
+    try {
+      const { personId } = req.params;
+
+      await client.query('BEGIN');
+
+      // Actualizar foto
+      if (req.files.photo) {
+        await client.query(
+          `UPDATE Persons SET photo_path = $1 WHERE id = $2`,
+          [req.files.photo[0].path, personId]
+        );
+      }
+
+      // Guardar huella si existe
+      if (req.files.fingerprint) {
+        const fingerprintFile = req.files.fingerprint[0];
+        const fingerprintData = fs.readFileSync(fingerprintFile.path);
+
+        await client.query(
+          `INSERT INTO Fingerprints (person_id, template, finger)
+           VALUES ($1,$2,$3)`,
+          [personId, fingerprintData, fingerprintFile.originalname]
+        );
+      }
+
+      await client.query('COMMIT');
+      res.status(200).json({
+        success: true,
+        message: 'Biometría subida con éxito'
+      });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.error('Error en /upload-biometric:', err.message);
+      res.status(500).json({ success: false, error: 'Error al subir biometría' });
+    } finally {
+      client.release();
+    }
+  }
+);
 
 module.exports = router;
