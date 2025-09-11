@@ -1,0 +1,608 @@
+/* ==========================================
+   ESTILOS PARA FORMULARIO DE REGISTRO POLICIAL
+   ========================================== */
+
+/* Reset y base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   CONTENEDOR PRINCIPAL
+   ========================================== */
+.main-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e0f2fe 50%, #e0e7ff 100%);
+  padding: 1rem;
+}
+
+.form-wrapper {
+  max-width: 96rem; /* 6xl */
+  margin: 0 auto;
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+.header-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.header-gradient {
+  background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%);
+  padding: 1.5rem 2rem;
+}
+
+.header-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-emoji {
+  font-size: 2.5rem;
+}
+
+.header-subtitle {
+  color: #c7d2fe;
+  margin-top: 0.5rem;
+}
+
+/* ==========================================
+   FORMULARIO PRINCIPAL
+   ========================================== */
+.form-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.form-content {
+  padding: 1.5rem 2rem;
+}
+
+.form-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+/* ==========================================
+   MENSAJES DE ESTADO
+   ========================================== */
+.message {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  border-left: 4px solid;
+}
+
+.message-success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border-left-color: #22c55e;
+}
+
+.message-error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-left-color: #ef4444;
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.message-icon {
+  font-size: 1.25rem;
+}
+
+/* ==========================================
+   SECCIONES DEL FORMULARIO
+   ========================================== */
+.section {
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid;
+}
+
+/* Sección Datos Personales - Azul */
+.section-personal {
+  background: linear-gradient(90deg, #dbeafe 0%, #e0e7ff 100%);
+  border-color: #bfdbfe;
+}
+
+/* Sección Contacto - Verde */
+.section-contact {
+  background: linear-gradient(90deg, #dcfce7 0%, #d1fae5 100%);
+  border-color: #bbf7d0;
+}
+
+/* Sección Arresto - Rojo */
+.section-arrest {
+  background: linear-gradient(90deg, #fef2f2 0%, #fdf2f8 100%);
+  border-color: #fecaca;
+}
+
+/* Sección Biométricos - Morado */
+.section-biometric {
+  background: linear-gradient(90deg, #faf5ff 0%, #f3e8ff 100%);
+  border-color: #e9d5ff;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-icon {
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.section-icon-blue { background-color: #3b82f6; }
+.section-icon-green { background-color: #10b981; }
+.section-icon-red { background-color: #ef4444; }
+.section-icon-purple { background-color: #8b5cf6; }
+
+.section-content {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+}
+
+/* ==========================================
+   GRIDS RESPONSIVOS
+   ========================================== */
+.grid-1 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+
+@media (min-width: 768px) {
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ==========================================
+   CAMPOS DE ENTRADA
+   ========================================== */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label-icon {
+  font-size: 1rem;
+}
+
+.label-icon-blue { color: #3b82f6; }
+.label-icon-green { color: #10b981; }
+.label-icon-red { color: #ef4444; }
+.label-icon-purple { color: #8b5cf6; }
+
+.field-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: #f9fafb;
+  transition: all 0.2s ease-in-out;
+}
+
+.field-input:hover {
+  border-color: #d1d5db;
+  background-color: white;
+}
+
+.field-input:focus {
+  outline: none;
+  background-color: white;
+}
+
+.field-input-blue:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.field-input-green:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.field-input-red:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.field-input-purple:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.field-input::placeholder {
+  color: #9ca3af;
+}
+
+/* ==========================================
+   CHECKBOX PERSONALIZADO
+   ========================================== */
+.checkbox-container {
+  background-color: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d97706;
+  background-color: white;
+  border: 2px solid #fbbf24;
+  border-radius: 0.25rem;
+}
+
+.checkbox-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f59e0b;
+}
+
+.checkbox-emoji {
+  font-size: 1.125rem;
+}
+
+.checkbox-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+/* ==========================================
+   CARGA DE ARCHIVOS
+   ========================================== */
+.upload-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .upload-container { grid-template-columns: repeat(2, 1fr); }
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.upload-area {
+  border: 2px dashed #d8b4fe;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  border-color: #c084fc;
+}
+
+.upload-input {
+  display: none;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.upload-icon-container {
+  width: 4rem;
+  height: 4rem;
+  background-color: #f3e8ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.upload-icon {
+  font-size: 1.5rem;
+}
+
+.upload-text {
+  color: #8b5cf6;
+  font-weight: 500;
+}
+
+.upload-subtext {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.upload-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preview-image {
+  margin: 0 auto;
+  width: 8rem;
+  height: 10rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.preview-text {
+  font-size: 0.875rem;
+  color: #8b5cf6;
+  font-weight: 500;
+}
+
+.upload-tip {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.tip-text {
+  font-size: 0.75rem;
+  color: #1d4ed8;
+}
+
+/* ==========================================
+   BOTONES
+   ========================================== */
+.button-container {
+  background-color: #f9fafb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .button-group {
+    flex-direction: row;
+  }
+}
+
+.button-primary {
+  width: 100%;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%);
+  color: white;
+  font-weight: 700;
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: linear-gradient(90deg, #4338ca 0%, #1d4ed8 100%);
+  transform: scale(1.05);
+}
+
+.button-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (min-width: 640px) {
+  .button-primary {
+    width: auto;
+  }
+}
+
+.button-secondary {
+  width: 100%;
+  padding: 0.75rem 2rem;
+  border: 2px solid #d1d5db;
+  color: #374151;
+  font-weight: 700;
+  background: white;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.button-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+@media (min-width: 640px) {
+  .button-secondary {
+    width: auto;
+  }
+}
+
+.button-icon {
+  font-size: 1.25rem;
+}
+
+/* ==========================================
+   SPINNER DE CARGA
+   ========================================== */
+.spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid transparent;
+  border-bottom: 2px solid white;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.footer-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* ==========================================
+   UTILIDADES RESPONSIVAS
+   ========================================== */
+@media (max-width: 767px) {
+  .main-container {
+    padding: 0.5rem;
+  }
+  
+  .header-gradient {
+    padding: 1rem 1.5rem;
+  }
+  
+  .header-title {
+    font-size: 1.5rem;
+  }
+  
+  .form-content {
+    padding: 1rem 1.5rem;
+  }
+  
+  .section {
+    padding: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+  }
+  
+  .form-sections {
+    gap: 2rem;
+  }
+}
+
+/* ==========================================
+   ESTADOS DE CAMPO REQUERIDO
+   ========================================== */
+.field-input:required:invalid {
+  border-color: #fbbf24;
+}
+
+.field-input:required:valid {
+  border-color: #10b981;
+}
+
+/* ==========================================
+   ACCESIBILIDAD
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.field-input:focus,
+.button-primary:focus,
+.button-secondary:focus,
+.checkbox-input:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+@media print {
+  .main-container {
+    background: white !important;
+  }
+  
+  .form-card,
+  .header-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  .button-container {
+    display: none !important;
+  }
+}
+

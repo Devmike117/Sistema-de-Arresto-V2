@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import './register-form.css';
 // RegisterForm.jsx
 // Componente React listo para usarse con Tailwind CSS.
 // Envía multipart/form-data a POST /api/register (tu backend).
