@@ -1,8 +1,7 @@
-// src/components/RegisterForm.js
 import React, { useState } from 'react';
 import './register-form.css';
 
-export default function RegisterForm({ onNext }) {
+export default function RegisterForm({ onNext, onMessage }) {
   const [form, setForm] = useState({
     first_name: '',
     middle_name: '',
@@ -21,8 +20,6 @@ export default function RegisterForm({ onNext }) {
     bail_status: false
   });
 
-  const [message, setMessage] = useState(null);
-
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
@@ -31,37 +28,43 @@ export default function RegisterForm({ onNext }) {
   function handleSave(e) {
     e.preventDefault();
 
-    // Validaciones mínimas
     if (!form.first_name || !form.last_name || !form.offense) {
-      setMessage({ type: 'error', text: 'Completa nombre, apellido y motivo del arresto.' });
+      if (onMessage) onMessage({ type: 'error', text: 'Completa nombre, apellido y motivo del arresto.' });
       return;
     }
 
-    // Aquí solo guardamos en memoria o pasamos los datos al padre
-    if (onNext) {
-      onNext(form); // Envía datos a otra pantalla (ej: foto + huella)
-    }
+    if (onNext) onNext(form);
 
-    setMessage({ type: 'success', text: 'Datos personales guardados, ahora captura foto y huellas.' });
+    if (onMessage) onMessage({ type: 'success', text: 'Datos personales guardados, ahora captura foto y huellas.' });
+  }
+
+  function handleReset() {
+    setForm({
+      first_name: '',
+      middle_name: '',
+      last_name: '',
+      dob: '',
+      gender: 'Masculino',
+      nationality: '',
+      address: '',
+      phone_number: '',
+      id_number: '',
+      notes: '',
+      offense: '',
+      location: '',
+      arresting_officer: '',
+      case_number: '',
+      bail_status: false
+    });
+    if (onMessage) onMessage(null);
   }
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow">
       <h2 className="text-2xl font-semibold mb-4">Datos de la persona</h2>
 
-      {message && (
-        <div
-          className={`mb-4 p-3 rounded ${
-            message.type === 'error'
-              ? 'bg-red-100 text-red-700'
-              : 'bg-green-100 text-green-700'
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
-
       <form onSubmit={handleSave} className="grid grid-cols-1 gap-4">
+        {/* Nombre, segundo nombre y apellido */}
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Nombre</label>
@@ -77,6 +80,7 @@ export default function RegisterForm({ onNext }) {
           </div>
         </div>
 
+        {/* Fecha de nacimiento, género, nacionalidad */}
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Fecha de nacimiento</label>
@@ -96,11 +100,13 @@ export default function RegisterForm({ onNext }) {
           </div>
         </div>
 
+        {/* Dirección */}
         <div>
           <label className="block text-sm">Dirección</label>
           <input name="address" value={form.address} onChange={handleChange} className="mt-1 input" />
         </div>
 
+        {/* Teléfono, ID, fianza */}
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Teléfono</label>
@@ -118,6 +124,7 @@ export default function RegisterForm({ onNext }) {
           </div>
         </div>
 
+        {/* Delito, lugar, oficial */}
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Delito</label>
@@ -133,6 +140,7 @@ export default function RegisterForm({ onNext }) {
           </div>
         </div>
 
+        {/* No. caso y observaciones */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm">No. de caso</label>
@@ -144,34 +152,12 @@ export default function RegisterForm({ onNext }) {
           </div>
         </div>
 
+        {/* Botones */}
         <div className="flex items-center gap-3 mt-4">
-          <button type="submit" className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+          <button type="submit" className="btn-primary">
             Guardar y continuar
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setForm({
-                first_name: '',
-                middle_name: '',
-                last_name: '',
-                dob: '',
-                gender: 'Masculino',
-                nationality: '',
-                address: '',
-                phone_number: '',
-                id_number: '',
-                notes: '',
-                offense: '',
-                location: '',
-                arresting_officer: '',
-                case_number: '',
-                bail_status: false
-              });
-              setMessage(null);
-            }}
-            className="px-4 py-2 rounded border"
-          >
+          <button type="button" onClick={handleReset} className="btn-secondary">
             Limpiar
           </button>
         </div>
@@ -183,6 +169,33 @@ export default function RegisterForm({ onNext }) {
           padding: 0.5rem;
           border: 1px solid #e5e7eb;
           border-radius: 0.375rem;
+        }
+
+        .btn-primary {
+          padding: 0.5rem 1rem;
+          background-color: #9580ff;
+          color: #fff;
+          border-radius: 0.375rem;
+          font-weight: bold;
+          border: none;
+          cursor: pointer;
+        }
+
+        .btn-primary:hover {
+          background-color: #7a63e6;
+        }
+
+        .btn-secondary {
+          padding: 0.5rem 1rem;
+          background-color: #f3f4f6;
+          color: #111;
+          border-radius: 0.375rem;
+          border: 1px solid #d1d5db;
+          cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+          background-color: #e5e7eb;
         }
       `}</style>
     </div>

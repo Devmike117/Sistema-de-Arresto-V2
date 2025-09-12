@@ -606,3 +606,43 @@ body {
   }
 }
 
+
+/* Botones principales */
+.btn-primary {
+  padding: 0.5rem 1rem;       /* px-4 py-2 */
+  border-radius: 0.375rem;    /* rounded */
+  background-color: #4f46e5;  /* bg-indigo-600 */
+  color: white;               /* text-white */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;  /* hover:bg-indigo-700 */
+}
+
+/* Botones secundarios / limpiar */
+.btn-secondary {
+  padding: 0.5rem 1rem;       /* px-4 py-2 */
+  border-radius: 0.375rem;    /* rounded */
+  border: 1px solid #d1d5db;  /* border-gray-300 */
+  background-color: white;
+  color: #374151;              /* text-gray-700 */
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f3f4f6;  /* hover:bg-gray-100 */
+  border-color: #9ca3af;
+}
+
+/* Contenedor de botones con espacio */
+.button-group {
+  display: flex;
+  gap: 0.75rem;  /* gap-3 */
+  margin-top: 1rem; /* mt-4 */
+}
+
+
