@@ -24,7 +24,8 @@ body {
 }
 
 .form-wrapper {
-  max-width: 96rem; /* 6xl */
+  max-width: 96rem;
+  /* 6xl */
   margin: 0 auto;
 }
 
@@ -167,10 +168,21 @@ body {
   font-size: 1.25rem;
 }
 
-.section-icon-blue { background-color: #3b82f6; }
-.section-icon-green { background-color: #10b981; }
-.section-icon-red { background-color: #ef4444; }
-.section-icon-purple { background-color: #8b5cf6; }
+.section-icon-blue {
+  background-color: #3b82f6;
+}
+
+.section-icon-green {
+  background-color: #10b981;
+}
+
+.section-icon-red {
+  background-color: #ef4444;
+}
+
+.section-icon-purple {
+  background-color: #8b5cf6;
+}
 
 .section-content {
   background: white;
@@ -183,13 +195,32 @@ body {
 /* ==========================================
    GRIDS RESPONSIVOS
    ========================================== */
-.grid-1 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-.grid-2 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-.grid-3 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+.grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
 
 @media (min-width: 768px) {
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* ==========================================
@@ -214,10 +245,21 @@ body {
   font-size: 1rem;
 }
 
-.label-icon-blue { color: #3b82f6; }
-.label-icon-green { color: #10b981; }
-.label-icon-red { color: #ef4444; }
-.label-icon-purple { color: #8b5cf6; }
+.label-icon-blue {
+  color: #3b82f6;
+}
+
+.label-icon-green {
+  color: #10b981;
+}
+
+.label-icon-red {
+  color: #ef4444;
+}
+
+.label-icon-purple {
+  color: #8b5cf6;
+}
 
 .field-input {
   width: 100%;
@@ -314,7 +356,9 @@ body {
 }
 
 @media (min-width: 768px) {
-  .upload-container { grid-template-columns: repeat(2, 1fr); }
+  .upload-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .upload-section {
@@ -531,27 +575,27 @@ body {
   .main-container {
     padding: 0.5rem;
   }
-  
+
   .header-gradient {
     padding: 1rem 1.5rem;
   }
-  
+
   .header-title {
     font-size: 1.5rem;
   }
-  
+
   .form-content {
     padding: 1rem 1.5rem;
   }
-  
+
   .section {
     padding: 1rem;
   }
-  
+
   .section-title {
     font-size: 1.25rem;
   }
-  
+
   .form-sections {
     gap: 2rem;
   }
@@ -594,13 +638,13 @@ body {
   .main-container {
     background: white !important;
   }
-  
+
   .form-card,
   .header-card {
     box-shadow: none !important;
     border: 1px solid #ccc !important;
   }
-  
+
   .button-container {
     display: none !important;
   }
@@ -609,40 +653,92 @@ body {
 
 /* Botones principales */
 .btn-primary {
-  padding: 0.5rem 1rem;       /* px-4 py-2 */
-  border-radius: 0.375rem;    /* rounded */
-  background-color: #4f46e5;  /* bg-indigo-600 */
-  color: white;               /* text-white */
+  padding: 0.5rem 1rem;
+  /* px-4 py-2 */
+  border-radius: 0.375rem;
+  /* rounded */
+  background-color: #4f46e5;
+  /* bg-indigo-600 */
+  color: white;
+  /* text-white */
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .btn-primary:hover {
-  background-color: #4338ca;  /* hover:bg-indigo-700 */
+  background-color: #4338ca;
+  /* hover:bg-indigo-700 */
 }
 
 /* Botones secundarios / limpiar */
 .btn-secondary {
-  padding: 0.5rem 1rem;       /* px-4 py-2 */
-  border-radius: 0.375rem;    /* rounded */
-  border: 1px solid #d1d5db;  /* border-gray-300 */
+  padding: 0.5rem 1rem;
+  /* px-4 py-2 */
+  border-radius: 0.375rem;
+  /* rounded */
+  border: 1px solid #d1d5db;
+  /* border-gray-300 */
   background-color: white;
-  color: #374151;              /* text-gray-700 */
+  color: #374151;
+  /* text-gray-700 */
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 .btn-secondary:hover {
-  background-color: #f3f4f6;  /* hover:bg-gray-100 */
+  background-color: #f3f4f6;
+  /* hover:bg-gray-100 */
   border-color: #9ca3af;
 }
 
 /* Contenedor de botones con espacio */
 .button-group {
   display: flex;
-  gap: 0.75rem;  /* gap-3 */
-  margin-top: 1rem; /* mt-4 */
+  gap: 0.75rem;
+  /* gap-3 */
+  margin-top: 1rem;
+  /* mt-4 */
 }
 
+/* Estilos para inputs de Botones de Guardar y Limpiar*/
+.input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
 
+.btn-primary {
+  padding: 0.5rem 1rem;
+  background-color: #9580ff;
+  color: #fff;
+  border-radius: 0.375rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #7a63e6;
+}
+
+.btn-secondary {
+  padding: 0.5rem 1rem;
+  background-color: #f3f4f6;
+  color: #111;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #828385ff;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 1rem;
+  /* Más espacio entre botones */
+  margin-top: 1rem;
+}

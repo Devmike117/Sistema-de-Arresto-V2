@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import './FacialCapture.css'; // Archivo CSS externo
 
 export default function FacialCapture({ photoFile, setPhotoFile }) {
   const videoRef = useRef(null);
@@ -19,15 +20,14 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
       }
     }
 
-    startCamera();
+    if (!captured) startCamera();
 
     return () => {
-      // Detener la cámara al desmontar
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []); // ✅ Dependencias vacías, solo se ejecuta al montar
+  }, [captured]);
 
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -53,9 +53,9 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white border border-gray-200 rounded-xl shadow-lg p-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-2">Captura Facial</h3>
-      <p className="text-gray-600 text-sm mb-4">
+    <div className="facial-capture-container">
+      <h3 className="fc-title">Captura Facial</h3>
+      <p className="fc-text">
         Usa la cámara para capturar la foto frontal de la persona. Puedes retomar si no queda bien.
       </p>
 
@@ -63,11 +63,8 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
 
       {!captured ? (
         <>
-          <video ref={videoRef} autoPlay className="w-full rounded-lg shadow" />
-          <button
-            onClick={capturePhoto}
-            className="w-full py-2 mt-4 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
-          >
+          <video ref={videoRef} autoPlay className="fc-video" />
+          <button onClick={capturePhoto} className="fc-btn fc-btn-primary">
             Tomar foto
           </button>
         </>
@@ -76,12 +73,9 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
           <img
             src={URL.createObjectURL(photoFile)}
             alt="captured"
-            className="w-full h-60 object-cover rounded-lg shadow"
+            className="fc-photo"
           />
-          <button
-            onClick={retakePhoto}
-            className="w-full py-2 mt-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
-          >
+          <button onClick={retakePhoto} className="fc-btn fc-btn-warning">
             Retomar foto
           </button>
         </>

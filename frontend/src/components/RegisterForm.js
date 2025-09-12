@@ -153,7 +153,7 @@ export default function RegisterForm({ onNext, onMessage }) {
         </div>
 
         {/* Botones */}
-        <div className="flex items-center gap-3 mt-4">
+        <div className="buttons-container">
           <button type="submit" className="btn-primary">
             Guardar y continuar
           </button>
@@ -162,42 +162,6 @@ export default function RegisterForm({ onNext, onMessage }) {
           </button>
         </div>
       </form>
-
-      <style jsx>{`
-        .input {
-          width: 100%;
-          padding: 0.5rem;
-          border: 1px solid #e5e7eb;
-          border-radius: 0.375rem;
-        }
-
-        .btn-primary {
-          padding: 0.5rem 1rem;
-          background-color: #9580ff;
-          color: #fff;
-          border-radius: 0.375rem;
-          font-weight: bold;
-          border: none;
-          cursor: pointer;
-        }
-
-        .btn-primary:hover {
-          background-color: #7a63e6;
-        }
-
-        .btn-secondary {
-          padding: 0.5rem 1rem;
-          background-color: #f3f4f6;
-          color: #111;
-          border-radius: 0.375rem;
-          border: 1px solid #d1d5db;
-          cursor: pointer;
-        }
-
-        .btn-secondary:hover {
-          background-color: #e5e7eb;
-        }
-      `}</style>
     </div>
   );
 }

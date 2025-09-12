@@ -1,0 +1,64 @@
+.facial-capture-container {
+    max-width: 600px;
+    margin: auto;
+    background-color: #1f2937;
+    /* gris oscuro */
+    color: #f9fafb;
+    /* texto claro */
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.fc-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #f3f4f6;
+}
+
+.fc-text {
+    font-size: 1rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.fc-video,
+.fc-photo {
+    height: 400px;/* antes sin altura específica o 1:1 */
+    width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1rem;
+}
+
+.fc-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 0.5rem;
+}
+
+.fc-btn-primary {
+    background-color: #6366f1;
+    /* morado */
+    color: #fff;
+}
+
+.fc-btn-primary:hover {
+    background-color: #4f46e5;
+}
+
+.fc-btn-warning {
+    background-color: #f59e0b;
+    /* amarillo/naranja */
+    color: #fff;
+}
+
+.fc-btn-warning:hover {
+    background-color: #d97706;
+}
