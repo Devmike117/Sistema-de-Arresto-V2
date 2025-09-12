@@ -1,88 +1,102 @@
-import React, { useState } from "react";
+// backend/routes/register.js
+const express = require('express');
+const router = express.Router();
+const pool = require('../db'); // tu conexión PostgreSQL
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-function RegisterForm({ setPersonId }) {
-  const [formData, setFormData] = useState({
-    first_name: "",
-    middle_name: "",
-    last_name: "",
-    dob: "",
-    gender: "",
-    nationality: "",
-    address: "",
-    phone_number: "",
-    id_number: "",
-    notes: ""
-  });
-  const [message, setMessage] = useState("");
+// Crear carpetas si no existen
+const photoDir = path.join(__dirname, '../uploads/photos');
+const fingerprintDir = path.join(__dirname, '../uploads/fingerprints');
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+if (!fs.existsSync(photoDir)) fs.mkdirSync(photoDir, { recursive: true });
+if (!fs.existsSync(fingerprintDir)) fs.mkdirSync(fingerprintDir, { recursive: true });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:5000/api/persons/create-person", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
+// Configuración de Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'photo') cb(null, photoDir);
+    else if (file.fieldname === 'fingerprint') cb(null, fingerprintDir);
+    else cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
 
-      const data = await res.json();
-      if (data.success) {
-        setPersonId(data.personId); // guardamos el id
-        setMessage("✅ Persona registrada. ID: " + data.personId);
-      } else {
-        setMessage("❌ Error: " + data.error);
-      }
-    } catch (error) {
-      setMessage("⚠️ Error en la conexión con el servidor");
+const upload = multer({ storage });
+
+// Endpoint de registro
+router.post('/', upload.fields([
+  { name: 'photo', maxCount: 1 },
+  { name: 'fingerprint', maxCount: 1 }
+]), async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    // Desestructuramos los datos enviados en formData
+    const {
+      first_name, middle_name, last_name, dob, gender, nationality,
+      address, phone_number, id_number, notes, offense, location,
+      arresting_officer, case_number, bail_status
+    } = req.body;
+
+    await client.query('BEGIN');
+
+    // Guardar persona
+    const personResult = await client.query(
+      `INSERT INTO Persons (first_name, middle_name, last_name, dob, gender, nationality, address, phone_number, id_number, notes, photo_path)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+      [
+        first_name,
+        middle_name,
+        last_name,
+        dob || null,
+        gender,
+        nationality,
+        address,
+        phone_number,
+        id_number,
+        notes,
+        req.files.photo ? req.files.photo[0].path : null
+      ]
+    );
+
+    const personId = personResult.rows[0].id;
+
+    // Guardar arresto
+    await client.query(
+      `INSERT INTO Arrests (person_id, offense, location, arresting_officer, case_number, bail_status, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [personId, offense, location, arresting_officer, case_number, bail_status === 'true', notes]
+    );
+
+    // Guardar huella si existe
+    if (req.files.fingerprint) {
+      const fingerprintFile = req.files.fingerprint[0];
+      const fingerprintData = fs.readFileSync(fingerprintFile.path);
+      await client.query(
+        `INSERT INTO Fingerprints (person_id, template, finger)
+         VALUES ($1,$2,$3)`,
+        [personId, fingerprintData, fingerprintFile.originalname]
+      );
     }
-  };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <label>Nombre:</label>
-      <input type="text" name="first_name" onChange={handleChange} />
+    await client.query('COMMIT');
 
-      <label>Apellido paterno:</label>
-      <input type="text" name="middle_name" onChange={handleChange} />
+    res.status(201).json({
+      success: true,
+      message: 'Persona, arresto y foto registrados correctamente',
+      personId
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error al registrar persona:', err.message);
+    res.status(500).json({ success: false, error: 'Error al registrar persona' });
+  } finally {
+    client.release();
+  }
+});
 
-      <label>Apellido materno:</label>
-      <input type="text" name="last_name" onChange={handleChange} />
-
-      <label>Fecha de nacimiento:</label>
-      <input type="date" name="dob" onChange={handleChange} />
-
-      <label>Género:</label>
-      <select name="gender" onChange={handleChange}>
-        <option value="">Selecciona</option>
-        <option value="masculino">Masculino</option>
-        <option value="femenino">Femenino</option>
-      </select>
-
-      <label>Nacionalidad:</label>
-      <input type="text" name="nationality" onChange={handleChange} />
-
-      <label>Dirección:</label>
-      <input type="text" name="address" onChange={handleChange} />
-
-      <label>Teléfono:</label>
-      <input type="text" name="phone_number" onChange={handleChange} />
-
-      <label>ID / CURP:</label>
-      <input type="text" name="id_number" onChange={handleChange} />
-
-      <label>Notas:</label>
-      <textarea name="notes" onChange={handleChange}></textarea>
-
-      <button type="submit">Guardar datos</button>
-      {message && <p>{message}</p>}
-    </form>
-  );
-}
-
-export default RegisterForm;
+module.exports = router;
