@@ -6,7 +6,9 @@ import FacialCapture from './components/FacialCapture';
 import FingerprintScan from './components/FingerprintScan';
 import Dashboard from './components/Dashboard';
 
+
 function App() {
+
   const [loading, setLoading] = useState(true);
   const [started, setStarted] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
