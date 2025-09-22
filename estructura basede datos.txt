@@ -32,7 +32,7 @@ CREATE TABLE Arrests (
 CREATE TABLE FacialData (
     id SERIAL PRIMARY KEY,
     person_id INTEGER REFERENCES Persons(id),
-    embedding BYTEA,
+    embedding FLOAT8[],
     image_path VARCHAR(255),
     capture_date TIMESTAMP DEFAULT NOW(),
     camera_id VARCHAR(50)

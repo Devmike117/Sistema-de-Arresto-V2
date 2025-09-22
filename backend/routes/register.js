@@ -93,26 +93,23 @@ router.post('/', upload.fields([
         formData.append('file', fs.createReadStream(photoPath));
 
         const response = await axios.post(
-          'http://localhost:8001/generate_embedding/', // tu microservicio DeepFace
+          'http://localhost:8001/generate_embedding/',
           formData,
           {
-            headers: {
-              ...formData.getHeaders()
-            }
+            headers: { ...formData.getHeaders() }
           }
         );
 
-        const embedding = response.data.embedding;
+        const embedding = response.data.embedding; // array de floats
 
         if (!embedding) {
           console.error('❌ No se recibió embedding del microservicio');
         } else {
-          const bufferEmbedding = Buffer.from(JSON.stringify(embedding));
-
+          // Guardar directamente como FLOAT8[] en PostgreSQL
           await client.query(
             `INSERT INTO FacialData (person_id, embedding, image_path)
-             VALUES ($1, $2, $3)`,
-            [personId, bufferEmbedding, photoPath]
+         VALUES ($1, $2, $3)`,
+            [personId, embedding, photoPath]
           );
           console.log('✅ Embedding facial guardado correctamente');
         }
@@ -120,6 +117,7 @@ router.post('/', upload.fields([
         console.error('❌ Error al generar embedding:', err.message);
       }
     }
+
 
     await client.query('COMMIT');
 
