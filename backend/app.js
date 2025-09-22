@@ -14,7 +14,7 @@ const statsRoutes = require('./routes/stats');
 
 
 
-// Usar rutas
+// Rutas
 app.use('/api/register', registerRoutes);
 app.use('/api/files', filesRoutes);
 app.use('/api/persons', personsRoutes);

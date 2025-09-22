@@ -89,6 +89,7 @@ function App() {
               borderRadius: "6px",
               cursor: "pointer",
               fontWeight: "bold",
+              textAlign: "left",
             }}
           >
             Registrar

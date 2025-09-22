@@ -18,6 +18,7 @@ const styles = {
     fontSize: '2.5rem',
     fontWeight: 'bold',
     letterSpacing: '1px',
+    textAlign: 'center',
   },
   nav: {
     marginTop: '1rem',
@@ -58,6 +59,17 @@ const styles = {
     fontSize: '0.9rem',
     borderTop: '1px solid #333',
   },
+
+  biometricContainer: {
+    display: "flex",
+    flexDirection: "column", // Para apilar verticalmente
+    alignItems: "center",    // Centra horizontalmente
+    justifyContent: "center",// Centra verticalmente (si hay altura definida)
+    textAlign: "center",     // Centra el texto
+    padding: "2rem",         // Espaciado opcional
+  },
+  
+
 };
 
 

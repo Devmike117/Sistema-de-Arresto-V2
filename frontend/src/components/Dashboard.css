@@ -1,0 +1,38 @@
+
+/* Nueva sección para filtros */
+.filter-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background-color: #111827; /* fondo más oscuro */
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos del input */
+.search-input {
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+/* Botón ya definido */
+.export-import-btn {
+    background-color: #6366f1;
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.export-import-btn:hover {
+    background-color: #4f46e5;
+    transform: translateY(-2px);
+}
