@@ -6,6 +6,7 @@ import FacialCapture from "./components/FacialCapture";
 import FingerprintScan from "./components/FingerprintScan";
 import Dashboard from "./components/Dashboard";
 import Notification from "./components/Notification";
+import FacialSearch from "./components/FacialSearch"; // Asegúrate de crear este componente
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -20,11 +21,10 @@ function App() {
 
   const handleLoaderFinish = () => setLoading(false);
 
-
   // Guardar datos de RegisterForm
   const handleNextFromRegister = (data) => {
     setPersonData(data);
-    setCurrentSection(1); // Pasar a biometría
+    setCurrentSection(2); // Pasar a biometría
     setMessage({ type: "success", text: "Datos guardados. Ahora captura foto y huellas." });
   };
 
@@ -55,7 +55,7 @@ function App() {
         setPersonData(null);
         setPhotoFile(null);
         setFingerprintFile(null);
-        setCurrentSection(2); // Ir a dashboard
+        setCurrentSection(3); // Ir a dashboard
       } else {
         setMessage({ type: "error", text: data.error || "Error al registrar." });
       }
@@ -66,6 +66,11 @@ function App() {
   };
 
   const sections = [
+    {
+      id: "inicio",
+      title: "Inicio / Búsqueda Facial",
+      content: <FacialSearch onMessage={setMessage} />,
+    },
     {
       id: "registro",
       title: "Formulario de Registro",
@@ -89,7 +94,6 @@ function App() {
               borderRadius: "6px",
               cursor: "pointer",
               fontWeight: "bold",
-              textAlign: "left",
             }}
           >
             Registrar
@@ -103,6 +107,17 @@ function App() {
       content: <Dashboard />,
     },
   ];
+
+  const navButtonStyle = {
+    backgroundColor: "#9580ff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    padding: "0.5rem 1rem",
+    marginRight: "0.5rem",
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
 
   if (loading) return <Loader onFinish={handleLoaderFinish} />;
 
@@ -148,56 +163,15 @@ function App() {
 
   return (
     <main style={styles.container}>
-      {/* Notificación flotante */}
       <Notification message={message} onClose={() => setMessage(null)} />
 
       <header style={styles.header}>
         <h1 style={styles.title}>BioRegistro</h1>
         <nav style={styles.nav}>
-          <button
-            style={{
-              backgroundColor: "#9580ff",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              padding: "0.5rem 1rem",
-              marginRight: "0.5rem",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => setCurrentSection(0)}
-          >
-            Registro
-          </button>
-          <button
-            style={{
-              backgroundColor: "#9580ff",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              padding: "0.5rem 1rem",
-              marginRight: "0.5rem",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => setCurrentSection(1)}
-          >
-            Biometría
-          </button>
-          <button
-            style={{
-              backgroundColor: "#9580ff",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              padding: "0.5rem 1rem",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => setCurrentSection(2)}
-          >
-            Dashboard
-          </button>
+          <button style={navButtonStyle} onClick={() => setCurrentSection(0)}>Inicio</button>
+          <button style={navButtonStyle} onClick={() => setCurrentSection(1)}>Registro</button>
+          <button style={navButtonStyle} onClick={() => setCurrentSection(2)}>Biometría</button>
+          <button style={navButtonStyle} onClick={() => setCurrentSection(3)}>Dashboard</button>
         </nav>
       </header>
 
