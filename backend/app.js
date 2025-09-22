@@ -11,8 +11,9 @@ const registerRoutes = require('./routes/register');
 const filesRoutes = require('./routes/files');
 const personsRoutes = require('./routes/persons');
 const statsRoutes = require('./routes/stats');
+const searchFaceRouter = require("./routes/search_face");
 
-
+app.use("/api/search_face", searchFaceRouter);
 
 // Rutas
 app.use('/api/register', registerRoutes);
