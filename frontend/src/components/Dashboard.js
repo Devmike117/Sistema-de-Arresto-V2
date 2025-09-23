@@ -1,6 +1,5 @@
 // src/components/Dashboard.js
 import React, { useEffect, useState } from "react";
-import FacialSearch from "./FacialSearch";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 
@@ -8,25 +7,33 @@ export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
     totalPersons: 0,
     totalArrests: 0,
-    topDelitos: [],
-    topPersons: []
+    topOffenses: [], // [{ offense: "Robo", count: 5 }]
+    topPersons: []   // [{ name: "Juan Perez", count: 3 }]
   });
   const [arrests, setArrests] = useState([]);
 
   // Obtener datos del dashboard desde backend
   const fetchDashboard = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/dashboard");
-      const data = await res.json();
-      if (res.ok) {
-        setSummary(data.summary);
-        setArrests(data.recentArrests);
-      } else {
-        onMessage({ type: "error", text: data.error || "Error al cargar dashboard" });
-      }
+      // Estadísticas generales
+      const statsRes = await fetch("http://localhost:5000/api/dashboard/stats");
+      const statsData = await statsRes.json();
+
+      // Arrestos recientes
+      const recentRes = await fetch("http://localhost:5000/api/dashboard/recent-arrests");
+      const recentData = await recentRes.json();
+
+      setSummary({
+        totalPersons: statsData.totalPersons,
+        totalArrests: statsData.totalArrests,
+        topOffenses: statsData.topOffenses, // [{ offense, count }]
+        topPersons: statsData.topPersons || [] // [{ name, count }]
+      });
+
+      setArrests(recentData.recentArrests);
     } catch (err) {
       console.error(err);
-      onMessage({ type: "error", text: "Error al cargar dashboard" });
+      if (onMessage) onMessage({ type: "error", text: "Error al cargar dashboard" });
     }
   };
 
@@ -42,8 +49,8 @@ export default function Dashboard({ onMessage }) {
       <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
         <Card title="Personas Registradas" value={summary.totalPersons} color="#4caf50" />
         <Card title="Arrestos Registrados" value={summary.totalArrests} color="#2196f3" />
-        <Card title="Delitos Más Comunes" value={summary.topDelitos.join(", ")} color="#f44336" />
-        <Card title="Personas con Más Arrestos" value={summary.topPersons.join(", ")} color="#ff9800" />
+        <Card title="Delitos Más Comunes" value={summary.topOffenses.map(o => o.offense).join(", ")} color="#f44336" />
+        <Card title="Personas con Más Arrestos" value={summary.topPersons.map(p => p.name).join(", ")} color="#ff9800" />
       </div>
 
       {/* Gráficos */}
@@ -52,11 +59,11 @@ export default function Dashboard({ onMessage }) {
           <h3>Arrestos por Delito</h3>
           <Pie
             data={{
-              labels: summary.topDelitos,
+              labels: summary.topOffenses.map(o => o.offense),
               datasets: [
                 {
-                  data: summary.topDelitos.map(d => Math.floor(Math.random() * 10) + 1), // ejemplo, reemplazar con backend
-                  backgroundColor: ["#4caf50", "#2196f3", "#f44336", "#ff9800"]
+                  data: summary.topOffenses.map(o => o.count),
+                  backgroundColor: ["#4caf50", "#2196f3", "#f44336", "#ff9800", "#9c27b0", "#ff5722"]
                 }
               ]
             }}
@@ -67,11 +74,11 @@ export default function Dashboard({ onMessage }) {
           <h3>Arrestos por Persona</h3>
           <Bar
             data={{
-              labels: summary.topPersons,
+              labels: summary.topPersons.map(p => p.name),
               datasets: [
                 {
                   label: "Cantidad de arrestos",
-                  data: summary.topPersons.map(() => Math.floor(Math.random() * 5) + 1),
+                  data: summary.topPersons.map(p => p.count),
                   backgroundColor: "#2196f3"
                 }
               ]
@@ -108,8 +115,6 @@ export default function Dashboard({ onMessage }) {
           </tbody>
         </table>
       </div>
-
-    
     </div>
   );
 }
