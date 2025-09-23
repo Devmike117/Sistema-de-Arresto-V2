@@ -7,7 +7,7 @@ const path = require('path');
 const axios = require('axios');
 const FormData = require('form-data');
 
-// Carpeta temporal para subir fotos
+// Carpeta temporal
 const tempDir = path.join(__dirname, '../uploads/temp');
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Función para distancia euclidiana
+// Distancia euclidiana
 function euclideanDistance(a, b) {
   let sum = 0;
   for (let i = 0; i < a.length; i++) {
@@ -27,20 +27,19 @@ function euclideanDistance(a, b) {
   return Math.sqrt(sum);
 }
 
-// Normalización de embeddings
+// Normalización
 function normalize(vec) {
-  const norm = Math.sqrt(vec.reduce((sum, x) => sum + x*x, 0));
+  const norm = Math.sqrt(vec.reduce((sum, x) => sum + x * x, 0));
   return vec.map(x => x / norm);
 }
 
-// POST /api/search_face
 router.post('/', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen' });
 
   const photoPath = req.file.path;
 
   try {
-    // 1️⃣ Generar embedding con microservicio
+    // 1️⃣ Embedding desde microservicio
     const formData = new FormData();
     formData.append('file', fs.createReadStream(photoPath), {
       filename: req.file.originalname,
@@ -61,9 +60,9 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     embedding = normalize(embedding);
 
-    // 2️⃣ Obtener embeddings de la base de datos
+    // 2️⃣ Embeddings en DB
     const { rows } = await pool.query(
-      `SELECT fd.person_id, fd.embedding, p.first_name, p.middle_name, p.last_name, p.photo_path
+      `SELECT fd.person_id, fd.embedding, p.*
        FROM FacialData fd
        JOIN Persons p ON p.id = fd.person_id`
     );
@@ -71,10 +70,9 @@ router.post('/', upload.single('file'), async (req, res) => {
     // 3️⃣ Comparar embeddings
     let bestMatch = null;
     let minDistance = Infinity;
-    const threshold = 3.0; // Ajusta según tu modelo
+    const threshold = 0.9;
 
     rows.forEach(row => {
-      // Convertir a número si PostgreSQL lo devuelve como string
       const dbEmbedding = row.embedding.map(Number);
       const dbNorm = normalize(dbEmbedding);
       const distance = euclideanDistance(embedding, dbNorm);
@@ -87,27 +85,51 @@ router.post('/', upload.single('file'), async (req, res) => {
       }
     });
 
-    // 4️⃣ Eliminar archivo temporal
+    // 4️⃣ Eliminar temporal
     fs.unlink(photoPath, err => {
       if (err) console.error('Error al eliminar temporal:', err);
     });
 
     // 5️⃣ Devolver resultado
     if (bestMatch) {
-      res.json({
-        found: true,
-        person: {
-          id: bestMatch.person_id,
-          first_name: bestMatch.first_name,
-          middle_name: bestMatch.middle_name,
-          last_name: bestMatch.last_name,
-          photo_path: bestMatch.photo_path,
-        },
-      });
+      try {
+        // Obtener información completa de la persona
+        const personQuery = await pool.query(
+          `SELECT id, first_name, middle_name, last_name, dob, gender, nationality, 
+              address, phone_number, id_number, photo_path, notes, created_at
+       FROM Persons
+       WHERE id = $1`,
+          [bestMatch.person_id]
+        );
+
+        const person = personQuery.rows[0];
+
+        // Obtener historial de arrestos
+        const arrestQuery = await pool.query(
+          `SELECT id, arrest_date, offense, location, arresting_officer, case_number, 
+              bail_status, notes
+       FROM Arrests
+       WHERE person_id = $1
+       ORDER BY arrest_date DESC`,
+          [bestMatch.person_id]
+        );
+
+        const arrests = arrestQuery.rows;
+
+        res.json({
+          found: true,
+          person: {
+            ...person,
+            arrests, // 👈 incluimos lista de arrestos
+          },
+        });
+      } catch (dbErr) {
+        console.error("Error obteniendo detalles de persona:", dbErr.message);
+        res.status(500).json({ error: "Error obteniendo información de la persona" });
+      }
     } else {
       res.json({ found: false, person: null });
     }
-
   } catch (err) {
     console.error('Error en /api/search_face:', err.message);
     if (fs.existsSync(photoPath)) fs.unlinkSync(photoPath);
