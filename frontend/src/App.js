@@ -104,7 +104,7 @@ function App() {
     {
       id: "dashboard",
       title: "Panel de Control",
-      content: <Dashboard />,
+      content: <Dashboard onMessage={setMessage} />,
     },
   ];
 

@@ -42,38 +42,45 @@ export default function FacialSearch({ onMessage }) {
       setLoading(false);
     }
   };
+  
+  // Formatear fecha
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "N/A";
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 
   // Guardar arresto
   const handleSaveArrest = async (arrestData) => {
-    if (!result || !result.person) return;
+  if (!result || !result.person) return;
 
-    try {
-      const res = await fetch("http://localhost:5000/api/arrests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ person_id: result.person.id, ...arrestData }),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/arrests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ person_id: result.person.id, ...arrestData }),
+    });
 
-      const data = await res.json();
-      if (res.ok) {
-        onMessage({ type: "success", text: "Arresto registrado correctamente" });
-        setShowModal(false);
-        // Actualizar historial de arrestos en la UI
-        setResult((prev) => ({
-          ...prev,
-          person: {
-            ...prev.person,
-            arrests: [...(prev.person.arrests || []), data],
-          },
-        }));
-      } else {
-        onMessage({ type: "error", text: data.error || "Error al registrar arresto" });
-      }
-    } catch (err) {
-      console.error(err);
-      onMessage({ type: "error", text: "Error al registrar arresto" });
+    const data = await res.json();
+    if (res.ok) {
+      onMessage({ type: "success", text: "Arresto registrado correctamente" });
+      setShowModal(false);
+
+      // 🔄 Recarga completa de la persona con sus arrestos
+      handleSearch();
+    } else {
+      onMessage({ type: "error", text: data.error || "Error al registrar arresto" });
     }
-  };
+  } catch (err) {
+    console.error(err);
+    onMessage({ type: "error", text: "Error al registrar arresto" });
+  }
+};
+
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -129,7 +136,7 @@ export default function FacialSearch({ onMessage }) {
                   <h3 style={{ fontSize: "1.4rem" }}>
                     {result.person.first_name} {result.person.middle_name} {result.person.last_name}
                   </h3>
-                  <p><strong>Fecha de Nac.:</strong> {result.person.dob || "N/A"}</p>
+                  <p><strong>Fecha de Nac.:</strong> {formatDate(result.person.dob)}</p>
                   <p><strong>Género:</strong> {result.person.gender || "N/A"}</p>
                   <p><strong>Nacionalidad:</strong> {result.person.nationality || "N/A"}</p>
                 </div>
