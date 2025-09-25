@@ -16,10 +16,10 @@ const searchFaceRouter = require("./routes/search_face");
 const registerArrestRouter = require("./routes/register_arrest");
 const dashboardRouter = require("./routes/dashboard");
 
-app.use("/api/search_face", searchFaceRouter);
 
 // Rutas
 app.use('/api/register', registerRoutes);
+app.use("/api/search_face", searchFaceRouter);
 app.use('/api/files', filesRoutes);
 app.use('/api/persons', personsRoutes);
 app.use('/api/stats', statsRoutes);

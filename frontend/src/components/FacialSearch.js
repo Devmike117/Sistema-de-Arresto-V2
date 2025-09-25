@@ -8,7 +8,6 @@ export default function FacialSearch({ onMessage }) {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Buscar persona
   const handleSearch = async () => {
     if (!photoFile) {
       onMessage({ type: "error", text: "Primero captura la foto." });
@@ -42,45 +41,39 @@ export default function FacialSearch({ onMessage }) {
       setLoading(false);
     }
   };
-  
-  // Formatear fecha
+
   const formatDate = (dateStr) => {
-  if (!dateStr) return "N/A";
-  const d = new Date(dateStr);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-};
+    if (!dateStr) return "N/A";
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
-
-  // Guardar arresto
   const handleSaveArrest = async (arrestData) => {
-  if (!result || !result.person) return;
+    if (!result || !result.person) return;
 
-  try {
-    const res = await fetch("http://localhost:5000/api/arrests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ person_id: result.person.id, ...arrestData }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/arrests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ person_id: result.person.id, ...arrestData }),
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      onMessage({ type: "success", text: "Arresto registrado correctamente" });
-      setShowModal(false);
-
-      // 🔄 Recarga completa de la persona con sus arrestos
-      handleSearch();
-    } else {
-      onMessage({ type: "error", text: data.error || "Error al registrar arresto" });
+      const data = await res.json();
+      if (res.ok) {
+        onMessage({ type: "success", text: "Arresto registrado correctamente" });
+        setShowModal(false);
+        handleSearch(); // recarga la persona con arrestos actualizados
+      } else {
+        onMessage({ type: "error", text: data.error || "Error al registrar arresto" });
+      }
+    } catch (err) {
+      console.error(err);
+      onMessage({ type: "error", text: "Error al registrar arresto" });
     }
-  } catch (err) {
-    console.error(err);
-    onMessage({ type: "error", text: "Error al registrar arresto" });
-  }
-};
-
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -144,10 +137,8 @@ export default function FacialSearch({ onMessage }) {
 
               <div style={{ marginBottom: "1rem" }}>
                 <h4>Información Personal</h4>
-                <p><strong>Dirección:</strong> {result.person.address || "N/A"}</p>
-                <p><strong>Teléfono:</strong> {result.person.phone_number || "N/A"}</p>
                 <p><strong>ID:</strong> {result.person.id_number || "N/A"}</p>
-                <p><strong>Notas:</strong> {result.person.notes || "Sin notas"}</p>
+                <p><strong>Notas:</strong> {result.person.observaciones || "Sin notas"}</p>
               </div>
 
               <div style={{ marginBottom: "1rem" }}>
@@ -156,13 +147,13 @@ export default function FacialSearch({ onMessage }) {
                   <ul style={{ paddingLeft: "1.2rem" }}>
                     {result.person.arrests.map((a, index) => (
                       <li key={index} style={{ marginBottom: "0.5rem" }}>
-                        <p><strong>Fecha:</strong> {new Date(a.arrest_date).toLocaleDateString()}</p>
-                        <p><strong>Delito:</strong> {a.offense}</p>
-                        <p><strong>Lugar:</strong> {a.location}</p>
-                        <p><strong>Oficial:</strong> {a.arresting_officer}</p>
-                        <p><strong>Expediente:</strong> {a.case_number}</p>
-                        <p><strong>Fianza:</strong> {a.bail_status ? "Permitida" : "Denegada"}</p>
-                        <p><strong>Notas:</strong> {a.notes || "N/A"}</p>
+                        <p><strong>Fecha:</strong> {formatDate(a.arrest_date)}</p>
+                        <p><strong>Delito:</strong> {a.falta_administrativa || "N/A"}</p>
+                        <p><strong>Lugar:</strong> {a.comunidad || "N/A"}</p>
+                        <p><strong>Oficial:</strong> {a.arresting_officer || "N/A"}</p>
+                        <p><strong>Expediente:</strong> {a.folio || "N/A"}</p>
+                        <p><strong>RND:</strong> {a.rnd || "N/A"}</p>
+                        <p><strong>Notas:</strong> {a.sentencia || "N/A"}</p>
                         <hr style={{ border: "0.5px solid #444" }} />
                       </li>
                     ))}
@@ -172,7 +163,6 @@ export default function FacialSearch({ onMessage }) {
                 )}
               </div>
 
-              {/* Botón para abrir modal */}
               <div style={{ textAlign: "center", marginTop: "1rem" }}>
                 <button
                   onClick={() => setShowModal(true)}
@@ -196,7 +186,6 @@ export default function FacialSearch({ onMessage }) {
         </div>
       )}
 
-      {/* Modal */}
       {showModal && result?.person && (
         <ArrestModal
           person={result.person}

@@ -1,22 +1,22 @@
-// routes/register_arrest.js
+// backend/routes/register_arrest.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Tu conexión PostgreSQL
+const pool = require('../db'); // Conexión PostgreSQL
 
 // POST /api/register_arrest
 router.post('/', async (req, res) => {
   const {
     person_id,
-    offense,
-    location,
+    falta_administrativa,
+    comunidad,
     arresting_officer,
-    case_number,
-    bail_status,
-    notes,
+    folio,
+    rnd,
+    sentencia
   } = req.body;
 
   // Validar campos obligatorios
-  if (!person_id || !offense || !location) {
+  if (!person_id || !falta_administrativa || !comunidad) {
     return res.status(400).json({ success: false, error: "Faltan campos obligatorios" });
   }
 
@@ -24,19 +24,19 @@ router.post('/', async (req, res) => {
     // Insertar arresto en la base de datos
     const query = `
       INSERT INTO Arrests(
-        person_id, offense, location, arresting_officer, case_number, bail_status, notes
+        person_id, falta_administrativa, comunidad, arresting_officer, folio, rnd, sentencia
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
 
     const values = [
       person_id,
-      offense,
-      location,
+      falta_administrativa,
+      comunidad,
       arresting_officer || null,
-      case_number || null,
-      bail_status || false,
-      notes || null
+      folio || null,
+      rnd || null,
+      sentencia || null
     ];
 
     const { rows } = await pool.query(query, values);

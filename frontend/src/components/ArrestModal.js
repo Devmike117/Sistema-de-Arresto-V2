@@ -2,63 +2,100 @@ import React, { useState } from "react";
 
 export default function ArrestModal({ person, onClose, onSave }) {
   const [formData, setFormData] = useState({
-    offense: "",
-    location: "",
+    falta_administrativa: "",
+    comunidad: "",
     arresting_officer: "",
-    case_number: "",
-    bail_status: false,
-    notes: "",
+    folio: "",
+    rnd: "",
+    sentencia: "",
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Crear objeto completo con valores por defecto si faltan
+    // Validación de campos obligatorios
+    if (!formData.falta_administrativa.trim() || !formData.comunidad.trim()) {
+      alert("Debes llenar Falta administrativa y Comunidad");
+      return;
+    }
+
     const dataToSend = {
       person_id: person.id,
-      offense: formData.offense.trim() || "N/A",
-      location: formData.location.trim() || "N/A",
-      arresting_officer: formData.arresting_officer.trim() || "N/A",
-      case_number: formData.case_number.trim() || "N/A",
-      bail_status: formData.bail_status,
-      notes: formData.notes.trim() || "",
+      falta_administrativa: formData.falta_administrativa.trim(),
+      comunidad: formData.comunidad.trim(),
+      arresting_officer: formData.arresting_officer.trim() || null,
+      folio: formData.folio.trim() || null,
+      rnd: formData.rnd.trim() || null,
+      sentencia: formData.sentencia.trim() || null,
     };
 
-    // Llamar a la función onSave pasada desde el padre
+    // Enviar datos al backend
     onSave(dataToSend);
   };
 
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
-        {/* Cerrar */}
         <button onClick={onClose} style={closeBtnStyle}>✖</button>
-
         <h2 style={titleStyle}>Nuevo Arresto</h2>
         <p style={subtitleStyle}>
           Persona: <strong>{person.first_name} {person.last_name}</strong>
         </p>
 
         <form onSubmit={handleSubmit} style={formStyle}>
-          <input name="offense" placeholder="Delito" value={formData.offense} onChange={handleChange} style={inputStyle} required />
-          <input name="location" placeholder="Lugar" value={formData.location} onChange={handleChange} style={inputStyle} required />
-          <input name="arresting_officer" placeholder="Oficial a cargo" value={formData.arresting_officer} onChange={handleChange} style={inputStyle} />
-          <input name="case_number" placeholder="Número de caso" value={formData.case_number} onChange={handleChange} style={inputStyle} />
-          
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <input type="checkbox" name="bail_status" checked={formData.bail_status} onChange={handleChange} />
-            Tiene fianza
-          </label>
-
-          <textarea name="notes" placeholder="Notas" value={formData.notes} onChange={handleChange} rows="3" style={textareaStyle}></textarea>
+          <input
+            name="falta_administrativa"
+            placeholder="Falta administrativa"
+            value={formData.falta_administrativa}
+            onChange={handleChange}
+            style={inputStyle}
+            required
+          />
+          <input
+            name="comunidad"
+            placeholder="Comunidad"
+            value={formData.comunidad}
+            onChange={handleChange}
+            style={inputStyle}
+            required
+          />
+          <input
+            name="arresting_officer"
+            placeholder="Oficial a cargo"
+            value={formData.arresting_officer}
+            onChange={handleChange}
+            style={inputStyle}
+          />
+          <input
+            name="folio"
+            placeholder="Folio"
+            value={formData.folio}
+            onChange={handleChange}
+            style={inputStyle}
+          />
+          <input
+            name="rnd"
+            placeholder="RND"
+            value={formData.rnd}
+            onChange={handleChange}
+            style={inputStyle}
+          />
+          <textarea
+            name="sentencia"
+            placeholder="Sentencia"
+            value={formData.sentencia}
+            onChange={handleChange}
+            rows="3"
+            style={textareaStyle}
+          />
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
             <button type="button" onClick={onClose} style={cancelBtnStyle}>Cancelar</button>
@@ -70,7 +107,7 @@ export default function ArrestModal({ person, onClose, onSave }) {
   );
 }
 
-// Estilos
+// --- Estilos ---
 const overlayStyle = {
   position: "fixed",
   inset: 0,

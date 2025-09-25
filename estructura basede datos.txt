@@ -1,4 +1,6 @@
--- Tabla Personas
+-- ====================================
+-- TABLA PERSONAS
+-- ====================================
 CREATE TABLE Persons (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(100),
@@ -7,28 +9,33 @@ CREATE TABLE Persons (
     dob DATE,
     gender VARCHAR(10),
     nationality VARCHAR(50),
-    address VARCHAR(255),
-    phone_number VARCHAR(20),
+    state VARCHAR(100),        -- Estado
+    municipality VARCHAR(100), -- Municipio
+    community VARCHAR(100),    -- Comunidad
     id_number VARCHAR(50),
     photo_path VARCHAR(255),
-    notes TEXT,
+    observaciones TEXT,        -- Antes era notes
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Tabla Arrestos
+-- ====================================
+-- TABLA ARRESTOS
+-- ====================================
 CREATE TABLE Arrests (
     id SERIAL PRIMARY KEY,
     person_id INTEGER REFERENCES Persons(id),
     arrest_date TIMESTAMP DEFAULT NOW(),
-    offense VARCHAR(255),
-    location VARCHAR(255),
+    falta_administrativa VARCHAR(255), -- Antes era offense
+    comunidad VARCHAR(255),            -- Antes era location
     arresting_officer VARCHAR(100),
-    case_number VARCHAR(50),
-    bail_status BOOLEAN,
-    notes TEXT
+    folio VARCHAR(100),                 -- Antes era case_number
+    rnd VARCHAR(100),                   -- Nuevo campo
+    sentencia TEXT                     -- Antes era notes
 );
 
--- Tabla FacialData
+-- ====================================
+-- TABLA DATOS FACIALES
+-- ====================================
 CREATE TABLE FacialData (
     id SERIAL PRIMARY KEY,
     person_id INTEGER REFERENCES Persons(id),
@@ -38,7 +45,9 @@ CREATE TABLE FacialData (
     camera_id VARCHAR(50)
 );
 
--- Tabla Fingerprints
+-- ====================================
+-- TABLA HUELLAS DIGITALES
+-- ====================================
 CREATE TABLE Fingerprints (
     id SERIAL PRIMARY KEY,
     person_id INTEGER REFERENCES Persons(id),

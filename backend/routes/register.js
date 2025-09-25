@@ -1,7 +1,7 @@
 // backend/routes/register.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // tu conexión PostgreSQL
+const pool = require('../db'); // conexión PostgreSQL
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -29,110 +29,130 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Endpoint de registro
-router.post('/', upload.fields([
-  { name: 'photo', maxCount: 1 },
-  { name: 'fingerprint', maxCount: 1 }
-]), async (req, res) => {
-  const client = await pool.connect();
+router.post(
+  '/',
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'fingerprint', maxCount: 1 }
+  ]),
+  async (req, res) => {
+    const client = await pool.connect();
 
-  try {
-    const {
-      first_name, middle_name, last_name, dob, gender, nationality,
-      address, phone_number, id_number, notes, offense, location,
-      arresting_officer, case_number, bail_status
-    } = req.body;
-
-    await client.query('BEGIN');
-
-    // 1️⃣ Guardar persona
-    const personResult = await client.query(
-      `INSERT INTO Persons (first_name, middle_name, last_name, dob, gender, nationality, address, phone_number, id_number, notes, photo_path)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
-      [
+    try {
+      const {
         first_name,
         middle_name,
         last_name,
-        dob || null,
+        dob,
         gender,
         nationality,
-        address,
-        phone_number,
+        state,
+        municipality,
+        community,           // comunidad de la persona
         id_number,
-        notes,
-        req.files.photo ? req.files.photo[0].path : null
-      ]
-    );
-    const personId = personResult.rows[0].id;
+        observaciones,
+        falta_administrativa,
+        arrest_community,    // comunidad del arresto
+        arresting_officer,
+        folio,
+        rnd,
+        sentencia
+      } = req.body;
 
-    // 2️⃣ Guardar arresto
-    await client.query(
-      `INSERT INTO Arrests (person_id, offense, location, arresting_officer, case_number, bail_status, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [personId, offense, location, arresting_officer, case_number, bail_status === 'true', notes]
-    );
+      await client.query('BEGIN');
 
-    // 3️⃣ Guardar huella si existe
-    if (req.files.fingerprint) {
-      const fingerprintFile = req.files.fingerprint[0];
-      const fingerprintData = fs.readFileSync(fingerprintFile.path);
-      await client.query(
-        `INSERT INTO Fingerprints (person_id, template, finger)
-         VALUES ($1,$2,$3)`,
-        [personId, fingerprintData, fingerprintFile.originalname]
+      // 1️⃣ Guardar persona
+      const personResult = await client.query(
+        `INSERT INTO Persons 
+          (first_name, middle_name, last_name, dob, gender, nationality, state, municipality, community, id_number, observaciones, photo_path)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        [
+          first_name,
+          middle_name,
+          last_name,
+          dob || null,
+          gender,
+          nationality,
+          state,
+          municipality,
+          community,
+          id_number,
+          observaciones,
+          req.files.photo ? req.files.photo[0].path : null
+        ]
       );
-      console.log('✅ Huella guardada correctamente');
-    }
+      const personId = personResult.rows[0].id;
 
-    // 4️⃣ Generar embedding facial usando microservicio
-    if (req.files.photo) {
-      try {
-        const photoPath = req.files.photo[0].path;
+      // 2️⃣ Guardar arresto
+      await client.query(
+        `INSERT INTO Arrests 
+          (person_id, falta_administrativa, comunidad, arresting_officer, folio, rnd, sentencia)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+        [
+          personId,
+          falta_administrativa || null,
+          arrest_community || null, // ✅ Aquí usamos el valor correcto del arresto
+          arresting_officer || null,
+          folio || null,
+          rnd || null,
+          sentencia || null
+        ]
+      );
 
-        const formData = new FormData();
-        formData.append('file', fs.createReadStream(photoPath));
-
-        const response = await axios.post(
-          'http://localhost:8001/generate_embedding/',
-          formData,
-          {
-            headers: { ...formData.getHeaders() }
-          }
+      // 3️⃣ Guardar huella si existe
+      if (req.files.fingerprint) {
+        const fingerprintFile = req.files.fingerprint[0];
+        const fingerprintData = fs.readFileSync(fingerprintFile.path);
+        await client.query(
+          `INSERT INTO Fingerprints (person_id, template, finger)
+           VALUES ($1,$2,$3)`,
+          [personId, fingerprintData, fingerprintFile.originalname]
         );
-
-        const embedding = response.data.embedding; // array de floats
-
-        if (!embedding) {
-          console.error('❌ No se recibió embedding del microservicio');
-        } else {
-          // Guardar directamente como FLOAT8[] en PostgreSQL
-          await client.query(
-            `INSERT INTO FacialData (person_id, embedding, image_path)
-         VALUES ($1, $2, $3)`,
-            [personId, embedding, photoPath]
-          );
-          console.log('✅ Embedding facial guardado correctamente');
-        }
-      } catch (err) {
-        console.error('❌ Error al generar embedding:', err.message);
       }
+
+      // 4️⃣ Generar embedding facial usando microservicio
+      if (req.files.photo) {
+        try {
+          const photoPath = req.files.photo[0].path;
+
+          const formData = new FormData();
+          formData.append('file', fs.createReadStream(photoPath));
+
+          const response = await axios.post(
+            'http://localhost:8001/generate_embedding/',
+            formData,
+            { headers: { ...formData.getHeaders() } }
+          );
+
+          const embedding = response.data.embedding;
+
+          if (embedding) {
+            await client.query(
+              `INSERT INTO FacialData (person_id, embedding, image_path)
+               VALUES ($1, $2, $3)`,
+              [personId, embedding, photoPath]
+            );
+          }
+        } catch (err) {
+          console.error('Error al generar embedding:', err.message);
+        }
+      }
+
+      await client.query('COMMIT');
+
+      res.status(201).json({
+        success: true,
+        message: 'Registro completo: persona, arresto, huella y embedding facial',
+        personId
+      });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.error('Error al registrar persona:', err);
+      res.status(500).json({ success: false, error: 'Error al registrar persona' });
+    } finally {
+      client.release();
     }
-
-
-    await client.query('COMMIT');
-
-    res.status(201).json({
-      success: true,
-      message: 'Registro completo: persona, arresto, huella y embedding facial',
-      personId
-    });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('❌ Error al registrar persona:', err);
-    res.status(500).json({ success: false, error: 'Error al registrar persona' });
-  } finally {
-    client.release();
   }
-});
+);
 
 module.exports = router;

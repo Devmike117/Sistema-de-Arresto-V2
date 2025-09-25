@@ -1,6 +1,7 @@
+// backend/routes/search_face.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // tu conexión PostgreSQL
+const pool = require('../db');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -18,39 +19,35 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Distancia euclidiana
+// Funciones auxiliares
 function euclideanDistance(a, b) {
   let sum = 0;
-  for (let i = 0; i < a.length; i++) {
-    sum += (a[i] - b[i]) ** 2;
-  }
+  for (let i = 0; i < a.length; i++) sum += (a[i] - b[i]) ** 2;
   return Math.sqrt(sum);
 }
 
-// Normalización
 function normalize(vec) {
   const norm = Math.sqrt(vec.reduce((sum, x) => sum + x * x, 0));
-  return vec.map(x => x / norm);
+  return vec.map((x) => x / norm);
 }
 
+// POST /api/search_face
 router.post('/', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen' });
 
   const photoPath = req.file.path;
 
   try {
-    // 1️⃣ Embedding desde microservicio
+    // 1️⃣ Generar embedding desde microservicio
     const formData = new FormData();
     formData.append('file', fs.createReadStream(photoPath), {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
     });
 
-    const response = await axios.post(
-      'http://localhost:8001/generate_embedding/',
-      formData,
-      { headers: formData.getHeaders() }
-    );
+    const response = await axios.post('http://localhost:8001/generate_embedding/', formData, {
+      headers: formData.getHeaders(),
+    });
 
     let embedding = response.data.embedding;
     if (!embedding) {
@@ -60,9 +57,9 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     embedding = normalize(embedding);
 
-    // 2️⃣ Embeddings en DB
+    // 2️⃣ Obtener embeddings de la DB
     const { rows } = await pool.query(
-      `SELECT fd.person_id, fd.embedding, p.*
+      `SELECT fd.person_id, fd.embedding, p.first_name, p.last_name
        FROM FacialData fd
        JOIN Persons p ON p.id = fd.person_id`
     );
@@ -70,14 +67,12 @@ router.post('/', upload.single('file'), async (req, res) => {
     // 3️⃣ Comparar embeddings
     let bestMatch = null;
     let minDistance = Infinity;
-    const threshold = 0.9;
+    const threshold = 0.95;
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const dbEmbedding = row.embedding.map(Number);
       const dbNorm = normalize(dbEmbedding);
       const distance = euclideanDistance(embedding, dbNorm);
-
-      console.log(`Distancia a ${row.first_name} ${row.last_name}: ${distance.toFixed(3)}`);
 
       if (distance < minDistance && distance <= threshold) {
         minDistance = distance;
@@ -86,31 +81,29 @@ router.post('/', upload.single('file'), async (req, res) => {
     });
 
     // 4️⃣ Eliminar temporal
-    fs.unlink(photoPath, err => {
-      if (err) console.error('Error al eliminar temporal:', err);
+    fs.unlink(photoPath, (err) => {
+      if (err) console.error('Error eliminando temporal:', err);
     });
 
     // 5️⃣ Devolver resultado
     if (bestMatch) {
       try {
-        // Obtener información completa de la persona
         const personQuery = await pool.query(
-          `SELECT id, first_name, middle_name, last_name, dob, gender, nationality, 
-              address, phone_number, id_number, photo_path, notes, created_at
-       FROM Persons
-       WHERE id = $1`,
+          `SELECT id, first_name, middle_name, last_name, dob, gender, nationality,
+                  state, municipality, community, id_number, photo_path, observaciones, created_at
+           FROM Persons
+           WHERE id = $1`,
           [bestMatch.person_id]
         );
 
         const person = personQuery.rows[0];
 
-        // Obtener historial de arrestos
         const arrestQuery = await pool.query(
-          `SELECT id, arrest_date, offense, location, arresting_officer, case_number, 
-              bail_status, notes
-       FROM Arrests
-       WHERE person_id = $1
-       ORDER BY arrest_date DESC`,
+          `SELECT id, arrest_date, falta_administrativa, comunidad, arresting_officer,
+                  folio, rnd, sentencia
+           FROM Arrests
+           WHERE person_id = $1
+           ORDER BY arrest_date DESC`,
           [bestMatch.person_id]
         );
 
@@ -120,12 +113,12 @@ router.post('/', upload.single('file'), async (req, res) => {
           found: true,
           person: {
             ...person,
-            arrests, // 👈 incluimos lista de arrestos
+            arrests, // historial de arrestos
           },
         });
       } catch (dbErr) {
-        console.error("Error obteniendo detalles de persona:", dbErr.message);
-        res.status(500).json({ error: "Error obteniendo información de la persona" });
+        console.error('Error obteniendo detalles de persona:', dbErr.message);
+        res.status(500).json({ error: 'Error obteniendo información de la persona' });
       }
     } else {
       res.json({ found: false, person: null });

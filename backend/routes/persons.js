@@ -32,7 +32,8 @@ router.post('/create-person', async (req, res) => {
   try {
     const {
       first_name, middle_name, last_name, dob, gender, nationality,
-      address, phone_number, id_number, notes
+      estado, municipio, comunidad,
+      id_number, observaciones
     } = req.body;
 
     await client.query('BEGIN');
@@ -40,12 +41,14 @@ router.post('/create-person', async (req, res) => {
     const result = await client.query(
       `INSERT INTO Persons (
         first_name, middle_name, last_name, dob, gender, nationality,
-        address, phone_number, id_number, notes
+        estado, municipio, comunidad, id_number, observaciones
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING id`,
-      [first_name, middle_name, last_name, dob, gender, nationality,
-       address, phone_number, id_number, notes]
+      [
+        first_name, middle_name, last_name, dob, gender, nationality,
+        estado, municipio, comunidad, id_number, observaciones
+      ]
     );
 
     await client.query('COMMIT');
