@@ -1,4 +1,3 @@
-// src/components/Dashboard.js
 import React, { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
@@ -7,7 +6,7 @@ export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
     totalPersons: 0,
     totalArrests: 0,
-    topOffenses: [], // [{ offense: "Robo", count: 5 }]
+    topOffenses: [], // [{ falta_administrativa: "Robo", count: 5 }]
     topPersons: []   // [{ name: "Juan Perez", count: 3 }]
   });
   const [arrests, setArrests] = useState([]);
@@ -15,22 +14,29 @@ export default function Dashboard({ onMessage }) {
   // Obtener datos del dashboard desde backend
   const fetchDashboard = async () => {
     try {
-      // Estadísticas generales
       const statsRes = await fetch("http://localhost:5000/api/dashboard/stats");
       const statsData = await statsRes.json();
 
-      // Arrestos recientes
       const recentRes = await fetch("http://localhost:5000/api/dashboard/recent-arrests");
       const recentData = await recentRes.json();
+
+      // Mapear nombre completo de cada persona en arrestos recientes
+      const recentArrests = recentData.recentArrests.map(a => ({
+        ...a,
+        person_name: `${a.first_name || ""} ${a.middle_name || ""} ${a.last_name || ""}`.trim(),
+        offense: a.falta_administrativa || "N/A",
+        location: a.comunidad || "N/A",
+        bail_status: a.fianza !== undefined ? a.fianza : "N/A"
+      }));
 
       setSummary({
         totalPersons: statsData.totalPersons,
         totalArrests: statsData.totalArrests,
-        topOffenses: statsData.topOffenses, // [{ offense, count }]
-        topPersons: statsData.topPersons || [] // [{ name, count }]
+        topOffenses: statsData.topOffenses, // [{ falta_administrativa, count }]
+        topPersons: statsData.topPersons || []
       });
 
-      setArrests(recentData.recentArrests);
+      setArrests(recentArrests);
     } catch (err) {
       console.error(err);
       if (onMessage) onMessage({ type: "error", text: "Error al cargar dashboard" });
@@ -49,7 +55,7 @@ export default function Dashboard({ onMessage }) {
       <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
         <Card title="Personas Registradas" value={summary.totalPersons} color="#4caf50" />
         <Card title="Arrestos Registrados" value={summary.totalArrests} color="#2196f3" />
-        <Card title="Delitos Más Comunes" value={summary.topOffenses.map(o => o.offense).join(", ")} color="#f44336" />
+        <Card title="Delitos Más Comunes" value={summary.topOffenses.map(o => o.falta_administrativa).join(", ")} color="#f44336" />
         <Card title="Personas con Más Arrestos" value={summary.topPersons.map(p => p.name).join(", ")} color="#ff9800" />
       </div>
 
@@ -59,7 +65,7 @@ export default function Dashboard({ onMessage }) {
           <h3>Arrestos por Delito</h3>
           <Pie
             data={{
-              labels: summary.topOffenses.map(o => o.offense),
+              labels: summary.topOffenses.map(o => o.falta_administrativa),
               datasets: [
                 {
                   data: summary.topOffenses.map(o => o.count),
@@ -108,8 +114,8 @@ export default function Dashboard({ onMessage }) {
                 <td style={tdStyle}>{a.person_name}</td>
                 <td style={tdStyle}>{a.offense}</td>
                 <td style={tdStyle}>{a.location}</td>
-                <td style={tdStyle}>{a.arresting_officer}</td>
-                <td style={tdStyle}>{a.bail_status ? "Permitida" : "Denegada"}</td>
+                <td style={tdStyle}>{a.arresting_officer || "N/A"}</td>
+                <td style={tdStyle}>{a.bail_status}</td>
               </tr>
             ))}
           </tbody>
