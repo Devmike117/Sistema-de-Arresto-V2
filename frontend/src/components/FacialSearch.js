@@ -133,6 +133,9 @@ export default function FacialSearch({ onMessage }) {
                   <p><strong>Fecha de Nac.:</strong> {formatDate(result.person.dob)}</p>
                   <p><strong>Género:</strong> {result.person.gender || "N/A"}</p>
                   <p><strong>Nacionalidad:</strong> {result.person.nationality || "N/A"}</p>
+                  <p><strong>Estado:</strong> {result.person.state || "N/A"}</p>
+                  <p><strong>Municipio:</strong> {result.person.municipality || "N/A"}</p>
+                  <p><strong>Comunidad:</strong> {result.person.community || "N/A"}</p>
                 </div>
               </div>
 
