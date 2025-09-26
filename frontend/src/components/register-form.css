@@ -742,3 +742,8 @@ body {
   /* Más espacio entre botones */
   margin-top: 1rem;
 }
+
+.select-scroll {
+  max-height: 120px;
+  overflow-y: auto;
+}

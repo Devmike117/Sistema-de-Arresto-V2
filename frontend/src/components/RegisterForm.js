@@ -19,22 +19,79 @@ const faltasAdministrativas = [
   "Otro"
 ];
 
+const comunidadesArresto = [
+  "ATOTONILCO",
+  "BARRIO DE TROJES",
+  "COLONIA CUAUHTÉMOC",
+  "COLONIA FRANCISCO I MADERO",
+  "COLONIA LUIS DONALDO COLOSIO",
+  "DOLORES ENYEGE",
+  "EJIDO 20 DE NOVIEMBRE",
+  "EL RINCÓN DE LOS PERALES",
+  "EL TECOMATE",
+  "EMILIANO ZAPATA",
+  "GUADALUPE CACHI",
+  "GUADALUPE DEL RÍO",
+  "HUEREJE",
+  "IXTLAHUACA DE RAYÓN",
+  "JALPA DE DOLORES",
+  "JALPA DE LOS BAÑOS",
+  "LA BANDERA",
+  "LA CONCEPCIÓN DE LOS BAÑOS",
+  "LA CONCEPCIÓN ENYEGE",
+  "LA ESTACIÓN DEL FERROCARRIL",
+  "LA GUADALUPANA",
+  "LA PURISIMA",
+  "SAN ANDRÉS DEL PEDREGAL",
+  "SAN ANTONIO BONIXI",
+  "SAN ANTONIO DE LOS REMEDIOS",
+  "SAN BARTOLO DEL LLANO",
+  "SAN CRISTÓBAL DE LOS BAÑOS",
+  "SAN FRANCISCO DE ASÍS",
+  "SAN FRANCISCO DE GUZMÁN",
+  "SAN FRANCISCO DEL RÍO",
+  "SAN FRANCISCO IXTLAHUACA",
+  "SAN IGNACIO DEL PEDREGAL",
+  "SAN ILDEFONSO",
+  "SAN ISIDRO BOXIPE",
+  "SAN JERÓNIMO IXTAPANTONGO",
+  "SAN JERÓNIMO LA CAÑADA",
+  "SAN JOAQUÍN EL JUNCO",
+  "SAN JOAQUÍN LA CABECERA",
+  "SAN JOSÉ DEL RÍO",
+  "SAN JUAN DE LAS MANZANAS",
+  "SAN LORENZO TOXICO",
+  "SAN MATEO IXTLAHUACA",
+  "SAN MIGUEL EL ALTO",
+  "SAN MIGUEL ENYEGE",
+  "SAN PABLO DE LOS REMEDIOS",
+  "SAN PEDRO DE LOS BAÑOS",
+  "SAN PEDRO LA CABECERA",
+  "SANTA ANA IXTLAHUACA",
+  "SANTA ANA LA LADERA",
+  "SANTA MARÍA DE GUADALUPE",
+  "SANTA MARÍA DEL LLANO",
+  "SANTO DOMINGO DE GUZMÁN",
+  "SANTO DOMINGO HUEREJE",
+  "SHIRA"
+];
+
 export default function RegisterForm({ onNext, onMessage }) {
   const [form, setForm] = useState({
     first_name: '',
-    middle_name: '',
+    alias: '', // Cambiado de middle_name a alias
     last_name: '',
     dob: '',
-    gender: 'Masculino',
-    nationality: '',
+    gender: '',
+    nationality: 'Mexicana',
     state: '',
     municipality: '',
     community: '',
     id_number: '',
     observaciones: '',
     falta_administrativa: '',
-    falta_administrativa_otro: '', // Nuevo campo para "Otra"
-    arrest_community: '',  // nombre interno para no confundir con persona.community
+    falta_administrativa_otro: '',
+    arrest_community: '',
     arresting_officer: '',
     folio: '',
     rnd: '',
@@ -96,7 +153,7 @@ export default function RegisterForm({ onNext, onMessage }) {
   function handleReset() {
     setForm({
       first_name: '',
-      middle_name: '',
+      alias: '', // Cambiado de middle_name a alias
       last_name: '',
       dob: '',
       gender: 'Masculino',
@@ -124,17 +181,19 @@ export default function RegisterForm({ onNext, onMessage }) {
         {/* Nombre completo */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm">Nombre</label>
+            <label className="block text-sm">Nombres</label>
             <input name="first_name" value={form.first_name} onChange={handleChange} className="mt-1 input" />
           </div>
-          <div>
-            <label className="block text-sm">Segundo nombre</label>
-            <input name="middle_name" value={form.middle_name} onChange={handleChange} className="mt-1 input" />
-          </div>
-          <div>
-            <label className="block text-sm">Apellido</label>
+
+           <div>
+            <label className="block text-sm">Apellidos</label>
             <input name="last_name" value={form.last_name} onChange={handleChange} className="mt-1 input" />
           </div>
+          <div>
+            <label className="block text-sm">Alias</label> {/* Cambiado */}
+            <input name="alias" value={form.alias} onChange={handleChange} className="mt-1 input" /> {/* Cambiado */}
+          </div>
+         
         </div>
 
         {/* Fecha, género, nacionalidad */}
@@ -146,6 +205,7 @@ export default function RegisterForm({ onNext, onMessage }) {
           <div>
             <label className="block text-sm">Género</label>
             <select name="gender" value={form.gender} onChange={handleChange} className="mt-1 input">
+              <option value="">Selecciona Genero</option>
               <option>Masculino</option>
               <option>Femenino</option>
               <option>Otro</option>
@@ -229,7 +289,17 @@ export default function RegisterForm({ onNext, onMessage }) {
           </div>
           <div>
             <label className="block text-sm">Comunidad del arresto</label>
-            <input name="arrest_community" value={form.arrest_community} onChange={handleChange} className="mt-1 input" />
+            <select
+              name="arrest_community"
+              value={form.arrest_community}
+              onChange={handleChange}
+              className="mt-1 input select-scroll"
+            >
+              <option value="">Selecciona una comunidad</option>
+              {comunidadesArresto.map(com => (
+                <option key={com} value={com}>{com}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm">Oficial</label>

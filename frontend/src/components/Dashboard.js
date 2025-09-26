@@ -23,8 +23,8 @@ export default function Dashboard({ onMessage }) {
       // Mapear nombre completo de cada persona en arrestos recientes
       const recentArrests = recentData.recentArrests.map(a => ({
         ...a,
-        person_name: `${a.first_name || ""} ${a.middle_name || ""} ${a.last_name || ""}`.trim(),
-        offense: a.falta_administrativa || "N/A",
+        person_name: `${a.first_name || ""} ${a.alias ? `"${a.alias}" ` : ""}${a.last_name || ""}`.trim(),
+        offense: a.falta_administrativa || "Sin especificar",
         location: a.comunidad || "N/A",
         bail_status: a.fianza !== undefined ? a.fianza : "N/A"
       }));
@@ -55,7 +55,7 @@ export default function Dashboard({ onMessage }) {
       <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
         <Card title="Personas Registradas" value={summary.totalPersons} color="#4caf50" />
         <Card title="Arrestos Registrados" value={summary.totalArrests} color="#2196f3" />
-        <Card title="Delitos Más Comunes" value={summary.topOffenses.map(o => o.falta_administrativa).join(", ")} color="#f44336" />
+        <Card title="Delitos Más Comunes" value={summary.topOffenses.map(o => o.offense).join(", ")} color="#f44336" />
         <Card title="Personas con Más Arrestos" value={summary.topPersons.map(p => p.name).join(", ")} color="#ff9800" />
       </div>
 
@@ -65,7 +65,7 @@ export default function Dashboard({ onMessage }) {
           <h3>Arrestos por Delito</h3>
           <Pie
             data={{
-              labels: summary.topOffenses.map(o => o.falta_administrativa),
+              labels: summary.topOffenses.map(o => o.offense),
               datasets: [
                 {
                   data: summary.topOffenses.map(o => o.count),
@@ -127,6 +127,8 @@ export default function Dashboard({ onMessage }) {
 
 // Card component
 function Card({ title, value, color }) {
+  // Aplica un tamaño de fuente menor solo si el título es "Delitos Más Comunes"
+  const isDelitos = title === "Delitos Más Comunes";
   return (
     <div style={{
       flex: 1,
@@ -139,7 +141,13 @@ function Card({ title, value, color }) {
       boxShadow: "0px 4px 10px rgba(0,0,0,0.3)"
     }}>
       <h4>{title}</h4>
-      <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{value}</p>
+      <p style={{
+        fontSize: isDelitos ? "1rem" : "1.5rem",
+        fontWeight: "bold",
+        wordBreak: "break-word"
+      }}>
+        {value}
+      </p>
     </div>
   );
 }

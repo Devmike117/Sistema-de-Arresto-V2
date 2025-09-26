@@ -42,9 +42,11 @@ router.get('/stats', async (req, res) => {
 router.get('/recent-arrests', async (req, res) => {
   try {
     const recentRes = await pool.query(`
-      SELECT a.id, a.arrest_date, a.falta_administrativa, a.comunidad, a.arresting_officer,
+      SELECT a.id, a.arrest_date,
+             COALESCE(NULLIF(a.falta_administrativa, ''), 'Sin especificar') AS falta_administrativa,
+             a.comunidad, a.arresting_officer,
              a.folio, a.rnd, a.sentencia,
-             p.first_name, p.middle_name, p.last_name
+             p.first_name, p.alias, p.last_name
       FROM Arrests a
       JOIN Persons p ON p.id = a.person_id
       ORDER BY a.arrest_date DESC

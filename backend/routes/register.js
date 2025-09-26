@@ -41,8 +41,8 @@ router.post(
     try {
       const {
         first_name,
-        middle_name,
         last_name,
+        alias,
         dob,
         gender,
         nationality,
@@ -64,20 +64,20 @@ router.post(
       // 1️⃣ Guardar persona
       const personResult = await client.query(
         `INSERT INTO Persons 
-          (first_name, middle_name, last_name, dob, gender, nationality, state, municipality, community, id_number, observaciones, photo_path)
+          (first_name, last_name, alias, dob, gender, nationality, state, municipality, community, id_number, observaciones, photo_path)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
         [
           first_name,
-          middle_name,
           last_name,
+          alias || null,
           dob || null,
-          gender,
-          nationality,
-          state,
-          municipality,
-          community,
-          id_number,
-          observaciones,
+          gender || null,
+          nationality || null,
+          state || null,
+          municipality || null,
+          community || null,
+          id_number || null,
+          observaciones || null,
           req.files.photo ? req.files.photo[0].path : null
         ]
       );
@@ -91,7 +91,7 @@ router.post(
         [
           personId,
           falta_administrativa || null,
-          arrest_community || null, // ✅ Aquí usamos el valor correcto del arresto
+          arrest_community || null, // ✅ comunidad del arresto
           arresting_officer || null,
           folio || null,
           rnd || null,

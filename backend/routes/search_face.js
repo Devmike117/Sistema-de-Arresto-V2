@@ -88,8 +88,9 @@ router.post('/', upload.single('file'), async (req, res) => {
     // 5️⃣ Devolver resultado
     if (bestMatch) {
       try {
+        // Info de la persona
         const personQuery = await pool.query(
-          `SELECT id, first_name, middle_name, last_name, dob, gender, nationality,
+          `SELECT id, first_name, last_name, alias, dob, gender, nationality,
                   state, municipality, community, id_number, photo_path, observaciones, created_at
            FROM Persons
            WHERE id = $1`,
@@ -98,6 +99,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 
         const person = personQuery.rows[0];
 
+        // Historial de arrestos
         const arrestQuery = await pool.query(
           `SELECT id, arrest_date, falta_administrativa, comunidad, arresting_officer,
                   folio, rnd, sentencia
@@ -113,7 +115,7 @@ router.post('/', upload.single('file'), async (req, res) => {
           found: true,
           person: {
             ...person,
-            arrests, // historial de arrestos
+            arrests,
           },
         });
       } catch (dbErr) {

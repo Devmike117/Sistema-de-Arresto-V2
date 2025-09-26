@@ -127,7 +127,8 @@ export default function FacialSearch({ onMessage }) {
                 />
                 <div>
                   <h3 style={{ fontSize: "1.4rem" }}>
-                    {result.person.first_name} {result.person.middle_name} {result.person.last_name}
+                    {result.person.first_name} {result.person.last_name}{" "}
+                    {result.person.alias && `(${result.person.alias})`}
                   </h3>
                   <p><strong>Fecha de Nac.:</strong> {formatDate(result.person.dob)}</p>
                   <p><strong>Género:</strong> {result.person.gender || "N/A"}</p>
@@ -148,12 +149,12 @@ export default function FacialSearch({ onMessage }) {
                     {result.person.arrests.map((a, index) => (
                       <li key={index} style={{ marginBottom: "0.5rem" }}>
                         <p><strong>Fecha:</strong> {formatDate(a.arrest_date)}</p>
-                        <p><strong>Delito:</strong> {a.falta_administrativa || "N/A"}</p>
-                        <p><strong>Lugar:</strong> {a.comunidad || "N/A"}</p>
+                        <p><strong>Falta Administrativa:</strong> {a.falta_administrativa || "N/A"}</p>
+                        <p><strong>Comunidad:</strong> {a.comunidad || "N/A"}</p>
                         <p><strong>Oficial:</strong> {a.arresting_officer || "N/A"}</p>
-                        <p><strong>Expediente:</strong> {a.folio || "N/A"}</p>
+                        <p><strong>Folio:</strong> {a.folio || "N/A"}</p>
                         <p><strong>RND:</strong> {a.rnd || "N/A"}</p>
-                        <p><strong>Notas:</strong> {a.sentencia || "N/A"}</p>
+                        <p><strong>Sentencia:</strong> {a.sentencia || "N/A"}</p>
                         <hr style={{ border: "0.5px solid #444" }} />
                       </li>
                     ))}
