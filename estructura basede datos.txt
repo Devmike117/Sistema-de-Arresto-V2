@@ -4,8 +4,8 @@
 CREATE TABLE Persons (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(100),
-    middle_name VARCHAR(100),
     last_name VARCHAR(100),
+    Alias VARCHAR(100),
     dob DATE,
     gender VARCHAR(10),
     nationality VARCHAR(50),

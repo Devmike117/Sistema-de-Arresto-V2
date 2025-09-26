@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
 import './register-form.css';
 
+const faltasAdministrativas = [
+  "Alteración al orden público",
+  "Realizar necesidades fisiológicas en vía pública",
+  "Realizar en cruceros actividades que pongan en riesgo la integridad física",
+  "Ingerir bebidas embriagantes en vía pública",
+  "Inhalar sustancias tóxicas en vía pública",
+  "Pega de propaganda",
+  "Faltas a la moral",
+  "Arrojar en lugares no autorizados animales muertos, escombros y desperdicios",
+  "Daños a los bienes del municipio",
+  "Dañar, podar o talar árboles",
+  "Trepar bardas o cualquier inmueble ajeno sin autorización",
+  "Pasar la señal roja del semáforo",
+  "Obstruir rampa para discapacitados",
+  "Vender animales o mascotas en vía pública",
+  "Otro"
+];
+
 export default function RegisterForm({ onNext, onMessage }) {
   const [form, setForm] = useState({
     first_name: '',
@@ -15,6 +33,7 @@ export default function RegisterForm({ onNext, onMessage }) {
     id_number: '',
     observaciones: '',
     falta_administrativa: '',
+    falta_administrativa_otro: '', // Nuevo campo para "Otra"
     arrest_community: '',  // nombre interno para no confundir con persona.community
     arresting_officer: '',
     folio: '',
@@ -30,12 +49,18 @@ export default function RegisterForm({ onNext, onMessage }) {
   function handleSave(e) {
     e.preventDefault();
 
-    if (!form.first_name || !form.last_name || !form.falta_administrativa) {
+    // Si selecciona "Otro", usar el texto personalizado
+    const falta = form.falta_administrativa === "Otro"
+      ? form.falta_administrativa_otro
+      : form.falta_administrativa;
+
+    if (!form.first_name || !form.last_name || !falta) {
       if (onMessage) onMessage({ type: 'error', text: 'Completa nombre, apellido y falta administrativa.' });
       return;
     }
 
-    if (onNext) onNext(form);
+    // Enviar el valor correcto
+    if (onNext) onNext({ ...form, falta_administrativa: falta });
 
     if (onMessage) onMessage({ type: 'success', text: 'Datos personales guardados, ahora captura foto y huellas.' });
   }
@@ -100,7 +125,11 @@ export default function RegisterForm({ onNext, onMessage }) {
           </div>
           <div>
             <label className="block text-sm">Nacionalidad</label>
-            <input name="nationality" value={form.nationality} onChange={handleChange} className="mt-1 input" />
+            <select name="nationality" value={form.nationality} onChange={handleChange} className="mt-1 input">
+              <option>Mexicana</option>
+              <option>Extranjera</option>
+            </select>
+
           </div>
         </div>
 
@@ -136,7 +165,27 @@ export default function RegisterForm({ onNext, onMessage }) {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Falta administrativa</label>
-            <input name="falta_administrativa" value={form.falta_administrativa} onChange={handleChange} className="mt-1 input" />
+            <select
+              name="falta_administrativa"
+              value={form.falta_administrativa}
+              onChange={handleChange}
+              className="mt-1 input"
+            >
+              <option value="">-- Selecciona una opción --</option>
+              {faltasAdministrativas.map(falta => (
+                <option key={falta} value={falta}>{falta}</option>
+              ))}
+            </select>
+            {/* Mostrar input si selecciona "Otro" */}
+            {form.falta_administrativa === "Otro" && (
+              <input
+                name="falta_administrativa_otro"
+                value={form.falta_administrativa_otro}
+                onChange={handleChange}
+                className="mt-2 input"
+                placeholder="Especifica la falta administrativa"
+              />
+            )}
           </div>
           <div>
             <label className="block text-sm">Comunidad del arresto</label>
