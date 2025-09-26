@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './register-form.css';
 
 const faltasAdministrativas = [
@@ -41,9 +41,39 @@ export default function RegisterForm({ onNext, onMessage }) {
     sentencia: ''
   });
 
+  const [mexicoData, setMexicoData] = useState([]);
+  const [municipios, setMunicipios] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
+
+  useEffect(() => {
+    fetch('https://raw.githubusercontent.com/Devmike117/DB-Mexico-JSON/master/M%C3%A9xico.json')
+      .then(res => res.json())
+      .then(data => {
+        const estadosSimplificados = data.map(e => ({
+          ...e,
+          nombre: e.nombre.split(' de ')[0] // simplifica nombres largos
+        }));
+        setMexicoData(estadosSimplificados);
+      })
+      .catch(err => console.error('Error al cargar México.json:', err));
+  }, []);
+
   function handleChange(e) {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+
+    if (name === 'state') {
+      const estado = mexicoData.find(e => e.nombre === value);
+      setMunicipios(estado?.municipios || []);
+      setForm(prev => ({ ...prev, municipality: '', community: '' }));
+      setLocalidades([]);
+    }
+
+    if (name === 'municipality') {
+      const municipio = municipios.find(m => m.nombre === value);
+      setLocalidades(municipio?.localidades || []);
+      setForm(prev => ({ ...prev, community: '' }));
+    }
   }
 
   function handleSave(e) {
@@ -59,9 +89,7 @@ export default function RegisterForm({ onNext, onMessage }) {
       return;
     }
 
-    // Enviar el valor correcto
-    if (onNext) onNext({ ...form, falta_administrativa: falta });
-
+    if (onNext) onNext(form);
     if (onMessage) onMessage({ type: 'success', text: 'Datos personales guardados, ahora captura foto y huellas.' });
   }
 
@@ -137,17 +165,29 @@ export default function RegisterForm({ onNext, onMessage }) {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm">Estado</label>
-            <input name="state" value={form.state} onChange={handleChange} className="mt-1 input" />
+            <select name="state" value={form.state} onChange={handleChange} className="mt-1 input">
+              <option value="">Selecciona un estado</option>
+              {mexicoData.map((e, i) => <option key={i} value={e.nombre}>{e.nombre}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm">Municipio</label>
-            <input name="municipality" value={form.municipality} onChange={handleChange} className="mt-1 input" />
+            <select name="municipality" value={form.municipality} onChange={handleChange} className="mt-1 input">
+              <option value="">Selecciona un municipio</option>
+              {municipios.map((m, i) => <option key={i} value={m.nombre}>{m.nombre}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm">Comunidad</label>
-            <input name="community" value={form.community} onChange={handleChange} className="mt-1 input" />
+            <select name="community" value={form.community} onChange={handleChange} className="mt-1 input">
+              <option value="">Selecciona una comunidad</option>
+              {localidades.map((l, i) => <option key={i} value={l.nombre}>{l.nombre}</option>)}
+            </select>
           </div>
         </div>
+    
+
+
 
         {/* ID y observaciones */}
         <div className="grid grid-cols-2 gap-3">
