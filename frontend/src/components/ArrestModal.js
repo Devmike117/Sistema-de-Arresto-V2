@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+
 const faltasAdministrativas = [
   "Alteración al orden público",
   "Realizar necesidades fisiológicas en vía pública",
@@ -75,10 +76,18 @@ const comunidadesArresto = [
   "Shira"
 ];
 
+const oficialesList = [
+  { id: 1, name: "Oficial 1", turno: "Primer Turno" },
+  { id: 2, name: "Oficial 2", turno: "Primer Turno" },
+  { id: 3, name: "Oficial 3", turno: "Segundo Turno" },
+  { id: 4, name: "Oficial 4", turno: "Segundo Turno" },
+];
+
 export default function ArrestModal({ person, onClose, onSave }) {
   const [formData, setFormData] = useState({
     falta_administrativa: "",
     comunidad: "",
+    turno: "",
     arresting_officer: "",
     folio: "",
     rnd: "",
@@ -91,13 +100,13 @@ export default function ArrestModal({ person, onClose, onSave }) {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "turno" ? { arresting_officer: "" } : {}), // reset oficial si cambia turno
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validación de campos obligatorios
     if (
       !formData.falta_administrativa.trim() ||
       !formData.comunidad.trim() ||
@@ -123,6 +132,14 @@ export default function ArrestModal({ person, onClose, onSave }) {
     onSave(dataToSend);
   };
 
+  // Turnos únicos
+  const turnos = [...new Set(oficialesList.map((o) => o.turno))];
+
+  // Oficiales filtrados según el turno seleccionado
+  const oficialesFiltrados = oficialesList.filter(
+    (o) => o.turno === formData.turno
+  );
+
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
@@ -145,6 +162,7 @@ export default function ArrestModal({ person, onClose, onSave }) {
               <option key={falta} value={falta}>{falta}</option>
             ))}
           </select>
+
           {formData.falta_administrativa === "Otro" && (
             <input
               name="otra_falta"
@@ -155,6 +173,7 @@ export default function ArrestModal({ person, onClose, onSave }) {
               required
             />
           )}
+
           <select
             name="comunidad"
             value={formData.comunidad}
@@ -169,13 +188,40 @@ export default function ArrestModal({ person, onClose, onSave }) {
               </option>
             ))}
           </select>
-          <input
+
+          {/* Select Turno */}
+          <select
+            name="turno"
+            value={formData.turno}
+            onChange={handleChange}
+            style={inputStyle}
+            required
+          >
+            <option value="">Seleccione un Turno</option>
+            {turnos.map((t, index) => (
+              <option key={index} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+
+          {/* Select Oficial filtrado por turno */}
+          <select
             name="arresting_officer"
-            placeholder="Oficial a cargo"
             value={formData.arresting_officer}
             onChange={handleChange}
             style={inputStyle}
-          />
+            required
+            disabled={!formData.turno}
+          >
+            <option value="">Seleccione un Oficial</option>
+            {oficialesFiltrados.map((o) => (
+              <option key={o.id} value={o.name}>
+                {o.name} - {o.turno}
+              </option>
+            ))}
+          </select>
+
           <input
             name="folio"
             placeholder="Folio"
@@ -208,6 +254,7 @@ export default function ArrestModal({ person, onClose, onSave }) {
     </div>
   );
 }
+
 
 // --- Estilos ---
 const overlayStyle = {

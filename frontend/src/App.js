@@ -8,6 +8,8 @@ import Dashboard from "./components/Dashboard";
 import Notification from "./components/Notification";
 import FacialSearch from "./components/FacialSearch";
 import SearchPeople from "./components/SearchPeople";
+import './styles/global.css';
+
 
 function App() {
   const [loading, setLoading] = useState(true);
