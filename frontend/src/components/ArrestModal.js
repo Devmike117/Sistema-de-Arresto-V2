@@ -1,5 +1,23 @@
 import React, { useState } from "react";
 
+const faltasAdministrativas = [
+  "Alteración al orden público",
+  "Realizar necesidades fisiológicas en vía pública",
+  "Realizar en cruceros actividades que pongan en riesgo la integridad física",
+  "Ingerir bebidas embriagantes en vía pública",
+  "Inhalar sustancias tóxicas en vía pública",
+  "Pega de propaganda",
+  "Faltas a la moral",
+  "Arrojar en lugares no autorizados animales muertos, escombros y desperdicios",
+  "Daños a los bienes del municipio",
+  "Dañar, podar o talar árboles",
+  "Trepar bardas o cualquier inmueble ajeno sin autorización",
+  "Pasar la señal roja del semáforo",
+  "Obstruir rampa para discapacitados",
+  "Vender animales o mascotas en vía pública",
+  "Otro"
+];
+
 export default function ArrestModal({ person, onClose, onSave }) {
   const [formData, setFormData] = useState({
     falta_administrativa: "",
@@ -8,6 +26,7 @@ export default function ArrestModal({ person, onClose, onSave }) {
     folio: "",
     rnd: "",
     sentencia: "",
+    otra_falta: "",
   });
 
   const handleChange = (e) => {
@@ -22,14 +41,21 @@ export default function ArrestModal({ person, onClose, onSave }) {
     e.preventDefault();
 
     // Validación de campos obligatorios
-    if (!formData.falta_administrativa.trim() || !formData.comunidad.trim()) {
+    if (
+      !formData.falta_administrativa.trim() ||
+      !formData.comunidad.trim() ||
+      (formData.falta_administrativa === "Otro" && !formData.otra_falta.trim())
+    ) {
       alert("Debes llenar Falta administrativa y Comunidad");
       return;
     }
 
     const dataToSend = {
       person_id: person.id,
-      falta_administrativa: formData.falta_administrativa.trim(),
+      falta_administrativa:
+        formData.falta_administrativa === "Otro"
+          ? formData.otra_falta.trim()
+          : formData.falta_administrativa.trim(),
       comunidad: formData.comunidad.trim(),
       arresting_officer: formData.arresting_officer.trim() || null,
       folio: formData.folio.trim() || null,
@@ -37,7 +63,6 @@ export default function ArrestModal({ person, onClose, onSave }) {
       sentencia: formData.sentencia.trim() || null,
     };
 
-    // Enviar datos al backend
     onSave(dataToSend);
   };
 
@@ -51,14 +76,28 @@ export default function ArrestModal({ person, onClose, onSave }) {
         </p>
 
         <form onSubmit={handleSubmit} style={formStyle}>
-          <input
+          <select
             name="falta_administrativa"
-            placeholder="Falta administrativa"
             value={formData.falta_administrativa}
             onChange={handleChange}
             style={inputStyle}
             required
-          />
+          >
+            <option value="">Selecciona falta administrativa</option>
+            {faltasAdministrativas.map((falta) => (
+              <option key={falta} value={falta}>{falta}</option>
+            ))}
+          </select>
+          {formData.falta_administrativa === "Otro" && (
+            <input
+              name="otra_falta"
+              placeholder="Especifica la falta"
+              value={formData.otra_falta}
+              onChange={handleChange}
+              style={inputStyle}
+              required
+            />
+          )}
           <input
             name="comunidad"
             placeholder="Comunidad"
