@@ -175,7 +175,19 @@ export default function RegisterForm({ onNext, onMessage }) {
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-semibold mb-4">Datos de la persona</h2>
+      {/* Divisor para datos de la persona */}
+      <div style={{ margin: "1.5rem 0 0rem 0", borderTop: "2px solid #e5e7eb", textAlign: "center" }}>
+        <span style={{
+          background: "#fff",
+          padding: "0 1rem",
+          position: "relative",
+          top: "-0.8em",
+          fontWeight: "bold",
+          color: "#555"
+        }}>
+          Datos de la persona
+        </span>
+      </div>
 
       <form onSubmit={handleSave} className="grid grid-cols-1 gap-4">
         {/* Nombre completo */}
@@ -256,9 +268,23 @@ export default function RegisterForm({ onNext, onMessage }) {
             <input name="id_number" value={form.id_number} onChange={handleChange} className="mt-1 input" />
           </div>
           <div>
-            <label className="block text-sm">Observaciones</label>
+            <label className="block text-sm">Observaciones "Señas Particulares" </label>
             <input name="observaciones" value={form.observaciones} onChange={handleChange} className="mt-1 input" />
           </div>
+        </div>
+
+        {/* Divisor para información del arresto */}
+        <div style={{ margin: "1.5rem 0 0rem 0", borderTop: "2px solid #e5e7eb", textAlign: "center" }}>
+          <span style={{
+            background: "#fff",
+            padding: "0 1rem",
+            position: "relative",
+            top: "-0.8em",
+            fontWeight: "bold",
+            color: "#555"
+          }}>
+            Información del arresto
+          </span>
         </div>
 
         {/* Arresto: falta administrativa, comunidad, oficial */}
