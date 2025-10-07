@@ -15,21 +15,19 @@ function App() {
   const [currentSection, setCurrentSection] = useState(0);
 
   const [personData, setPersonData] = useState(null);
-const [photoFile, setPhotoFile] = useState(null);
-const [fingerprintFile, setFingerprintFile] = useState(null);
-  
+  const [photoFile, setPhotoFile] = useState(null);
+  const [fingerprintFile, setFingerprintFile] = useState(null);
 
- const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState(null);
 
-const handleLoaderFinish = () => setLoading(false);
+  const handleLoaderFinish = () => setLoading(false);
 
-// Guardar datos de RegisterForm
-const handleNextFromRegister = (data) => {
-  setPersonData(data);
-  setCurrentSection(3); // Pasar a biometría
-  setMessage({ type: "success", text: "Datos guardados. Ahora captura foto y huellas." });
-};
-
+  // Guardar datos de RegisterForm
+  const handleNextFromRegister = (data) => {
+    setPersonData(data);
+    setCurrentSection(3); // Pasar a biometría (índice corregido)
+    setMessage({ type: "success", text: "Datos guardados. Ahora captura foto y huellas." });
+  };
 
   // Registrar persona y biometría
   const handleRegister = async () => {
@@ -48,7 +46,7 @@ const handleNextFromRegister = (data) => {
     if (fingerprintFile) formData.append("fingerprint", fingerprintFile);
 
     try {
-      const res = await fetch("http://localhost:5000/api/register/create-person", {
+      const res = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         body: formData,
       });
@@ -68,6 +66,7 @@ const handleNextFromRegister = (data) => {
     }
   };
 
+  // Secciones de la app en orden lógico
   const sections = [
     {
       id: "inicio",
@@ -76,7 +75,7 @@ const handleNextFromRegister = (data) => {
     },
     {
       id: "buscar",
-      title: "Búsqueda de Personas",
+      title: "Buscar Personas",
       content: <SearchPeople onMessage={setMessage} />,
     },
     {
@@ -197,3 +196,4 @@ const handleNextFromRegister = (data) => {
 }
 
 export default App;
+
