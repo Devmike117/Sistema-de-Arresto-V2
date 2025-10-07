@@ -61,7 +61,20 @@ const SearchPeople = () => {
     setSelectedPerson(null);
   };
 
-  // Puedes implementar aquí la lógica para guardar un arresto y refrescar resultados si lo deseas
+  const handleSaveArrest = async (arrestData) => {
+    if (!selectedPerson) return;
+    try {
+      await axios.post('http://localhost:5000/api/arrests', {
+        person_id: selectedPerson.id,
+        ...arrestData,
+      });
+      setShowArrestModal(false);
+      // Opcional: recargar resultados para mostrar el nuevo arresto
+      handleSearch({ preventDefault: () => {} });
+    } catch (err) {
+      alert('Error al registrar arresto');
+    }
+  };
 
   return (
     <div>
@@ -174,7 +187,7 @@ const SearchPeople = () => {
         <ArrestModal
           person={selectedPerson}
           onClose={handleCloseArrestModal}
-          // onSave={...} // Implementa la lógica de guardado si lo necesitas
+          onSave={handleSaveArrest}
         />
       )}
       {showHistoryModal && selectedPerson && (
