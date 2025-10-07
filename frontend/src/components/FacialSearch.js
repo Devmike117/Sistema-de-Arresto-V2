@@ -95,7 +95,8 @@ export default function FacialSearch({ onMessage }) {
       >
         {loading ? "Buscando..." : "Buscar Persona"}
       </button>
-
+          {/* Mostrar la informacion de resultados en otra seccion horizontal  */}
+          
       {result && (
         <div
           style={{
@@ -109,35 +110,39 @@ export default function FacialSearch({ onMessage }) {
             boxShadow: "0px 4px 15px rgba(0,0,0,0.5)",
           }}
         >
+
+          
+
           <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>Resultado</h2>
           {result.found ? (
             <>
-              <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
-                <img
-                  src={`http://localhost:5000/uploads/photos/${result.person.photo_path.split("\\").pop()}`}
-                  alt="Foto de la persona"
-                  style={{
-                    width: "120px",
-                    height: "120px",
-                    borderRadius: "8px",
-                    objectFit: "cover",
-                    marginRight: "1rem",
-                    border: "2px solid #4caf50",
-                  }}
-                />
-                <div>
-                  <h3 style={{ fontSize: "1.4rem" }}>
-                    {result.person.first_name} {result.person.last_name}{" "}
-                    {result.person.alias && `(${result.person.alias})`}
-                  </h3>
-                  <p><strong>Fecha de Nac.:</strong> {formatDate(result.person.dob)}</p>
-                  <p><strong>Género:</strong> {result.person.gender || "N/A"}</p>
-                  <p><strong>Nacionalidad:</strong> {result.person.nationality || "N/A"}</p>
-                  <p><strong>Estado:</strong> {result.person.state || "N/A"}</p>
-                  <p><strong>Municipio:</strong> {result.person.municipality || "N/A"}</p>
-                  <p><strong>Comunidad:</strong> {result.person.community || "N/A"}</p>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+              <img
+                src={`http://localhost:5000/uploads/photos/${result.person.photo_path.split("\\").pop()}`}
+                alt="Foto de la persona"
+                style={{
+                  width: "140px",
+                  height: "140px",
+                  borderRadius: "8px",
+                  objectFit: "cover",
+                  border: "2px solid #4caf50",
+                }}
+              />
+              <div style={{ flex: "1 1 400px" }}>
+                <h3 style={{ fontSize: "1.4rem", marginBottom: "0.5rem" }}>
+                  {result.person.first_name} {result.person.last_name}{" "}
+                  {result.person.alias && `(${result.person.alias})`}
+                </h3>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                  <div><strong>Fecha de Nac.:</strong> {formatDate(result.person.dob)}</div>
+                  <div><strong>Género:</strong> {result.person.gender || "N/A"}</div>
+                  <div><strong>Nacionalidad:</strong> {result.person.nationality || "N/A"}</div>
+                  <div><strong>Estado:</strong> {result.person.state || "N/A"}</div>
+                  <div><strong>Municipio:</strong> {result.person.municipality || "N/A"}</div>
+                  <div><strong>Comunidad:</strong> {result.person.community || "N/A"}</div>
                 </div>
               </div>
+            </div>
 
               <div style={{ marginBottom: "1rem" }}>
                 <h4>Información Personal</h4>
@@ -147,24 +152,32 @@ export default function FacialSearch({ onMessage }) {
 
               <div style={{ marginBottom: "1rem" }}>
                 <h4>Historial de Arrestos</h4>
-                {result.person.arrests && result.person.arrests.length > 0 ? (
-                  <ul style={{ paddingLeft: "1.2rem" }}>
-                    {result.person.arrests.map((a, index) => (
-                      <li key={index} style={{ marginBottom: "0.5rem" }}>
-                        <p><strong>Fecha:</strong> {formatDate(a.arrest_date)}</p>
-                        <p><strong>Falta Administrativa:</strong> {a.falta_administrativa || "N/A"}</p>
-                        <p><strong>Comunidad:</strong> {a.comunidad || "N/A"}</p>
-                        <p><strong>Oficial:</strong> {a.arresting_officer || "N/A"}</p>
-                        <p><strong>Folio:</strong> {a.folio || "N/A"}</p>
-                        <p><strong>RND:</strong> {a.rnd || "N/A"}</p>
-                        <p><strong>Sentencia:</strong> {a.sentencia || "N/A"}</p>
-                        <hr style={{ border: "0.5px solid #444" }} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No hay arrestos registrados.</p>
-                )}
+                {result.person.arrests && result.person.arrests.length > 0 ? result.person.arrests.map((a, index) => (
+                <div key={index} style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                  backgroundColor: "#2a2a3d",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  marginBottom: "1rem",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                }}>
+                  <div style={{ flex: "1 1 200px" }}>
+                    <p><strong>Fecha:</strong> {formatDate(a.arrest_date)}</p>
+                    <p><strong>Falta:</strong> {a.falta_administrativa || "N/A"}</p>
+                    <p><strong>Comunidad:</strong> {a.comunidad || "N/A"}</p>
+                  </div>
+                  <div style={{ flex: "1 1 200px" }}>
+                    <p><strong>Oficial:</strong> {a.arresting_officer || "N/A"}</p>
+                    <p><strong>Folio:</strong> {a.folio || "N/A"}</p>
+                    <p><strong>RND:</strong> {a.rnd || "N/A"}</p>
+                    <p><strong>Sentencia:</strong> {a.sentencia || "N/A"}</p>
+                  </div>
+                </div>
+              )) : (
+                <p>No hay arrestos registrados.</p>
+              )}
               </div>
 
               <div style={{ textAlign: "center", marginTop: "1rem" }}>

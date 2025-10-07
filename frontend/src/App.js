@@ -6,7 +6,8 @@ import FacialCapture from "./components/FacialCapture";
 import FingerprintScan from "./components/FingerprintScan";
 import Dashboard from "./components/Dashboard";
 import Notification from "./components/Notification";
-import FacialSearch from "./components/FacialSearch"; // Asegúrate de crear este componente
+import FacialSearch from "./components/FacialSearch";
+import SearchPeople from "./components/SearchPeople";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -14,21 +15,23 @@ function App() {
   const [currentSection, setCurrentSection] = useState(0);
 
   const [personData, setPersonData] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-  const [fingerprintFile, setFingerprintFile] = useState(null);
+const [photoFile, setPhotoFile] = useState(null);
+const [fingerprintFile, setFingerprintFile] = useState(null);
+  
 
-  const [message, setMessage] = useState(null);
+ const [message, setMessage] = useState(null);
 
-  const handleLoaderFinish = () => setLoading(false);
+const handleLoaderFinish = () => setLoading(false);
 
-  // Guardar datos de RegisterForm
-  const handleNextFromRegister = (data) => {
-    setPersonData(data);
-    setCurrentSection(2); // Pasar a biometría
-    setMessage({ type: "success", text: "Datos guardados. Ahora captura foto y huellas." });
-  };
+// Guardar datos de RegisterForm
+const handleNextFromRegister = (data) => {
+  setPersonData(data);
+  setCurrentSection(3); // Pasar a biometría
+  setMessage({ type: "success", text: "Datos guardados. Ahora captura foto y huellas." });
+};
 
-  // Registrar en backend
+
+  // Registrar persona y biometría
   const handleRegister = async () => {
     if (!personData) {
       setMessage({ type: "error", text: "Primero guarda los datos de la persona." });
@@ -45,7 +48,7 @@ function App() {
     if (fingerprintFile) formData.append("fingerprint", fingerprintFile);
 
     try {
-      const res = await fetch("http://localhost:5000/api/register", {
+      const res = await fetch("http://localhost:5000/api/register/create-person", {
         method: "POST",
         body: formData,
       });
@@ -55,7 +58,7 @@ function App() {
         setPersonData(null);
         setPhotoFile(null);
         setFingerprintFile(null);
-        setCurrentSection(3); // Ir a dashboard
+        setCurrentSection(4); // Ir a dashboard
       } else {
         setMessage({ type: "error", text: data.error || "Error al registrar." });
       }
@@ -70,6 +73,11 @@ function App() {
       id: "inicio",
       title: "Inicio / Búsqueda Facial",
       content: <FacialSearch onMessage={setMessage} />,
+    },
+    {
+      id: "buscar",
+      title: "Búsqueda de Personas",
+      content: <SearchPeople onMessage={setMessage} />,
     },
     {
       id: "registro",
@@ -168,10 +176,11 @@ function App() {
       <header style={styles.header}>
         <h1 style={styles.title}>BioRegistro</h1>
         <nav style={styles.nav}>
-          <button style={navButtonStyle} onClick={() => setCurrentSection(0)}>Inicio</button>
-          <button style={navButtonStyle} onClick={() => setCurrentSection(1)}>Registro</button>
-          <button style={navButtonStyle} onClick={() => setCurrentSection(2)}>Biometría</button>
-          <button style={navButtonStyle} onClick={() => setCurrentSection(3)}>Dashboard</button>
+          {sections.map((sec, idx) => (
+            <button key={sec.id} style={navButtonStyle} onClick={() => setCurrentSection(idx)}>
+              {sec.title}
+            </button>
+          ))}
         </nav>
       </header>
 
