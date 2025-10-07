@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import ArrestModal from './ArrestModal';
+import HistoryArrestModal from './HistoryArrestModal';
 
 const SearchPeople = () => {
   const [firstName, setFirstName] = useState('');
@@ -7,6 +9,9 @@ const SearchPeople = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showArrestModal, setShowArrestModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState(null);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -35,6 +40,28 @@ const SearchPeople = () => {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   };
+
+  const handleOpenArrestModal = (person) => {
+    setSelectedPerson(person);
+    setShowArrestModal(true);
+  };
+
+  const handleOpenHistoryModal = (person) => {
+    setSelectedPerson(person);
+    setShowHistoryModal(true);
+  };
+
+  const handleCloseArrestModal = () => {
+    setShowArrestModal(false);
+    setSelectedPerson(null);
+  };
+
+  const handleCloseHistoryModal = () => {
+    setShowHistoryModal(false);
+    setSelectedPerson(null);
+  };
+
+  // Puedes implementar aquí la lógica para guardar un arresto y refrescar resultados si lo deseas
 
   return (
     <div>
@@ -106,11 +133,58 @@ const SearchPeople = () => {
                 <p><strong>Notas:</strong> {person.observaciones || "Sin notas"}</p>
                 <p><strong>Creado:</strong> {formatDate(person.created_at)}</p>
               </div>
+              <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
+                <button
+                  onClick={() => handleOpenArrestModal(person)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    backgroundColor: "#4caf50",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Registrar nuevo arresto
+                </button>
+                <button
+                  onClick={() => handleOpenHistoryModal(person)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    backgroundColor: "#2196f3",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Ver historial de arrestos
+                </button>
+              </div>
             </div>
           </li>
         ))}
       </ul>
       {results.length === 0 && !loading && <p>No se encontraron resultados.</p>}
+
+      {/* Modales */}
+      {showArrestModal && selectedPerson && (
+        <ArrestModal
+          person={selectedPerson}
+          onClose={handleCloseArrestModal}
+          // onSave={...} // Implementa la lógica de guardado si lo necesitas
+        />
+      )}
+      {showHistoryModal && selectedPerson && (
+        <HistoryArrestModal
+          open={showHistoryModal}
+          onClose={handleCloseHistoryModal}
+          arrests={selectedPerson.arrests || []}
+          person={selectedPerson}
+        />
+      )}
     </div>
   );
 };

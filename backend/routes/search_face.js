@@ -135,7 +135,6 @@ router.post('/', upload.single('file'), async (req, res) => {
 // Búsqueda por nombre y apellido
 router.get('/by_name', async (req, res) => {
   const { first_name, last_name } = req.query;
-  const search = (first_name || '') + ' ' + (last_name || '');
   if (!first_name && !last_name) {
     return res.status(400).json({ error: 'Debe proporcionar al menos un nombre o apellido' });
   }
@@ -150,7 +149,25 @@ router.get('/by_name', async (req, res) => {
           OR LOWER(alias) LIKE LOWER('%' || $1 || '%')`,
       [first_name || last_name]
     );
-    res.json({ results: rows });
+
+    // Obtener arrestos para cada persona
+    const results = [];
+    for (const person of rows) {
+      const arrestQuery = await pool.query(
+        `SELECT id, arrest_date, falta_administrativa, comunidad, arresting_officer,
+                folio, rnd, sentencia
+         FROM Arrests
+         WHERE person_id = $1
+         ORDER BY arrest_date DESC`,
+        [person.id]
+      );
+      results.push({
+        ...person,
+        arrests: arrestQuery.rows,
+      });
+    }
+
+    res.json({ results });
   } catch (err) {
     console.error('Error en búsqueda por nombre:', err.message);
     res.status(500).json({ error: 'Error al buscar por nombre' });
