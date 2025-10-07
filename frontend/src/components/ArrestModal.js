@@ -18,6 +18,63 @@ const faltasAdministrativas = [
   "Otro"
 ];
 
+const comunidadesArresto = [
+  "Atotonilco",
+  "Barrio De Trojes",
+  "Colonia Cuauhtémoc",
+  "Colonia Francisco I Madero",
+  "Colonia Luis Donaldo Colosio",
+  "Dolores Enyege",
+  "Ejido 20 De Noviembre",
+  "El Rincón De Los Perales",
+  "El Tecomate",
+  "Emiliano Zapata",
+  "Guadalupe Cachi",
+  "Guadalupe Del Río",
+  "Huereje",
+  "Ixtlahuaca De Rayón",
+  "Jalpa De Dolores",
+  "Jalpa De Los Baños",
+  "La Bandera",
+  "La Concepción De Los Baños",
+  "La Concepción Enyege",
+  "La Estación Del Ferrocarril",
+  "La Guadalupana",
+  "La Purisima",
+  "San Andrés Del Pedregal",
+  "San Antonio Bonixi",
+  "San Antonio De Los Remedios",
+  "San Bartolo Del Llano",
+  "San Cristóbal De Los Baños",
+  "San Francisco De Asís",
+  "San Francisco De Guzmán",
+  "San Francisco Del Río",
+  "San Francisco Ixtlahuaca",
+  "San Ignacio Del Pedregal",
+  "San Ildefonso",
+  "San Isidro Boxipe",
+  "San Jerónimo Ixtapantongo",
+  "San Jerónimo La Cañada",
+  "San Joaquín El Junco",
+  "San Joaquín La Cabecera",
+  "San José Del Río",
+  "San Juan De Las Manzanas",
+  "San Lorenzo Toxico",
+  "San Mateo Ixtlahuaca",
+  "San Miguel El Alto",
+  "San Miguel Enyege",
+  "San Pablo De Los Remedios",
+  "San Pedro De Los Baños",
+  "San Pedro La Cabecera",
+  "Santa Ana Ixtlahuaca",
+  "Santa Ana La Ladera",
+  "Santa María De Guadalupe",
+  "Santa María Del Llano",
+  "Santo Domingo De Guzmán",
+  "Santo Domingo Huereje",
+  "Shira"
+];
+
 export default function ArrestModal({ person, onClose, onSave }) {
   const [formData, setFormData] = useState({
     falta_administrativa: "",
@@ -98,14 +155,20 @@ export default function ArrestModal({ person, onClose, onSave }) {
               required
             />
           )}
-          <input
+          <select
             name="comunidad"
-            placeholder="Comunidad"
             value={formData.comunidad}
             onChange={handleChange}
             style={inputStyle}
             required
-          />
+          >
+            <option value="">Selecciona una comunidad</option>
+            {comunidadesArresto.map((comunidad) => (
+              <option key={comunidad} value={comunidad}>
+                {comunidad}
+              </option>
+            ))}
+          </select>
           <input
             name="arresting_officer"
             placeholder="Oficial a cargo"
