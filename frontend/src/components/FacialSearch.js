@@ -151,11 +151,11 @@ export default function FacialSearch({ onMessage }) {
 
                     <div style={styles.infoGrid}>
                       <InfoItem icon={<span className="material-symbols-outlined">calendar_month</span>} label="Fecha de Nac." value={formatDate(result.person.dob)} />
-                      <InfoItem icon={<span className="material-symbols-outlined">gender</span>} label="Género" value={result.person.gender || "N/A"} />
-                      <InfoItem icon="🌎" label="Nacionalidad" value={result.person.nationality || "N/A"} />
-                      <InfoItem icon="📍" label="Estado" value={result.person.state || "N/A"} />
-                      <InfoItem icon="🏛️" label="Municipio" value={result.person.municipality || "N/A"} />
-                      <InfoItem icon="🏘️" label="Comunidad" value={result.person.community || "N/A"} />
+                      <InfoItem icon={<span className="material-symbols-outlined">transgender</span>} label="Género" value={result.person.gender || "N/A"} />
+                      <InfoItem icon={<span className="material-symbols-outlined">globe</span>} label="Nacionalidad" value={result.person.nationality || "N/A"} />
+                      <InfoItem icon={<span className="material-symbols-outlined">location_on</span>} label="Estado" value={result.person.state || "N/A"} />
+                      <InfoItem icon={<span className="material-symbols-outlined">apartment</span>} label="Municipio" value={result.person.municipality || "N/A"} />
+                      <InfoItem icon={<span className="material-symbols-outlined">home</span>} label="Comunidad" value={result.person.community || "N/A"} />
                     </div>
                   </div>
                 </div>
@@ -163,16 +163,26 @@ export default function FacialSearch({ onMessage }) {
                 {/* Información adicional */}
                 <div style={styles.additionalSection}>
                   <h4 style={styles.sectionTitle}>
-                    <span style={styles.sectionIcon}>📋</span>
+                    <span style={styles.sectionIcon}>
+                      <span className="material-symbols-outlined">info</span>
+                    </span>
                     Información Personal
                   </h4>
                   <div style={styles.infoBox}>
                     <div style={styles.infoRow}>
-                      <span style={styles.infoLabel}>🪪 ID:</span>
+                      <span style={styles.infoLabel}>
+                        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>
+                    id_card
+                  </span>
+                         ID:</span>
                       <span style={styles.infoValue}>{result.person.id_number || "N/A"}</span>
                     </div>
                     <div style={styles.infoRow}>
-                      <span style={styles.infoLabel}>📝 Notas:</span>
+                      <span style={styles.infoLabel}>
+                        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>
+                          notes
+                        </span>
+                        Notas:</span>
                       <span style={styles.infoValue}>{result.person.observaciones || "Sin notas"}</span>
                     </div>
                   </div>
@@ -182,7 +192,10 @@ export default function FacialSearch({ onMessage }) {
                 <div style={styles.arrestSection}>
                   <div style={styles.arrestHeader}>
                     <h4 style={styles.sectionTitle}>
-                      <span style={styles.sectionIcon}>🚨</span>
+                      <span style={styles.sectionIcon}>
+
+                        <span className="material-symbols-outlined">gavel</span>
+                      </span>
                       Historial de Arrestos
                     </h4>
                     {result.person.arrests && result.person.arrests.length > 0 && (
@@ -200,34 +213,69 @@ export default function FacialSearch({ onMessage }) {
                           <div style={styles.arrestContent}>
                             <div style={styles.arrestColumn}>
                               <div style={styles.arrestItem}>
-                                <span style={styles.arrestLabel}>📅 Fecha:</span>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    calendar_today
+                                  </span>
+                                  <span style={{ color: '#000000ff' }}>Fecha:</span>
+                                </span>
                                 <span style={styles.arrestValue}>{formatDate(a.arrest_date)}</span>
                               </div>
                               <div style={styles.arrestItem}>
-                                <span style={styles.arrestLabel}>⚠️ Falta:</span>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    warning
+                                  </span>
+                                  <span style={{ color: '#000000ff' }}>Falta:</span>
+                                </span>
                                 <span style={styles.arrestValue}>{a.falta_administrativa || "N/A"}</span>
                               </div>
                               <div style={styles.arrestItem}>
-                                <span style={styles.arrestLabel}>📍 Comunidad:</span>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    location_on
+                                  </span>
+                                  <span style={{ color: '#000000ff' }}>Comunidad:</span>
+                                </span>
                                 <span style={styles.arrestValue}>{a.comunidad || "N/A"}</span>
                               </div>
                             </div>
                             <div style={styles.arrestColumn}>
                               <div style={styles.arrestItem}>
-                                <span style={styles.arrestLabel}>👮 Oficial:</span>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    local_police
+                                  </span>
+                                  <span style={{ color: '#000000ff' }}>Oficial:</span>
+                                </span>
                                 <span style={styles.arrestValue}>{a.arresting_officer || "N/A"}</span>
                               </div>
                               <div style={styles.arrestItem}>
-                                <span style={styles.arrestLabel}>📄 Folio:</span>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    description
+                                  </span>
+                                  <span style={{ color: '#000000ff' }}>Folio:</span>
+                                </span>
                                 <span style={styles.arrestValue}>{a.folio || "N/A"}</span>
                               </div>
                               <div style={styles.arrestItem}>
-                                <span style={styles.arrestLabel}>🔢 RND:</span>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    description
+                                  </span>
+                                  <span style={{ color: '#000000ff' }}>RND:</span>
+                                </span>
                                 <span style={styles.arrestValue}>{a.rnd || "N/A"}</span>
                               </div>
                               {a.sentencia && a.sentencia !== "N/A" && (
                                 <div style={styles.arrestItem}>
-                                  <span style={styles.arrestLabel}>⚖️ Sentencia:</span>
+                                  <span style={styles.arrestLabel}>
+                                    <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                      description
+                                    </span>
+                                    <span style={{ color: '#000000ff' }}>Sentencia:</span>
+                                  </span>
                                   <span style={styles.arrestValue}>{a.sentencia}</span>
                                 </div>
                               )}
@@ -238,7 +286,9 @@ export default function FacialSearch({ onMessage }) {
                     </div>
                   ) : (
                     <div style={styles.noArrests}>
-                      <span style={styles.noArrestsIcon}>📭</span>
+                      <span style={styles.noArrestsIcon}>
+                        <span className="material-symbols-outlined">history_toggle_off</span>
+                      </span>
                       <p style={styles.noArrestsText}>No hay arrestos registrados</p>
                     </div>
                   )}
@@ -252,14 +302,18 @@ export default function FacialSearch({ onMessage }) {
                     onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                     onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                   >
-                    <span style={styles.buttonIcon}>➕</span>
+                    <span style={styles.buttonIcon}>
+                      <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '20px' }}>add</span>
+                    </span>
                     Registrar Nuevo Arresto
                   </button>
                 </div>
               </>
             ) : (
               <div style={styles.notFound}>
-                <span style={styles.notFoundIcon}>🔍</span>
+                <span style={styles.notFoundIcon}>
+                  <span className="material-symbols-outlined">face_6</span>
+                </span>
                 <p style={styles.notFoundText}>No se encontró ninguna coincidencia</p>
                 <p style={styles.notFoundSubtext}>Intenta con otra foto o verifica la calidad de la imagen</p>
               </div>
