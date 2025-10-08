@@ -76,6 +76,104 @@ const comunidadesArresto = [
   "Shira"
 ];
 
+const turnos = ["Primer Turno", "Segundo Turno"];
+
+const oficialesPrimerTurno = [
+  { id: 1, name: "AGUILAR REYES SANTIAGO" },
+  { id: 2, name: "AGUILAR MENDOZA LUCIO" },
+  { id: 3, name: "AGUSTÍN MEDINA WALDEMAR" },
+  { id: 4, name: "ALBA VALLEJO JOSÉ" },
+  { id: 5, name: "ALCÁNTARA MELCHOR ROLANDO" },
+  { id: 6, name: "ÁLVAREZ MARTÍNEZ JUAN" },
+  { id: 7, name: "ALEJO CORTEZ ISMAEL" },
+  { id: 8, name: "AMADO CAYETANO MARIO" },
+  { id: 9, name: "ANDRÉS ISIDRO EDUARDO" },
+  { id: 10, name: "ÁNGELES SANDOVAL ALEJANDRO" },
+  { id: 11, name: "ANTONIO MARCIAL JORGE LUIS" },
+  { id: 12, name: "BENAVIDES ENRÍQUEZ MARIO ALBERTO" },
+  { id: 13, name: "CANCÍN MATÍAS AUGUSTO CESAR" },
+  { id: 14, name: "CONTRERAS ÁNGELES ANTONIO" },
+  { id: 15, name: "DÁVALOS CRUZ JOSÉ HUMBERTO" },
+  { id: 16, name: "DÍAZ MATA EPIFANIO" },
+  { id: 17, name: "DÍAZ SANTIAGO ANDRÉS" },
+  { id: 18, name: "DURAN MIRELES DAVID" },
+  { id: 19, name: "GARCÍA CRUZ ROBERTO" },
+  { id: 20, name: "GÓMEZ HERNÁNDEZ EDUARDO" },
+  { id: 21, name: "GONZÁLEZ SÁNCHEZ ISIDRO" },
+  { id: 22, name: "GUZMÁN JULIÁN JUAN" },
+  { id: 23, name: "JIMÉNEZ PEDRAZA JUAN" },
+  { id: 24, name: "LÓPEZ JIMÉNEZ DAVID" },
+  { id: 25, name: "LÓPEZ MENDOZA ABDIEL" },
+  { id: 26, name: "LUCIO GARCÍA CESAR" },
+  { id: 27, name: "LUIS AMADO LÁZARO" },
+  { id: 28, name: "MATEO CARMONA HUGO" },
+  { id: 29, name: "MONROY CORTEZ KEVIN URIEL" },
+  { id: 30, name: "NAVA BALLINA WILFRIDO" },
+  { id: 31, name: "NICOLÁS JIMÉNEZ EFRÉN" },
+  { id: 32, name: "ORTEGA HERNÁNDEZ REYNA" },
+  { id: 33, name: "OSORIO MEJÍA ALEJANDRO" },
+  { id: 34, name: "PEÑA PÉREZ JOSÉ ALBERTO" },
+  { id: 35, name: "PIÑA GALINDO JOSÉ FRANCISCO" },
+  { id: 36, name: "PLATA MUÑOZ SERGIO" },
+  { id: 37, name: "SALAZAR ESPINOZA MARTÍN" },
+  { id: 38, name: "SALVADOR ANCONA ÓSCAR" },
+  { id: 39, name: "SÁNCHEZ LUIS ROBERTO" },
+  { id: 40, name: "TOMAS GONZÁLEZ FABIÁN" },
+  { id: 41, name: "VALENTÍN ODILÓN REMIGIO" },
+  { id: 42, name: "VENTURA SÁNCHEZ JUAN" },
+  { id: 43, name: "VELÁZQUEZ ANTONIO EDUARDO" },
+  { id: 44, name: "ZETINA MENDOZA DANIEL" }
+];
+
+const oficialesSegundoTurno = [
+  { id: 1, name: "ÁLVAREZ LUIS JOEL" },
+  { id: 2, name: "ÁLVAREZ MARTÍNEZ MAURICIO" },
+  { id: 3, name: "ANTONIO MENDOZA OMAR" },
+  { id: 4, name: "BARRIOS PÉREZ TELESFORO" },
+  { id: 5, name: "BETANCOURT ANTONIO CARLOS ALEJANDRO" },
+  { id: 6, name: "BRACAMONTE GARCÍA GABRIEL" },
+  { id: 7, name: "BRACAMONTE GARCÍA PRISCILIANO" },
+  { id: 8, name: "CARRANZA GONZÁLEZ URIEL" },
+  { id: 9, name: "CARREOLA SÁNCHEZ YOLIDIA" },
+  { id: 10, name: "CASTAÑEDA JERÓNIMO ALEJANDRO" },
+  { id: 11, name: "DÍAZ HERNÁNDEZ RIGOBERTO" },
+  { id: 12, name: "DÍAZ MORALES CESAR" },
+  { id: 13, name: "FELIPE DE JESÚS SANTOS" },
+  { id: 14, name: "GABINO ANTONIO RAYMUNDO" },
+  { id: 15, name: "GARCÍA SEGUNDO FELIPE" },
+  { id: 16, name: "GARDUÑO GONZÁLEZ ALONSO" },
+  { id: 17, name: "GONZÁLEZ AVILÉS DOMINGO" },
+  { id: 18, name: "GUADALUPE SÁNCHEZ BLAS" },
+  { id: 19, name: "HERNÁNDEZ LÓPEZ ALBERTO" },
+  { id: 20, name: "HERNÁNDEZ PÉREZ JOAQUÍN" },
+  { id: 21, name: "JIMÉNEZ GONZÁLEZ EFRAÍN" },
+  { id: 22, name: "JIMÉNEZ GONZÁLEZ RAMÓN" },
+  { id: 23, name: "LÓPEZ MATÍAS DAVID" },
+  { id: 24, name: "LÓPEZ MORALES PEDRO" },
+  { id: 25, name: "LORENZO ARANA JOSÉ ARMANDO" },
+  { id: 26, name: "LORENZO ARANA ROBERTO" },
+  { id: 27, name: "LUIS AMADO ISIDRO" },
+  { id: 28, name: "MARTÍN FUENTES ARMANDO" },
+  { id: 29, name: "MARTÍNEZ MEJÍA NEHUTALID" },
+  { id: 30, name: "MONDRAGÓN ORTEGA ÁNGEL" },
+  { id: 31, name: "MORENO MONROY FERNANDO" },
+  { id: 32, name: "OCADIZ ROSAS JESÚS ANDRÉS" },
+  { id: 33, name: "ONOFRE MALDONADO ALFONSO" },
+  { id: 34, name: "ONOFRE VIEYRA VALENTÍN" },
+  { id: 35, name: "RIVERA SÁNCHEZ ANDRÉS" },
+  { id: 36, name: "PACHECO HERNÁNDEZ MIGUEL ÁNGEL" },
+  { id: 37, name: "QUINTANA TORIBIO ELIASIM" },
+  { id: 38, name: "SEGUNDO BARRIOS JUAN PABLO" },
+  { id: 39, name: "SEGUNDO GASPAR DANIEL" },
+  { id: 40, name: "SOTELO HERNÁNDEZ RICARDO" },
+  { id: 41, name: "SUAREZ LÓPEZ DIEGO" },
+  { id: 42, name: "TOMAS HERNÁNDEZ ADELAIDO" },
+  { id: 43, name: "TORRES MEDINA ALEJANDRO" },
+  { id: 44, name: "TREVIÑO MORENO RAFAEL" },
+  { id: 45, name: "VALENTÍN PIÑA RICARDO" },
+  { id: 46, name: "VÁZQUEZ ALCÁNTARA LUIS ALBERTO" }
+];
+
 export default function RegisterForm({ onNext, onMessage }) {
   const [form, setForm] = useState({
     first_name: '',
@@ -101,6 +199,7 @@ export default function RegisterForm({ onNext, onMessage }) {
   const [mexicoData, setMexicoData] = useState([]);
   const [municipios, setMunicipios] = useState([]);
   const [localidades, setLocalidades] = useState([]);
+  const [oficiales, setOficiales] = useState([]);
 
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/Devmike117/DB-Mexico-JSON/master/M%C3%A9xico.json')
@@ -130,6 +229,13 @@ export default function RegisterForm({ onNext, onMessage }) {
       const municipio = municipios.find(m => m.nombre === value);
       setLocalidades(municipio?.localidades || []);
       setForm(prev => ({ ...prev, community: '' }));
+    }
+
+    if (name === 'turno') {
+      if (value === "Primer Turno") setOficiales(oficialesPrimerTurno);
+      else if (value === "Segundo Turno") setOficiales(oficialesSegundoTurno);
+      else setOficiales([]);
+      setForm(prev => ({ ...prev, arresting_officer: '' }));
     }
   }
 
@@ -328,8 +434,35 @@ export default function RegisterForm({ onNext, onMessage }) {
             </select>
           </div>
           <div>
+            <label className="block text-sm">Turno</label>
+            <select
+              name="turno"
+              value={form.turno || ""}
+              onChange={handleChange}
+              className="mt-1 input"
+              required
+            >
+              <option value="">Selecciona un turno</option>
+              {turnos.map((t, i) => (
+                <option key={i} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label className="block text-sm">Oficial</label>
-            <input name="arresting_officer" value={form.arresting_officer} onChange={handleChange} className="mt-1 input" />
+            <select
+              name="arresting_officer"
+              value={form.arresting_officer}
+              onChange={handleChange}
+              className="mt-1 input"
+              required
+              disabled={!form.turno}
+            >
+              <option value="">Selecciona un oficial</option>
+              {oficiales.map((o) => (
+                <option key={o.id} value={o.name}>{o.name}</option>
+              ))}
+            </select>
           </div>
         </div>
 
