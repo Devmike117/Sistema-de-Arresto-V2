@@ -25,10 +25,24 @@ router.get('/stats', async (req, res) => {
       LIMIT 5
     `);
 
+    // Top 5 personas con más arrestos
+    const topPersonsRes = await pool.query(`
+      SELECT 
+        p.id,
+        CONCAT(p.first_name, ' ', COALESCE(NULLIF(p.alias, ''), ''), ' ', p.last_name) AS name,
+        COUNT(a.id) AS count
+      FROM Persons p
+      JOIN Arrests a ON a.person_id = p.id
+      GROUP BY p.id, p.first_name, p.alias, p.last_name
+      ORDER BY count DESC
+      LIMIT 5
+    `);
+
     res.json({
       totalPersons,
       totalArrests,
-      topOffenses: offensesRes.rows
+      topOffenses: offensesRes.rows,
+      topPersons: topPersonsRes.rows
     });
   } catch (err) {
     console.error('Error en /dashboard/stats:', err);
