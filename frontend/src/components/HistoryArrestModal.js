@@ -120,15 +120,16 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
                             RND</span>
                           <span style={styles.itemValue}>{a.rnd || "N/A"}</span>
                         </div>
-                      </div>
-                      {a.sentencia && a.sentencia !== "N/A" && (
-                        <div style={styles.sentenciaBox}>
-                          <span style={styles.sentenciaLabel}>
-                            <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>balance</span>
-                            Sentencia:</span>
-                          <p style={styles.sentenciaText}>{a.sentencia}</p>
+
+                        {/* Mostrar sentencia aunque no tenga valor */}
+                        <div style={styles.infoItem}>
+                          <span style={styles.itemLabel}>
+                            <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>description</span>
+                            Sentencia</span>
+                          <span style={styles.itemValue}>{a.sentencia || "N/A"}</span>
                         </div>
-                      )}
+                      </div>
+
                     </div>
                   </div>
                 ))}
