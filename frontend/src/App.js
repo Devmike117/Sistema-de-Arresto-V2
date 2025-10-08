@@ -150,7 +150,18 @@ function App() {
         <div style={styles.headerContent}>
           <div style={styles.logoContainer}>
             <div style={styles.logo}>
-              <span className="material-symbols-outlined" style={{ fontSize: '2rem', verticalAlign: 'middle', fontSize: '2rem', color: '#fff' }}>local_police</span>
+            {/* imagen logo */}
+             <img
+              src="https://th.bing.com/th/id/R.eb6e5629278a9adf8ffd6d85998747d0?rik=Syphi5ks4Z7ljA&riu=http%3a%2f%2fbe32.mx%2fjsons%2fimg%2fclientes%2fgdhfe-32.jpg&ehk=RPMsfcqAXz8my3Wi2%2bvR0cuElqjAHwjmUzytVmahTVo%3d&risl=&pid=ImgRaw&r=0"
+              alt="Logo"
+              style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                display: 'block'
+              }}
+            />
             </div>
             <h1 style={styles.title}>Sistema Modular de Comando</h1>
           </div>
