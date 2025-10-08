@@ -6,12 +6,11 @@ export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
     totalPersons: 0,
     totalArrests: 0,
-    topOffenses: [], // [{ falta_administrativa: "Robo", count: 5 }]
-    topPersons: []   // [{ name: "Juan Perez", count: 3 }]
+    topOffenses: [],
+    topPersons: []
   });
   const [arrests, setArrests] = useState([]);
 
-  // Obtener datos del dashboard desde backend
   const fetchDashboard = async () => {
     try {
       const statsRes = await fetch("http://localhost:5000/api/dashboard/stats");
@@ -20,7 +19,6 @@ export default function Dashboard({ onMessage }) {
       const recentRes = await fetch("http://localhost:5000/api/dashboard/recent-arrests");
       const recentData = await recentRes.json();
 
-      // Mapear nombre completo de cada persona en arrestos recientes
       const recentArrests = recentData.recentArrests.map(a => ({
         ...a,
         person_name: `${a.first_name || ""} ${a.alias ? `"${a.alias}" ` : ""}${a.last_name || ""}`.trim(),
@@ -32,7 +30,7 @@ export default function Dashboard({ onMessage }) {
       setSummary({
         totalPersons: statsData.totalPersons,
         totalArrests: statsData.totalArrests,
-        topOffenses: statsData.topOffenses, // [{ falta_administrativa, count }]
+        topOffenses: statsData.topOffenses,
         topPersons: statsData.topPersons || []
       });
 
@@ -48,109 +46,338 @@ export default function Dashboard({ onMessage }) {
   }, []);
 
   return (
-    <div style={{ padding: "2rem", background: "#1e1e2f", minHeight: "100vh", color: "#fff" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "2rem" }}>Dashboard de Monitoreo</h1>
+    <div style={{
+      padding: "2rem",
+      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      minHeight: "100vh",
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    }}>
+      {/* Header */}
+      <div style={{
+        marginBottom: "2rem",
+        textAlign: "center"
+      }}>
+        <h1 style={{
+          fontSize: "2.5rem",
+          fontWeight: "700",
+          color: "#fff",
+          marginBottom: "0.5rem",
+          textShadow: "0 2px 4px rgba(0,0,0,0.2)"
+        }}>
+        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '60px' }}>dashboard_2</span>
+          Dashboard de Monitoreo
+        </h1>
+        <p style={{
+          color: "rgba(255,255,255,0.8)",
+          fontSize: "1rem"
+        }}>
+          Sistema de seguimiento y análisis en tiempo real
+        </p>
+      </div>
 
       {/* Cards resumen */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-        <Card title="Personas Registradas" value={summary.totalPersons} color="#4caf50" />
-        <Card title="Arrestos Registrados" value={summary.totalArrests} color="#2196f3" />
-        <Card title="Delitos Más Comunes" value={summary.topOffenses.map(o => o.offense).join(", ")} color="#f44336" />
-        <Card title="Personas con Más Arrestos" value={summary.topPersons.map(p => p.name).join(", ")} color="#ff9800" />
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "1.5rem",
+        marginBottom: "2rem"
+      }}>
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>people</span>}
+          title="Personas Registradas"
+          value={summary.totalPersons}
+          gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        />
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>gavel</span>}
+          title="Arrestos Totales"
+          value={summary.totalArrests}
+          gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+        />
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>warning</span>}
+          title="Delito Más Común"
+          value={summary.topOffenses[0]?.offense || "N/A"}
+          subtitle={summary.topOffenses[0] ? `${summary.topOffenses[0].count} casos` : ""}
+          gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+        />
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>crown</span>}
+          title="Persona con Más Arrestos"
+          value={summary.topPersons[0]?.name || "N/A"}
+          subtitle={summary.topPersons[0] ? `${summary.topPersons[0].count} arrestos` : ""}
+          gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+        />
       </div>
 
       {/* Gráficos */}
-      <div style={{ display: "flex", gap: "2rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-        <div style={{ flex: 1, minWidth: "300px", background: "#2a2a3d", padding: "1rem", borderRadius: "12px" }}>
-          <h3>Arrestos por Delito</h3>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+        gap: "2rem",
+        marginBottom: "2rem"
+      }}>
+        <ChartCard title="Distribución de Delitos">
           <Pie
             data={{
               labels: summary.topOffenses.map(o => o.offense),
-              datasets: [
-                {
-                  data: summary.topOffenses.map(o => o.count),
-                  backgroundColor: ["#4caf50", "#2196f3", "#f44336", "#ff9800", "#9c27b0", "#ff5722"]
+              datasets: [{
+                data: summary.topOffenses.map(o => o.count),
+                backgroundColor: [
+                  "#667eea",
+                  "#764ba2",
+                  "#f093fb",
+                  "#f5576c",
+                  "#4facfe",
+                  "#00f2fe"
+                ],
+                borderWidth: 0
+              }]
+            }}
+            options={{
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: { color: "#fff", padding: 15, font: { size: 12 } }
                 }
-              ]
+              }
             }}
           />
-        </div>
+        </ChartCard>
 
-        <div style={{ flex: 1, minWidth: "300px", background: "#2a2a3d", padding: "1rem", borderRadius: "12px" }}>
-          <h3>Arrestos por Persona</h3>
+        <ChartCard title="Top 5 Personas con Más Arrestos">
           <Bar
             data={{
               labels: summary.topPersons.map(p => p.name),
-              datasets: [
-                {
-                  label: "Cantidad de arrestos",
-                  data: summary.topPersons.map(p => p.count),
-                  backgroundColor: "#2196f3"
+              datasets: [{
+                label: "Arrestos",
+                data: summary.topPersons.map(p => p.count),
+                backgroundColor: "rgba(102, 126, 234, 0.8)",
+                borderColor: "#667eea",
+                borderWidth: 2,
+                borderRadius: 8
+              }]
+            }}
+            options={{
+              plugins: {
+                legend: { display: false }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: "#fff" },
+                  grid: { color: "rgba(255,255,255,0.1)" }
+                },
+                x: {
+                  ticks: { color: "#fff", font: { size: 11 } },
+                  grid: { display: false }
                 }
-              ]
+              }
             }}
           />
-        </div>
+        </ChartCard>
       </div>
 
       {/* Tabla de arrestos recientes */}
-      <div style={{ marginBottom: "2rem" }}>
-        <h3>Arrestos Recientes</h3>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: "#2a2a3d" }}>
-              <th style={thStyle}>Fecha</th>
-              <th style={thStyle}>Persona</th>
-              <th style={thStyle}>Delito</th>
-              <th style={thStyle}>Lugar</th>
-              <th style={thStyle}>Oficial</th>
-              <th style={thStyle}>Fianza</th>
-            </tr>
-          </thead>
-          <tbody>
-            {arrests.map((a, idx) => (
-              <tr key={idx} style={{ background: idx % 2 === 0 ? "#1e1e2f" : "#252537" }}>
-                <td style={tdStyle}>{new Date(a.arrest_date).toLocaleDateString()}</td>
-                <td style={tdStyle}>{a.person_name}</td>
-                <td style={tdStyle}>{a.offense}</td>
-                <td style={tdStyle}>{a.location}</td>
-                <td style={tdStyle}>{a.arresting_officer || "N/A"}</td>
-                <td style={tdStyle}>{a.bail_status}</td>
+      <div style={{
+        background: "rgba(255,255,255,0.1)",
+        backdropFilter: "blur(10px)",
+        borderRadius: "16px",
+        padding: "1.5rem",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+      }}>
+        <h3 style={{
+          color: "#fff",
+          fontSize: "1.5rem",
+          marginBottom: "1.5rem",
+          fontWeight: "600"
+        }}>
+          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>schedule</span>
+          Arrestos Recientes
+        </h3>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{
+            width: "100%",
+            borderCollapse: "separate",
+            borderSpacing: "0"
+          }}>
+            <thead>
+                <tr>
+                  <th style={thStyle}>
+                    <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    calendar_today
+                  </span>
+                  Fecha
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    people
+                  </span>
+                  Persona
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    warning
+                  </span>
+                  Delito
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    place
+                  </span>
+                  Lugar
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    local_police
+                  </span>
+                  Oficial
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    attach_money
+                  </span>
+                  Fianza
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {arrests.map((a, idx) => (
+                <tr key={idx} style={{
+                  background: idx % 2 === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)",
+                  transition: "all 0.2s",
+                  cursor: "pointer"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
+                onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)"}
+                >
+                  <td style={tdStyle}>{new Date(a.arrest_date).toLocaleDateString()}</td>
+                  <td style={tdStyle}>{a.person_name}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      background: "rgba(245, 87, 108, 0.2)",
+                      padding: "0.25rem 0.75rem",
+                      borderRadius: "12px",
+                      fontSize: "0.85rem",
+                      fontWeight: "500"
+                    }}>
+                      {a.offense}
+                    </span>
+                  </td>
+                  <td style={tdStyle}>{a.location}</td>
+                  <td style={tdStyle}>{a.arresting_officer || "N/A"}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      background: "rgba(102, 126, 234, 0.2)",
+                      padding: "0.25rem 0.75rem",
+                      borderRadius: "12px",
+                      fontSize: "0.85rem",
+                      fontWeight: "500"
+                    }}>
+                      {a.bail_status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
 
-// Card component
-function Card({ title, value, color }) {
-  // Aplica un tamaño de fuente menor solo si el título es "Delitos Más Comunes"
-  const isDelitos = title === "Delitos Más Comunes";
+function StatCard({ icon, title, value, subtitle, gradient }) {
   return (
     <div style={{
-      flex: 1,
-      minWidth: "200px",
-      background: color,
-      borderRadius: "12px",
-      padding: "1rem",
+      background: gradient,
+      borderRadius: "16px",
+      padding: "1.5rem",
       color: "#fff",
-      textAlign: "center",
-      boxShadow: "0px 4px 10px rgba(0,0,0,0.3)"
-    }}>
-      <h4>{title}</h4>
+      boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+      transition: "transform 0.2s",
+      cursor: "pointer"
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+    onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+        <div style={{
+          background: "rgba(255,255,255,0.2)",
+          padding: "0.75rem",
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "2rem"
+        }}>
+          {icon}
+        </div>
+        <h4 style={{
+          fontSize: "0.9rem",
+          fontWeight: "500",
+          opacity: 0.9,
+          margin: 0
+        }}>
+          {title}
+        </h4>
+      </div>
       <p style={{
-        fontSize: isDelitos ? "1rem" : "1.5rem",
-        fontWeight: "bold",
+        fontSize: "2rem",
+        fontWeight: "700",
+        margin: "0.5rem 0",
         wordBreak: "break-word"
       }}>
         {value}
       </p>
+      {subtitle && (
+        <p style={{
+          fontSize: "0.85rem",
+          opacity: 0.8,
+          margin: 0
+        }}>
+          {subtitle}
+        </p>
+      )}
     </div>
   );
 }
 
-const thStyle = { padding: "0.5rem", textAlign: "left" };
-const tdStyle = { padding: "0.5rem" };
+function ChartCard({ title, children }) {
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.1)",
+      backdropFilter: "blur(10px)",
+      borderRadius: "16px",
+      padding: "1.5rem",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+    }}>
+      <h3 style={{
+        color: "#fff",
+        fontSize: "1.25rem",
+        marginBottom: "1.5rem",
+        fontWeight: "600"
+      }}>
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+const thStyle = {
+  padding: "1rem",
+  textAlign: "left",
+  color: "#fff",
+  fontWeight: "600",
+  fontSize: "0.9rem",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  borderBottom: "2px solid rgba(255,255,255,0.2)"
+};
+
+const tdStyle = {
+  padding: "1rem",
+  color: "#fff",
+  fontSize: "0.95rem"
+};

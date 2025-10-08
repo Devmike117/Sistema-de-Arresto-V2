@@ -65,7 +65,7 @@ export default function FacialSearch({ onMessage }) {
       if (res.ok) {
         onMessage({ type: "success", text: "Arresto registrado correctamente" });
         setShowModal(false);
-        handleSearch(); // recarga la persona con arrestos actualizados
+        handleSearch();
       } else {
         onMessage({ type: "error", text: data.error || "Error al registrar arresto" });
       }
@@ -76,130 +76,195 @@ export default function FacialSearch({ onMessage }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <FacialCapture photoFile={photoFile} setPhotoFile={setPhotoFile} />
+    <div style={styles.mainContainer}>
+      {/* Columna Izquierda - Siempre visible */}
+      <div style={styles.leftColumn}>
+        <FacialCapture photoFile={photoFile} setPhotoFile={setPhotoFile} />
 
-      <button
-        onClick={handleSearch}
-        disabled={loading}
-        style={{
-          marginTop: "1rem",
-          padding: "0.75rem 1.5rem",
-          backgroundColor: loading ? "#9e9e9e" : "#4caf50",
-          color: "#fff",
-          border: "none",
-          borderRadius: "6px",
-          cursor: loading ? "not-allowed" : "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        {loading ? "Buscando..." : "Buscar Persona"}
-      </button>
-          {/* Mostrar la informacion de resultados en otra seccion horizontal  */}
-          
-      {result && (
-        <div
+        <button
+          onClick={handleSearch}
+          disabled={loading}
           style={{
-            marginTop: "1.5rem",
-            width: "100%",
-            maxWidth: "650px",
-            background: "#1e1e2f",
-            color: "#fff",
-            borderRadius: "12px",
-            padding: "1.5rem",
-            boxShadow: "0px 4px 15px rgba(0,0,0,0.5)",
+            ...styles.searchButton,
+            ...(loading ? styles.searchButtonDisabled : {})
           }}
+          onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
+          onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
         >
+          <span style={styles.buttonIcon}>
+            {loading ? (
+              <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
+            ) : (
+              <span className="material-symbols-outlined">search</span>
+            )}
+          </span>
+          {loading ? "Buscando..." : "Buscar Persona"}
+        </button>
 
-          
+        {/* Mensaje de instrucción cuando no hay resultados */}
+        {!result && (
+          <div style={styles.instructionBox}>
+            <span style={styles.instructionIcon}>
+              <span className="material-symbols-outlined" style={{ color: '#fff' }}>lightbulb_2</span>
+            </span>
+            <p style={styles.instructionText}>
+              Captura una foto facial y presiona "Buscar Persona" para iniciar la búsqueda en la base de datos
+            </p>
+          </div>
+        )}
+      </div>
 
-          <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>Resultado</h2>
-          {result.found ? (
-            <>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
-              <img
-                src={`http://localhost:5000/uploads/photos/${result.person.photo_path.split("\\").pop()}`}
-                alt="Foto de la persona"
-                style={{
-                  width: "140px",
-                  height: "140px",
-                  borderRadius: "8px",
-                  objectFit: "cover",
-                  border: "2px solid #4caf50",
-                }}
-              />
-              <div style={{ flex: "1 1 400px" }}>
-                <h3 style={{ fontSize: "1.4rem", marginBottom: "0.5rem" }}>
-                  {result.person.first_name} {result.person.last_name}{" "}
-                  {result.person.alias && `(${result.person.alias})`}
-                </h3>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                  <div><strong>Fecha de Nac.:</strong> {formatDate(result.person.dob)}</div>
-                  <div><strong>Género:</strong> {result.person.gender || "N/A"}</div>
-                  <div><strong>Nacionalidad:</strong> {result.person.nationality || "N/A"}</div>
-                  <div><strong>Estado:</strong> {result.person.state || "N/A"}</div>
-                  <div><strong>Municipio:</strong> {result.person.municipality || "N/A"}</div>
-                  <div><strong>Comunidad:</strong> {result.person.community || "N/A"}</div>
-                </div>
+      {/* Columna Derecha - Solo cuando hay resultados */}
+      {result && (
+        <div style={styles.rightColumn}>
+          <div style={styles.resultContainer}>
+            <div style={styles.resultHeader}>
+              <div style={styles.resultIconContainer}>
+                <span style={styles.resultIcon}>
+                  {result.found ? '✓' : '✖'}
+                </span>
               </div>
+              <h2 style={styles.resultTitle}>
+                {result.found ? 'Persona Encontrada' : 'Sin Coincidencias'}
+              </h2>
             </div>
 
-              <div style={{ marginBottom: "1rem" }}>
-                <h4>Información Personal</h4>
-                <p><strong>ID:</strong> {result.person.id_number || "N/A"}</p>
-                <p><strong>Notas:</strong> {result.person.observaciones || "Sin notas"}</p>
-              </div>
-
-              <div style={{ marginBottom: "1rem" }}>
-                <h4>Historial de Arrestos</h4>
-                {result.person.arrests && result.person.arrests.length > 0 ? result.person.arrests.map((a, index) => (
-                <div key={index} style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                  backgroundColor: "#2a2a3d",
-                  padding: "1rem",
-                  borderRadius: "8px",
-                  marginBottom: "1rem",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                }}>
-                  <div style={{ flex: "1 1 200px" }}>
-                    <p><strong>Fecha:</strong> {formatDate(a.arrest_date)}</p>
-                    <p><strong>Falta:</strong> {a.falta_administrativa || "N/A"}</p>
-                    <p><strong>Comunidad:</strong> {a.comunidad || "N/A"}</p>
+            {result.found ? (
+              <>
+                {/* Información principal */}
+                <div style={styles.personCard}>
+                  <div style={styles.photoContainer}>
+                    <img
+                      src={`http://localhost:5000/uploads/photos/${result.person.photo_path.split("\\").pop()}`}
+                      alt="Foto de la persona"
+                      style={styles.photo}
+                    />
                   </div>
-                  <div style={{ flex: "1 1 200px" }}>
-                    <p><strong>Oficial:</strong> {a.arresting_officer || "N/A"}</p>
-                    <p><strong>Folio:</strong> {a.folio || "N/A"}</p>
-                    <p><strong>RND:</strong> {a.rnd || "N/A"}</p>
-                    <p><strong>Sentencia:</strong> {a.sentencia || "N/A"}</p>
+
+                  <div style={styles.personInfo}>
+                    <h3 style={styles.personName}>
+                      {result.person.first_name} {result.person.last_name}
+                      {result.person.alias && (
+                        <span style={styles.alias}> "{result.person.alias}"</span>
+                      )}
+                    </h3>
+
+                    <div style={styles.infoGrid}>
+                      <InfoItem icon={<span className="material-symbols-outlined">calendar_month</span>} label="Fecha de Nac." value={formatDate(result.person.dob)} />
+                      <InfoItem icon={<span className="material-symbols-outlined">gender</span>} label="Género" value={result.person.gender || "N/A"} />
+                      <InfoItem icon="🌎" label="Nacionalidad" value={result.person.nationality || "N/A"} />
+                      <InfoItem icon="📍" label="Estado" value={result.person.state || "N/A"} />
+                      <InfoItem icon="🏛️" label="Municipio" value={result.person.municipality || "N/A"} />
+                      <InfoItem icon="🏘️" label="Comunidad" value={result.person.community || "N/A"} />
+                    </div>
                   </div>
                 </div>
-              )) : (
-                <p>No hay arrestos registrados.</p>
-              )}
-              </div>
 
-              <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                <button
-                  onClick={() => setShowModal(true)}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    backgroundColor: "#2196f3",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Registrar Arresto
-                </button>
+                {/* Información adicional */}
+                <div style={styles.additionalSection}>
+                  <h4 style={styles.sectionTitle}>
+                    <span style={styles.sectionIcon}>📋</span>
+                    Información Personal
+                  </h4>
+                  <div style={styles.infoBox}>
+                    <div style={styles.infoRow}>
+                      <span style={styles.infoLabel}>🪪 ID:</span>
+                      <span style={styles.infoValue}>{result.person.id_number || "N/A"}</span>
+                    </div>
+                    <div style={styles.infoRow}>
+                      <span style={styles.infoLabel}>📝 Notas:</span>
+                      <span style={styles.infoValue}>{result.person.observaciones || "Sin notas"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Historial de arrestos */}
+                <div style={styles.arrestSection}>
+                  <div style={styles.arrestHeader}>
+                    <h4 style={styles.sectionTitle}>
+                      <span style={styles.sectionIcon}>🚨</span>
+                      Historial de Arrestos
+                    </h4>
+                    {result.person.arrests && result.person.arrests.length > 0 && (
+                      <span style={styles.arrestBadge}>
+                        {result.person.arrests.length} {result.person.arrests.length === 1 ? 'arresto' : 'arrestos'}
+                      </span>
+                    )}
+                  </div>
+
+                  {result.person.arrests && result.person.arrests.length > 0 ? (
+                    <div style={styles.arrestList}>
+                      {result.person.arrests.map((a, index) => (
+                        <div key={index} style={styles.arrestCard}>
+                          <div style={styles.arrestNumber}>#{index + 1}</div>
+                          <div style={styles.arrestContent}>
+                            <div style={styles.arrestColumn}>
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>📅 Fecha:</span>
+                                <span style={styles.arrestValue}>{formatDate(a.arrest_date)}</span>
+                              </div>
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>⚠️ Falta:</span>
+                                <span style={styles.arrestValue}>{a.falta_administrativa || "N/A"}</span>
+                              </div>
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>📍 Comunidad:</span>
+                                <span style={styles.arrestValue}>{a.comunidad || "N/A"}</span>
+                              </div>
+                            </div>
+                            <div style={styles.arrestColumn}>
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>👮 Oficial:</span>
+                                <span style={styles.arrestValue}>{a.arresting_officer || "N/A"}</span>
+                              </div>
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>📄 Folio:</span>
+                                <span style={styles.arrestValue}>{a.folio || "N/A"}</span>
+                              </div>
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>🔢 RND:</span>
+                                <span style={styles.arrestValue}>{a.rnd || "N/A"}</span>
+                              </div>
+                              {a.sentencia && a.sentencia !== "N/A" && (
+                                <div style={styles.arrestItem}>
+                                  <span style={styles.arrestLabel}>⚖️ Sentencia:</span>
+                                  <span style={styles.arrestValue}>{a.sentencia}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={styles.noArrests}>
+                      <span style={styles.noArrestsIcon}>📭</span>
+                      <p style={styles.noArrestsText}>No hay arrestos registrados</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Botón de acción */}
+                <div style={styles.actionSection}>
+                  <button
+                    onClick={() => setShowModal(true)}
+                    style={styles.arrestButton}
+                    onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                  >
+                    <span style={styles.buttonIcon}>➕</span>
+                    Registrar Nuevo Arresto
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={styles.notFound}>
+                <span style={styles.notFoundIcon}>🔍</span>
+                <p style={styles.notFoundText}>No se encontró ninguna coincidencia</p>
+                <p style={styles.notFoundSubtext}>Intenta con otra foto o verifica la calidad de la imagen</p>
               </div>
-            </>
-          ) : (
-            <p style={{ textAlign: "center" }}>No se encontró ninguna coincidencia.</p>
-          )}
+            )}
+          </div>
         </div>
       )}
 
@@ -213,3 +278,402 @@ export default function FacialSearch({ onMessage }) {
     </div>
   );
 }
+
+// Componente auxiliar para items de información
+const InfoItem = ({ icon, label, value }) => (
+  <div style={styles.infoItem}>
+    <span style={styles.itemIcon}>{icon}</span>
+    <div>
+      <div style={styles.itemLabel}>{label}</div>
+      <div style={styles.itemValue}>{value}</div>
+    </div>
+  </div>
+);
+
+const styles = {
+  mainContainer: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: "2rem",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    '@media (min-width: 1024px)': {
+      gridTemplateColumns: "1fr 1fr"
+    }
+  },
+
+  leftColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1.5rem",
+    alignItems: "center"
+  },
+
+  rightColumn: {
+    display: "flex",
+    flexDirection: "column"
+  },
+
+  searchButton: {
+    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "12px",
+    padding: "1rem 2.5rem",
+    fontSize: "1.1rem",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.75rem",
+    boxShadow: "0 8px 20px rgba(79, 172, 254, 0.4)",
+    transition: "all 0.3s ease",
+    outline: "none",
+    width: "100%",
+    maxWidth: "300px",
+    justifyContent: "center"
+  },
+
+  searchButtonDisabled: {
+    opacity: 0.6,
+    cursor: "not-allowed"
+  },
+
+  buttonIcon: {
+    fontSize: "1.3rem"
+  },
+
+  instructionBox: {
+    background: "rgba(79, 172, 254, 0.1)",
+    border: "1px solid rgba(79, 172, 254, 0.3)",
+    borderRadius: "12px",
+    padding: "1.5rem",
+    display: "flex",
+    gap: "1rem",
+    alignItems: "flex-start",
+    maxWidth: "500px"
+  },
+
+  instructionIcon: {
+    fontSize: "2rem",
+    flexShrink: 0
+  },
+
+  instructionText: {
+    fontSize: "0.95rem",
+    color: "rgba(255, 255, 255, 0.9)",
+    margin: 0,
+    lineHeight: "1.5"
+  },
+
+  resultContainer: {
+    width: "100%",
+    background: "rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "16px",
+    padding: "2rem",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+    maxHeight: "calc(100vh - 150px)",
+    overflowY: "auto"
+  },
+
+  resultHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+    marginBottom: "2rem",
+    paddingBottom: "1rem",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
+  },
+
+  resultIconContainer: {
+    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    padding: "0.75rem",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 4px 15px rgba(79, 172, 254, 0.3)"
+  },
+
+  resultIcon: {
+    fontSize: "1.8rem",
+    color: "#fff"
+  },
+
+  resultTitle: {
+    fontSize: "1.75rem",
+    fontWeight: "700",
+    color: "#fff",
+    margin: 0,
+    textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)"
+  },
+
+  personCard: {
+    display: "flex",
+    gap: "1.5rem",
+    marginBottom: "1.5rem",
+    flexWrap: "wrap"
+  },
+
+  photoContainer: {
+    flexShrink: 0
+  },
+
+  photo: {
+    width: "150px",
+    height: "150px",
+    borderRadius: "12px",
+    objectFit: "cover",
+    border: "3px solid rgba(79, 212, 102, 0.5)",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)"
+  },
+
+  personInfo: {
+    flex: "1 1 300px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem"
+  },
+
+  personName: {
+    fontSize: "1.5rem",
+    fontWeight: "700",
+    color: "#fff",
+    margin: 0,
+    textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)"
+  },
+
+  alias: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontStyle: "italic",
+    fontSize: "1.2rem"
+  },
+
+  infoGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+    gap: "0.75rem"
+  },
+
+  infoItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    background: "rgba(255, 255, 255, 0.05)",
+    padding: "0.5rem 0.75rem",
+    borderRadius: "8px"
+  },
+
+  itemIcon: {
+    fontSize: "1.2rem"
+  },
+
+  itemLabel: {
+    fontSize: "0.75rem",
+    color: "rgba(255, 255, 255, 0.7)",
+    fontWeight: "500"
+  },
+
+  itemValue: {
+    fontSize: "0.9rem",
+    color: "#fff",
+    fontWeight: "600"
+  },
+
+  additionalSection: {
+    marginBottom: "1.5rem"
+  },
+
+  sectionTitle: {
+    fontSize: "1.2rem",
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: "1rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem"
+  },
+
+  sectionIcon: {
+    fontSize: "1.3rem"
+  },
+
+  infoBox: {
+    background: "rgba(255, 255, 255, 0.05)",
+    padding: "1rem",
+    borderRadius: "10px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.75rem"
+  },
+
+  infoRow: {
+    display: "flex",
+    gap: "0.75rem",
+    alignItems: "baseline"
+  },
+
+  infoLabel: {
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.8)",
+    minWidth: "80px"
+  },
+
+  infoValue: {
+    fontSize: "0.9rem",
+    color: "#fff",
+    flex: 1
+  },
+
+  arrestSection: {
+    marginBottom: "1.5rem"
+  },
+
+  arrestHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "1rem",
+    flexWrap: "wrap",
+    gap: "0.5rem"
+  },
+
+  arrestBadge: {
+    background: "rgba(245, 87, 108, 0.2)",
+    color: "#fff",
+    padding: "0.5rem 1rem",
+    borderRadius: "20px",
+    fontSize: "0.85rem",
+    fontWeight: "600",
+    border: "1px solid rgba(245, 87, 108, 0.3)"
+  },
+
+  arrestList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem"
+  },
+
+  arrestCard: {
+    background: "rgba(255, 255, 255, 0.05)",
+    borderRadius: "10px",
+    padding: "1rem",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    display: "flex",
+    gap: "1rem",
+    alignItems: "flex-start"
+  },
+
+  arrestNumber: {
+    background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    color: "#fff",
+    padding: "0.25rem 0.75rem",
+    borderRadius: "20px",
+    fontSize: "0.85rem",
+    fontWeight: "700",
+    flexShrink: 0,
+    boxShadow: "0 2px 8px rgba(245, 87, 108, 0.3)"
+  },
+
+  arrestContent: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "1rem",
+    flex: 1
+  },
+
+  arrestColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem"
+  },
+
+  arrestItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.25rem"
+  },
+
+  arrestLabel: {
+    fontSize: "0.8rem",
+    color: "rgba(255, 255, 255, 0.6)",
+    fontWeight: "600"
+  },
+
+  arrestValue: {
+    fontSize: "0.9rem",
+    color: "#fff"
+  },
+
+  noArrests: {
+    textAlign: "center",
+    padding: "2rem",
+    background: "rgba(255, 255, 255, 0.05)",
+    borderRadius: "10px"
+  },
+
+  noArrestsIcon: {
+    fontSize: "3rem",
+    display: "block",
+    marginBottom: "0.5rem",
+    opacity: 0.5
+  },
+
+  noArrestsText: {
+    fontSize: "1rem",
+    color: "rgba(255, 255, 255, 0.7)",
+    margin: 0
+  },
+
+  actionSection: {
+    display: "flex",
+    justifyContent: "center",
+    paddingTop: "1rem",
+    borderTop: "1px solid rgba(255, 255, 255, 0.1)"
+  },
+
+  arrestButton: {
+    background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    padding: "0.75rem 2rem",
+    fontSize: "1rem",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    boxShadow: "0 4px 15px rgba(245, 87, 108, 0.4)",
+    transition: "all 0.3s ease",
+    outline: "none"
+  },
+
+  notFound: {
+    textAlign: "center",
+    padding: "3rem 1rem"
+  },
+
+  notFoundIcon: {
+    fontSize: "4rem",
+    display: "block",
+    marginBottom: "1rem",
+    opacity: 0.5
+  },
+
+  notFoundText: {
+    fontSize: "1.2rem",
+    fontWeight: "600",
+    color: "#fff",
+    margin: "0 0 0.5rem 0"
+  },
+
+  notFoundSubtext: {
+    fontSize: "0.95rem",
+    color: "rgba(255, 255, 255, 0.6)",
+    margin: 0
+  }
+};
+

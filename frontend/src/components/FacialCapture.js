@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './FacialCapture.css';
 
 export default function FacialCapture({ photoFile, setPhotoFile }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [captured, setCaptured] = useState(false);
-  const [camOn, setCamOn] = useState(true); //  Estado para el botón
+  const [camOn, setCamOn] = useState(true);
 
   useEffect(() => {
     async function startCamera() {
@@ -43,7 +42,6 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
     context.scale(-1, 1);
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-
     canvas.toBlob(blob => {
       const file = new File([blob], `photo_${Date.now()}.png`, { type: 'image/png' });
       setPhotoFile(file);
@@ -75,36 +73,308 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
   };
 
   return (
-    <div className="facial-capture-container">
-      <h3 className="fc-title">Captura Facial</h3>
-      <p className="fc-text">
-        Usa la cámara para capturar la foto frontal de la persona. Puedes retomar si no queda bien.
-      </p>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <div style={styles.iconContainer}>
+          <span className="material-symbols-outlined" style={{ color: '#fff' }}>camera</span>
+        </div>
+        <div>
+          <h3 style={styles.title}>Captura Facial</h3>
+          <p style={styles.subtitle}>
+            Captura una foto frontal clara de la persona
+          </p>
+        </div>
+      </div>
 
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      {!captured ? (
-        <>
-          <video ref={videoRef} autoPlay className="fc-video" />
-          <button onClick={capturePhoto} className="fc-btn fc-btn-primary">
-            Tomar foto
-          </button>
-          <button onClick={toggleCamera} className="fc-btn fc-btn-primary">
-            {camOn ? 'Apagar cámara' : 'Prender cámara'}
-          </button>
-        </>
-      ) : (
-        <>
-          <img
-            src={URL.createObjectURL(photoFile)}
-            alt="captured"
-            className="fc-photo"
-          />
-          <button onClick={retakePhoto} className="fc-btn fc-btn-warning">
-            Retomar foto
-          </button>
-        </>
-      )}
+      <div style={styles.captureArea}>
+        {!captured ? (
+          <>
+            <div style={styles.videoContainer}>
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                style={styles.video}
+              />
+              <div style={styles.videoOverlay}>
+                <div style={styles.faceOutline}></div>
+              </div>
+            </div>
+            
+            <div style={styles.buttonGroup}>
+              <button 
+                onClick={capturePhoto} 
+                style={styles.captureButton}
+                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+              >
+                <span className='material-symbols-outlined'>camera_alt</span>
+                Tomar Foto
+              </button>
+              
+              <button 
+                onClick={toggleCamera} 
+                style={styles.toggleButton}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.25)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+              >
+                <span className="material-symbols-outlined">{camOn ? 'no_photography' : 'photo_camera'}</span>
+                {camOn ? 'Apagar Cámara' : 'Encender Cámara'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={styles.photoContainer}>
+              <img
+                src={URL.createObjectURL(photoFile)}
+                alt="Foto capturada"
+                style={styles.photo}
+              />
+              <div style={styles.photoOverlay}>
+                <span style={styles.checkmark}>
+                  <span className="material-symbols-outlined">check</span>
+                </span>
+              </div>
+            </div>
+            
+            <div style={styles.buttonGroup}>
+              <button 
+                onClick={retakePhoto} 
+                style={styles.retakeButton}
+                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+              >
+                <span style={styles.buttonIcon}>
+                  <span className="material-symbols-outlined">refresh</span>
+                </span>
+                Retomar Foto
+              </button>
+            </div>
+            
+            <div style={styles.successMessage}>
+              <span style={styles.successIcon}>
+                <span className="material-symbols-outlined">check_circle</span>
+              </span>
+              Foto capturada correctamente
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
+const styles = {
+container: {
+    background: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '16px',
+    padding: '0.5rem',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    display: 'flex',
+    flexDirection: 'column',
+    flex: '1 1 40%',   // ahora ocupa 40% del ancho
+    minWidth: '250px', // se hace un poco más pequeño
+    boxSizing: 'border-box',
+},
+
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginBottom: '1.5rem'
+  },
+
+  iconContainer: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    padding: '1rem',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+  },
+
+  icon: {
+    fontSize: '2rem'
+  },
+
+  title: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#fff',
+    margin: 0,
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+  },
+
+  subtitle: {
+    fontSize: '0.9rem',
+    color: 'rgba(255, 255, 255, 0.8)',
+    margin: '0.25rem 0 0 0'
+  },
+ captureArea: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1.5rem',
+    width: '100%' 
+  },
+
+  videoContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '400px',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+    border: '3px solid rgba(102, 126, 234, 0.5)'
+  },
+
+  video: {
+    width: '100%',
+    height: '100%',        
+    display: 'block',
+    transform: 'scaleX(-1)',
+    objectFit: 'cover'
+  },
+
+  videoOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none'
+  },
+
+  faceOutline: {
+    width: '60%',
+    height: '75%',
+    border: '3px dashed rgba(255, 255, 255, 0.5)',
+    borderRadius: '50%',
+    animation: 'pulse 2s ease-in-out infinite'
+  },
+
+  photoContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '400px',       
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+    border: '3px solid rgba(79, 212, 102, 0.5)'
+  },
+
+  photo: {
+    width: '100%',
+    height: '100%',        
+    display: 'block',
+    objectFit: 'cover'     
+  },
+  photoOverlay: {
+    position: 'absolute',
+    top: '1rem',
+    right: '1rem',
+    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    borderRadius: '50%',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 15px rgba(79, 172, 254, 0.5)'
+  },
+
+  checkmark: {
+    fontSize: '1.5rem',
+    color: '#fff',
+    fontWeight: 'bold'
+  },
+
+  buttonGroup: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    width: '100%'
+  },
+
+  captureButton: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '1rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+    transition: 'all 0.3s ease',
+    outline: 'none'
+  },
+
+  toggleButton: {
+    background: 'rgba(255, 255, 255, 0.15)',
+    color: '#fff',
+    border: '2px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '12px',
+    padding: '1rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
+    outline: 'none'
+  },
+
+  retakeButton: {
+    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '1rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 8px 20px rgba(245, 87, 108, 0.4)',
+    transition: 'all 0.3s ease',
+    outline: 'none'
+  },
+
+  buttonIcon: {
+    fontSize: '1.2rem'
+  },
+
+  successMessage: {
+    background: 'rgba(79, 212, 102, 0.2)',
+    color: '#fff',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.95rem',
+    fontWeight: '500',
+    border: '1px solid rgba(79, 212, 102, 0.3)'
+  },
+
+  successIcon: {
+    fontSize: '1.2rem',
+    color: '#4fd466'
+  }
+};
