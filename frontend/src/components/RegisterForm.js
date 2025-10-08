@@ -483,11 +483,79 @@ export default function RegisterForm({ onNext, onMessage }) {
         </div>
 
         {/* Botones */}
-        <div className="buttons-container">
-          <button type="submit" className="btn-primary">Guardar y continuar</button>
-          <button type="button" onClick={handleReset} className="btn-secondary">Limpiar</button>
-        </div>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+        <button
+          type="submit"
+          style={{
+            ...styles.baseButton,
+          }}
+          onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+        >
+          <span style={styles.buttonIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+          </span>
+          Guardar y continuar
+        </button>
+
+        <button
+          type="button"
+          onClick={handleReset}
+          style={{
+            ...styles.baseButton,
+            ...styles.secondaryButton
+          }}
+          onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+        >
+          <span style={styles.buttonIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
+          </span>
+          Limpiar
+        </button>
+      </div>
       </form>
     </div>
   );
 }
+
+
+const styles = {
+  baseButton: {
+    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '0.75rem 1.5rem',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 4px 15px rgba(245, 87, 108, 0.4)',
+    transition: 'all 0.3s ease',
+    outline: 'none'
+  },
+  secondaryButton: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '0.75rem 1.5rem',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+    transition: 'all 0.3s ease',
+    outline: 'none'
+  },
+  buttonIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+};

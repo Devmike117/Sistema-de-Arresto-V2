@@ -150,7 +150,7 @@ function App() {
         <div style={styles.headerContent}>
           <div style={styles.logoContainer}>
             <div style={styles.logo}>
-            {/* imagen logo */}
+                           {/* imagen logo */}
              <img
               src="https://th.bing.com/th/id/R.eb6e5629278a9adf8ffd6d85998747d0?rik=Syphi5ks4Z7ljA&riu=http%3a%2f%2fbe32.mx%2fjsons%2fimg%2fclientes%2fgdhfe-32.jpg&ehk=RPMsfcqAXz8my3Wi2%2bvR0cuElqjAHwjmUzytVmahTVo%3d&risl=&pid=ImgRaw&r=0"
               alt="Logo"
@@ -289,7 +289,8 @@ const styles = {
     padding: "1rem 2rem",
     position: "sticky",
     top: 0,
-    zIndex: 100
+    zIndex: 100,
+    padding: "0.9rem 1.9rem", 
   },
   headerContent: {
     maxWidth: "1400px",
@@ -298,12 +299,13 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: "1rem"
+    gap: "0.5rem" 
   },
   logoContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "1rem"
+    gap: "1rem",
+    height: "35px"
   },
   logo: {
     fontSize: "2rem",

@@ -203,7 +203,7 @@ const styles = {
   scanner: {
     position: 'relative',
     width: '100%',        // ocupa todo el ancho de la columna
-    maxWidth: '250px',    // ancho máximo
+    maxWidth: '335px',    // ancho máximo
     aspectRatio: '1 / 1', // mantiene forma cuadrada
     background: 'linear-gradient(135deg, rgba(118, 75, 162, 0.3) 0%, rgba(102, 126, 234, 0.3) 100%)',
     borderRadius: '16px',
@@ -228,6 +228,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2
+
   },
 
   fingerprintIcon: {
