@@ -6,6 +6,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
   const [stream, setStream] = useState(null);
   const [captured, setCaptured] = useState(false);
   const [camOn, setCamOn] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(1.0); // Zoom digital
 
   useEffect(() => {
     async function startCamera() {
@@ -30,24 +31,30 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
   }, [captured]);
 
   const capturePhoto = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+  const video = videoRef.current;
+  const canvas = canvasRef.current;
+  if (!video || !canvas) return;
 
-    const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+  const context = canvas.getContext('2d');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
-    context.translate(canvas.width, 0);
-    context.scale(-1, 1);
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const zoom = zoomLevel;
+  const cropWidth = canvas.width / zoom;
+  const cropHeight = canvas.height / zoom;
+  const cropX = (canvas.width - cropWidth) / 2;
+  const cropY = (canvas.height - cropHeight) / 2;
 
-    canvas.toBlob(blob => {
-      const file = new File([blob], `photo_${Date.now()}.png`, { type: 'image/png' });
-      setPhotoFile(file);
-      setCaptured(true);
-    }, 'image/png');
-  };
+  // Foto capturada sin modo espejo
+  context.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+
+  canvas.toBlob(blob => {
+    const file = new File([blob], `photo_${Date.now()}.png`, { type: 'image/png' });
+    setPhotoFile(file);
+    setCaptured(true);
+  }, 'image/png');
+};
+
 
   const retakePhoto = () => {
     setPhotoFile(null);
@@ -80,9 +87,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
         </div>
         <div>
           <h3 style={styles.title}>Captura Facial</h3>
-          <p style={styles.subtitle}>
-            Captura una foto frontal clara de la persona
-          </p>
+          <p style={styles.subtitle}>Captura una foto frontal clara de la persona</p>
         </div>
       </div>
 
@@ -95,13 +100,31 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
               <video 
                 ref={videoRef} 
                 autoPlay 
-                style={styles.video}
+                style={{
+                  ...styles.video,
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: 'center center',
+                  transition: 'transform 0.3s ease-in-out'
+                }}
               />
               <div style={styles.videoOverlay}>
                 <div style={styles.faceOutline}></div>
               </div>
             </div>
-            
+
+            <div style={{ marginTop: '1rem' }}>
+              <label style={{ color: '#fff' }}>Zoom:</label>
+              <input 
+                type="range" 
+                min="1" 
+                max="2" 
+                step="0.1" 
+                value={zoomLevel} 
+                onChange={(e) => setZoomLevel(parseFloat(e.target.value))} 
+                style={{ width: '100%' }}
+              />
+            </div>
+
             <div style={styles.buttonGroup}>
               <button 
                 onClick={capturePhoto} 
@@ -112,7 +135,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
                 <span className='material-symbols-outlined'>camera_alt</span>
                 Tomar Foto
               </button>
-              
+
               <button 
                 onClick={toggleCamera} 
                 style={styles.toggleButton}
@@ -138,7 +161,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
                 </span>
               </div>
             </div>
-            
+
             <div style={styles.buttonGroup}>
               <button 
                 onClick={retakePhoto} 
@@ -152,7 +175,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
                 Retomar Foto
               </button>
             </div>
-            
+
             <div style={styles.successMessage}>
               <span style={styles.successIcon}>
                 <span className="material-symbols-outlined">check_circle</span>
@@ -165,6 +188,9 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
     </div>
   );
 }
+
+// Puedes mantener tus estilos como los tenías o modularizarlos en otro archivo.
+
 const styles = {
 container: {
     background: 'rgba(255, 255, 255, 0.1)',
