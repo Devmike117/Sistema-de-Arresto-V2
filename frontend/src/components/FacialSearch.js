@@ -278,6 +278,7 @@ export default function FacialSearch({ onMessage }) {
                                 </span>
                                 <span style={styles.arrestValue}>{a.sentencia || "N/A"}</span>
                               </div>
+                              {/* Mostrar seccion para editar sentencia : version furura */}
                             </div>
                           </div>
                         </div>
