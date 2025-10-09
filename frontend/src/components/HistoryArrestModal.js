@@ -129,7 +129,6 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
                           <span style={styles.itemValue}>{a.sentencia || "N/A"}</span>
                         </div>
                       </div>
-
                     </div>
                   </div>
                 ))}

@@ -268,17 +268,16 @@ export default function FacialSearch({ onMessage }) {
                                 </span>
                                 <span style={styles.arrestValue}>{a.rnd || "N/A"}</span>
                               </div>
-                              {a.sentencia && a.sentencia !== "N/A" && (
-                                <div style={styles.arrestItem}>
-                                  <span style={styles.arrestLabel}>
-                                    <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
-                                      description
-                                    </span>
-                                    <span style={{ color: '#000000ff' }}>Sentencia:</span>
+                              {/* Mostrar seccion de sentencia y en caso de no tener mostrarlo igual como N/A */}
+                              <div style={styles.arrestItem}>
+                                <span style={styles.arrestLabel}>
+                                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
+                                    description
                                   </span>
-                                  <span style={styles.arrestValue}>{a.sentencia}</span>
-                                </div>
-                              )}
+                                  <span style={{ color: '#000000ff' }}>Sentencia:</span>
+                                </span>
+                                <span style={styles.arrestValue}>{a.sentencia || "N/A"}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
