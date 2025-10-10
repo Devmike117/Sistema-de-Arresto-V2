@@ -1,7 +1,37 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export default function DashboardModal({ title, data, onClose, renderItem }) {
   if (!data) return null;
+
+  // 🔹 Inserta las animaciones al cargar el componente
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          backdrop-filter: blur(0px);
+        }
+        to {
+          opacity: 1;
+          backdrop-filter: blur(6px);
+        }
+      }
+
+      @keyframes slideDown {
+        from {
+          transform: translateY(-60px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -37,56 +67,63 @@ const styles = {
   overlay: {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0, 0, 0, 0.7)',
-    backdropFilter: 'blur(5px)',
+    background: 'rgba(0, 0, 0, 0.75)',
+    backdropFilter: 'blur(6px)',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center', // Centrado horizontal
+    alignItems: 'flex-start', // 🔹 Aparece arriba
     zIndex: 1000,
-    padding: '1rem',
+    paddingTop: '3rem', // 🔹 Margen superior del modal
+    animation: 'fadeIn 0.4s ease forwards',
+    overflowY: 'auto',
   },
   modal: {
-    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
-    backdropFilter: 'blur(20px)',
-    borderRadius: '20px',
-    width: '100%',
-    maxWidth: '600px',
-    maxHeight: '80vh',
+    background: 'rgba(30, 30, 60, 0.7)',
+    backdropFilter: 'blur(25px)',
+    borderRadius: '24px',
+    width: '90%',
+    maxWidth: '950px',
+    maxHeight: '85vh',
     display: 'flex',
     flexDirection: 'column',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+    border: '1px solid rgba(255, 255, 255, 0.25)',
+    boxShadow: '0 25px 80px rgba(0, 0, 0, 0.6)',
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     color: '#fff',
+    animation: 'slideDown 0.5s ease forwards',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '1.5rem',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    padding: '1.8rem 2rem',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
   },
   title: {
-    fontSize: '1.5rem',
+    fontSize: '1.9rem',
     fontWeight: '700',
     margin: 0,
+    letterSpacing: '0.5px',
   },
   closeButton: {
-    background: 'rgba(255, 255, 255, 0.1)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: '8px',
-    width: '35px',
-    height: '35px',
+    background: 'rgba(255, 255, 255, 0.15)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '10px',
+    width: '40px',
+    height: '40px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
     color: '#fff',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.25s ease',
   },
   content: {
-    padding: '1.5rem',
+    padding: '1.8rem 2rem',
     overflowY: 'auto',
+    flex: 1,
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(255,255,255,0.4) transparent',
   },
   list: {
     listStyle: 'none',
@@ -94,23 +131,20 @@ const styles = {
     margin: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.75rem',
+    gap: '1rem',
   },
   listItem: {
     background: 'rgba(255, 255, 255, 0.1)',
-    padding: '1rem',
-    borderRadius: '10px',
+    padding: '1.2rem 1.5rem',
+    borderRadius: '12px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    transition: 'all 0.25s ease',
   },
   emptyText: {
     textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: '1rem',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: '1.1rem',
   },
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 206a80e (Correciones en la cámara, actualizacion de sentencias en frontend, manejo de alertas)
