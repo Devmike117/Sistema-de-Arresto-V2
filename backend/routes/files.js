@@ -38,11 +38,11 @@ const uploadFingerprint = multer({ storage: fingerprintStorage });
 router.post('/photo/:personId', uploadPhoto.single('photo'), async (req, res) => {
   try {
     const personId = req.params.personId;
-    const filePath = req.file.path;
+    const relativePath = `uploads/photos/${req.file.filename}`;
 
     await pool.query(
       'INSERT INTO FacialData (person_id, image_path) VALUES ($1, $2)',
-      [personId, filePath]
+      [personId, relativePath]
     );
 
     res.status(201).json({ message: 'Foto subida correctamente', filePath });

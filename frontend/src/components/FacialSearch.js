@@ -179,7 +179,7 @@ const handleSaveSentencia = async (arrestId) => {
                 <div style={styles.personCard}>
                   <div style={styles.photoContainer}>
                     <img
-                      src={`http://localhost:5000/uploads/photos/${result.person.photo_path.split("\\").pop()}`}
+                      src={`http://localhost:5000/${result.person.photo_path}`}
                       alt="Foto de la persona"
                       style={styles.photo}
                     />
@@ -862,4 +862,3 @@ const styles = {
     margin: 0
   }
 };
-

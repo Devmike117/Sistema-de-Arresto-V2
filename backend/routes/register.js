@@ -113,10 +113,11 @@ router.post(
       // 4️⃣ Generar embedding facial usando microservicio
       if (req.files.photo) {
         try {
-          const photoPath = req.files.photo[0].path;
+          const photoFile = req.files.photo[0];
+          const relativePhotoPath = `uploads/photos/${photoFile.filename}`;
 
           const formData = new FormData();
-          formData.append('file', fs.createReadStream(photoPath));
+          formData.append('file', fs.createReadStream(photoFile.path));
 
           const response = await axios.post(
             'http://localhost:8001/generate_embedding/',
@@ -130,7 +131,7 @@ router.post(
             await client.query(
               `INSERT INTO FacialData (person_id, embedding, image_path)
                VALUES ($1, $2, $3)`,
-              [personId, embedding, photoPath]
+              [personId, embedding, relativePhotoPath]
             );
           }
         } catch (err) {

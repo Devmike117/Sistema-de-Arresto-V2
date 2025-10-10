@@ -140,14 +140,23 @@ router.get('/by_name', async (req, res) => {
   }
 
   try {
+    let queryText = `SELECT id, first_name, last_name, alias, dob, gender, nationality,
+                            state, municipality, community, id_number, photo_path, observaciones, created_at
+                     FROM Persons WHERE 1=1 `;
+    const queryParams = [];
+
+    if (first_name) {
+      queryParams.push(`%${first_name}%`);
+      queryText += ` AND LOWER(first_name) LIKE LOWER($${queryParams.length})`;
+    }
+    if (last_name) {
+      queryParams.push(`%${last_name}%`);
+      queryText += ` AND LOWER(last_name) LIKE LOWER($${queryParams.length})`;
+    }
+
     const { rows } = await pool.query(
-      `SELECT id, first_name, last_name, alias, dob, gender, nationality,
-              state, municipality, community, id_number, photo_path, observaciones, created_at
-       FROM Persons
-       WHERE LOWER(first_name) LIKE LOWER('%' || $1 || '%')
-          OR LOWER(last_name) LIKE LOWER('%' || $1 || '%')
-          OR LOWER(alias) LIKE LOWER('%' || $1 || '%')`,
-      [first_name || last_name]
+      queryText,
+      queryParams
     );
 
     // Obtener arrestos para cada persona

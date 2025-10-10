@@ -151,7 +151,7 @@ const SearchPeople = () => {
             {person.photo_path && (
               <div style={styles.photoContainer}>
                 <img
-                  src={`http://localhost:5000/uploads/photos/${person.photo_path.split("\\").pop()}`}
+                  src={`http://localhost:5000/${person.photo_path}`}
                   alt="Foto"
                   style={styles.photo}
                 />

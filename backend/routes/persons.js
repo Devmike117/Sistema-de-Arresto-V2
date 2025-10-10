@@ -84,9 +84,10 @@ router.post(
 
       // Actualizar foto
       if (req.files.photo) {
+        const relativePhotoPath = `uploads/photos/${req.files.photo[0].filename}`;
         await client.query(
           `UPDATE Persons SET photo_path = $1 WHERE id = $2`,
-          [req.files.photo[0].path, personId]
+          [relativePhotoPath, personId]
         );
       }
 
