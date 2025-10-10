@@ -1,6 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-export default function HistoryArrestModal({ open, onClose, arrests = [], person }) {
+export default function HistoryArrestModal({ 
+  open, 
+  onClose, 
+  arrests = [], 
+  person,
+  onMessage // Sin valor por defecto
+}) {
+  const [editingSentencia, setEditingSentencia] = useState({});
+  const [sentenciaValues, setSentenciaValues] = useState({});
+  const [localArrests, setLocalArrests] = useState(arrests);
+
+  // Sincronizar con arrests externos
+  useEffect(() => {
+    setLocalArrests(arrests);
+  }, [arrests]);
+
   if (!open) return null;
 
   const formatDate = (dateStr) => {
@@ -12,6 +27,66 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
     return `${day}/${month}/${year}`;
   };
 
+  const handleEditSentencia = (arrestId) => {
+    setEditingSentencia({ ...editingSentencia, [arrestId]: true });
+    const arrest = localArrests.find(a => a.id === arrestId);
+    setSentenciaValues({ ...sentenciaValues, [arrestId]: arrest?.sentencia || "" });
+  };
+
+  const handleCancelEditSentencia = (arrestId) => {
+    setEditingSentencia({ ...editingSentencia, [arrestId]: false });
+    setSentenciaValues({ ...sentenciaValues, [arrestId]: "" });
+  };
+
+  const handleSaveSentencia = async (arrestId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}/sentencia`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentencia: sentenciaValues[arrestId] || "" }),
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        // Actualizar el estado local inmediatamente
+        setLocalArrests(prev => 
+          prev.map(arrest => 
+            arrest.id === arrestId 
+              ? { ...arrest, sentencia: sentenciaValues[arrestId] || "" }
+              : arrest
+          )
+        );
+
+        // Cerrar modo edición
+        setEditingSentencia({ ...editingSentencia, [arrestId]: false });
+
+        // Mostrar notificación solo si existe la función
+        if (onMessage) {
+          onMessage({ 
+            type: "success", 
+            text: data.message || "Sentencia actualizada correctamente" 
+          });
+        }
+      } else {
+        if (onMessage) {
+          onMessage({ 
+            type: "error", 
+            text: data.error || "Error al actualizar sentencia" 
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (onMessage) {
+        onMessage({ 
+          type: "error", 
+          text: "Error al actualizar sentencia" 
+        });
+      }
+    }
+  };
+
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -20,7 +95,7 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
           <div style={styles.headerContent}>
             <div style={styles.iconContainer}>
               <span style={styles.icon}>
-                <span className="material-symbols-outlined" style={{ fontSize: '1.8rem' }}>history</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.8rem', color: '#fff' }}>history</span>
               </span>
             </div>
             <div>
@@ -48,7 +123,7 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
 
         {/* Contenido */}
         <div style={styles.content}>
-          {arrests.length === 0 ? (
+          {localArrests.length === 0 ? (
             <div style={styles.emptyState}>
               <span style={styles.emptyIcon}>
                 <span className="material-symbols-outlined" style={{ fontSize: '4rem' }}>inbox</span>
@@ -65,13 +140,13 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
                 <span style={styles.badgeIcon}>
                   <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>gavel</span>
                 </span>
-                {arrests.length} {arrests.length === 1 ? 'arresto registrado' : 'arrestos registrados'}
+                {localArrests.length} {localArrests.length === 1 ? 'arresto registrado' : 'arrestos registrados'}
               </div>
 
               {/* Lista de arrestos */}
               <div style={styles.arrestList}>
-                {arrests.map((a, idx) => (
-                  <div key={idx} style={styles.arrestCard}>
+                {localArrests.map((a, idx) => (
+                  <div key={a.id || idx} style={styles.arrestCard}>
                     {/* Header del arresto */}
                     <div style={styles.arrestHeader}>
                       <span style={styles.arrestNumber}>#{idx + 1}</span>
@@ -121,12 +196,104 @@ export default function HistoryArrestModal({ open, onClose, arrests = [], person
                           <span style={styles.itemValue}>{a.rnd || "N/A"}</span>
                         </div>
 
-                        {/* Mostrar sentencia aunque no tenga valor */}
+                        {/* Sentencia editable */}
                         <div style={styles.infoItem}>
                           <span style={styles.itemLabel}>
                             <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>description</span>
                             Sentencia</span>
-                          <span style={styles.itemValue}>{a.sentencia || "N/A"}</span>
+                          {editingSentencia[a.id] ? (
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', marginTop: '4px' }}>
+                              <input
+                                type="text"
+                                value={sentenciaValues[a.id] || ""}
+                                onChange={(e) => setSentenciaValues({ ...sentenciaValues, [a.id]: e.target.value })}
+                                style={{
+                                  flex: 1,
+                                  padding: '8px 12px',
+                                  border: '2px solid #4facfe',
+                                  borderRadius: '8px',
+                                  fontSize: '0.9rem',
+                                  outline: 'none',
+                                  background: 'rgba(255, 255, 255, 0.9)',
+                                  color: '#000',
+                                }}
+                                placeholder="Ingrese la sentencia"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => handleSaveSentencia(a.id)}
+                                style={{
+                                  padding: '8px 14px',
+                                  background: '#10b981',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '600',
+                                  transition: 'all 0.2s ease',
+                                }}
+                                title="Guardar"
+                                onMouseEnter={(e) => e.target.style.background = '#059669'}
+                                onMouseLeave={(e) => e.target.style.background = '#10b981'}
+                              >
+                                <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '18px' }}>
+                                  check
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleCancelEditSentencia(a.id)}
+                                style={{
+                                  padding: '8px 14px',
+                                  background: '#ef4444',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '600',
+                                  transition: 'all 0.2s ease',
+                                }}
+                                title="Cancelar"
+                                onMouseEnter={(e) => e.target.style.background = '#dc2626'}
+                                onMouseLeave={(e) => e.target.style.background = '#ef4444'}
+                              >
+                                <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '18px' }}>
+                                  close
+                                </span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', marginTop: '4px' }}>
+                              <span style={styles.itemValue}>{a.sentencia || "N/A"}</span>
+                              <button
+                                onClick={() => handleEditSentencia(a.id)}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                  fontWeight: '600',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: '0 2px 8px rgba(79, 172, 254, 0.3)',
+                                }}
+                                title="Editar sentencia"
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                              >
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                                  edit
+                                </span>
+                                Editar
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -376,27 +543,6 @@ const styles = {
     fontSize: "0.9rem",
     color: "#fff",
     fontWeight: "500"
-  },
-
-  sentenciaBox: {
-    marginTop: "0.5rem",
-    paddingTop: "0.75rem",
-    borderTop: "1px solid rgba(255, 255, 255, 0.1)"
-  },
-
-  sentenciaLabel: {
-    fontSize: "0.85rem",
-    fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.8)",
-    marginBottom: "0.5rem",
-    display: "block"
-  },
-
-  sentenciaText: {
-    fontSize: "0.9rem",
-    color: "rgba(255, 255, 255, 0.9)",
-    margin: 0,
-    lineHeight: "1.5"
   },
 
   emptyState: {

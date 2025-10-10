@@ -147,4 +147,8 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: '1.1rem',
   },
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 5885c51 (Agregar edición en Historial Modal)
