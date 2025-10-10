@@ -49,13 +49,13 @@ export default function Notification({ message, onClose }) {
   const getIcon = () => {
     switch (message.type) {
       case 'success':
-        return '✓';
+        return <span className="material-symbols-outlined" style={{ color: '#0bff85ff' }}>check_circle</span>;
       case 'error':
-        return '✖';
+        return <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>cancel</span>;
       case 'warning':
-        return '⚠';
+        return <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>warning</span>;
       default:
-        return 'ℹ';
+        return <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>info</span>;
     }
   };
 

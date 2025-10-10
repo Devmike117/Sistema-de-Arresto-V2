@@ -109,4 +109,8 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: '1rem',
   },
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 206a80e (Correciones en la cámara, actualizacion de sentencias en frontend, manejo de alertas)

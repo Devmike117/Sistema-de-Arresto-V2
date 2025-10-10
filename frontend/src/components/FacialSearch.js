@@ -7,6 +7,9 @@ export default function FacialSearch({ onMessage }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editingSentencia, setEditingSentencia] = useState({});
+  const [sentenciaValues, setSentenciaValues] = useState({});  
+
 
   const handleSearch = async () => {
     if (!photoFile) {
@@ -75,6 +78,43 @@ export default function FacialSearch({ onMessage }) {
     }
   };
 
+  // AGREGAR ESTAS FUNCIONES AQUÍ (ANTES DEL RETURN):
+
+const handleEditSentencia = (arrestId) => {
+  setEditingSentencia({ ...editingSentencia, [arrestId]: true });
+  const arrest = result.person.arrests.find(a => a.id === arrestId);
+  setSentenciaValues({ ...sentenciaValues, [arrestId]: arrest?.sentencia || "" });
+};
+
+const handleCancelEditSentencia = (arrestId) => {
+  setEditingSentencia({ ...editingSentencia, [arrestId]: false });
+  setSentenciaValues({ ...sentenciaValues, [arrestId]: "" });
+};
+
+const handleSaveSentencia = async (arrestId) => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}/sentencia`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sentencia: sentenciaValues[arrestId] || "" }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      onMessage({ type: "success", text: "Sentencia actualizada correctamente" });
+      setEditingSentencia({ ...editingSentencia, [arrestId]: false });
+      handleSearch();
+    } else {
+      onMessage({ type: "error", text: data.error || "Error al actualizar sentencia" });
+    }
+  } catch (err) {
+    console.error(err);
+    onMessage({ type: "error", text: "Error al actualizar sentencia" });
+  }
+};
+
+  
+
   return (
     <div style={styles.mainContainer}>
       {/* Columna Izquierda - Siempre visible */}
@@ -121,7 +161,11 @@ export default function FacialSearch({ onMessage }) {
             <div style={styles.resultHeader}>
               <div style={styles.resultIconContainer}>
                 <span style={styles.resultIcon}>
-                  {result.found ? '✓' : '✖'}
+                  {result.found ? (
+                    <span className="material-symbols-outlined">check</span>
+                  ) : (
+                    <span className="material-symbols-outlined">close</span>
+                  )}
                 </span>
               </div>
               <h2 style={styles.resultTitle}>
@@ -268,7 +312,7 @@ export default function FacialSearch({ onMessage }) {
                                 </span>
                                 <span style={styles.arrestValue}>{a.rnd || "N/A"}</span>
                               </div>
-                              {/* Mostrar seccion de sentencia y en caso de no tener mostrarlo igual como N/A */}
+                              {/* Mostrar sección de sentencia y editarla */}
                               <div style={styles.arrestItem}>
                                 <span style={styles.arrestLabel}>
                                   <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', color: '#000000ff' }}>
@@ -276,9 +320,94 @@ export default function FacialSearch({ onMessage }) {
                                   </span>
                                   <span style={{ color: '#000000ff' }}>Sentencia:</span>
                                 </span>
-                                <span style={styles.arrestValue}>{a.sentencia || "N/A"}</span>
+                                {editingSentencia[a.id] ? (
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', marginTop: '4px' }}>
+                                    <input
+                                      type="text"
+                                      value={sentenciaValues[a.id] || ""}
+                                      onChange={(e) => setSentenciaValues({ ...sentenciaValues, [a.id]: e.target.value })}
+                                      style={{
+                                        flex: 1,
+                                        padding: '8px 12px',
+                                        border: '2px solid #4facfe',
+                                        borderRadius: '8px',
+                                        fontSize: '0.9rem',
+                                        outline: 'none',
+                                        background: 'rgba(255, 255, 255, 0.9)',
+                                        color: '#000',
+                                      }}
+                                      placeholder="Ingrese la sentencia"
+                                      autoFocus
+                                    />
+                                    <button
+                                      onClick={() => handleSaveSentencia(a.id)}
+                                      style={{
+                                        padding: '8px 14px',
+                                        background: '#10b981',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        transition: 'all 0.2s ease',
+                                      }}
+                                      title="Guardar"
+                                    >
+                                      <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '18px' }}>
+                                        check
+                                      </span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleCancelEditSentencia(a.id)}
+                                      style={{
+                                        padding: '8px 14px',
+                                        background: '#ef4444',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        transition: 'all 0.2s ease',
+                                      }}
+                                      title="Cancelar"
+                                    >
+                                      <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '18px' }}>
+                                        close
+                                      </span>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', marginTop: '4px' }}>
+                                    <span style={styles.arrestValue}>{a.sentencia || "N/A"}</span>
+                                    <button
+                                      onClick={() => handleEditSentencia(a.id)}
+                                      style={{
+                                        padding: '6px 12px',
+                                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 2px 8px rgba(79, 172, 254, 0.3)',
+                                      }}
+                                      title="Editar sentencia"
+                                    >
+                                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                                        edit
+                                      </span>
+                                      Editar
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                              {/* Mostrar seccion para editar sentencia : version furura */}
                             </div>
                           </div>
                         </div>
@@ -439,11 +568,14 @@ const styles = {
     paddingBottom: "1rem",
     borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
   },
-
+//icno circular con gradiente
   resultIconContainer: {
-    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    background: "linear-gradient(135deg, #4ffe69ff 0%, #10dc58ff 100%)",
     padding: "0.75rem",
-    borderRadius: "12px",
+    borderRadius: "90px",
+    overflow: "hidden",
+    width: "50px",
+    height: "50px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

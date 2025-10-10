@@ -45,8 +45,10 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
   const cropX = (canvas.width - cropWidth) / 2;
   const cropY = (canvas.height - cropHeight) / 2;
 
-  // Foto capturada sin modo espejo
+  // Foto capturada en modo espejo
   context.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+  context.scale(-1, 1); // Voltear horizontalmente
+  context.drawImage(canvas, -canvas.width, 0);
 
   canvas.toBlob(blob => {
     const file = new File([blob], `photo_${Date.now()}.png`, { type: 'image/png' });
@@ -98,15 +100,16 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
           <>
             <div style={styles.videoContainer}>
               <video 
-                ref={videoRef} 
-                autoPlay 
-                style={{
-                  ...styles.video,
-                  transform: `scale(${zoomLevel})`,
-                  transformOrigin: 'center center',
-                  transition: 'transform 0.3s ease-in-out'
-                }}
-              />
+              ref={videoRef} 
+              autoPlay 
+              style={{
+                ...styles.video,
+                transform: `scaleX(-1) scale(${zoomLevel})`,
+                transformOrigin: 'center center',
+                transition: 'transform 0.3s ease-in-out'
+              }}
+            />
+
               <div style={styles.videoOverlay}>
                 <div style={styles.faceOutline}></div>
               </div>
