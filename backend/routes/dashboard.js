@@ -106,8 +106,4 @@ router.get('/all-arrests', async (req, res) => {
     console.error('Error fetching all arrests:', err.message);
     res.status(500).json({ error: 'Error en el servidor' });
   }
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 206a80e (Correciones en la cámara, actualizacion de sentencias en frontend, manejo de alertas)
