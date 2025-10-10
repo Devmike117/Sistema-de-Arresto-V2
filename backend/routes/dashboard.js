@@ -75,3 +75,35 @@ router.get('/recent-arrests', async (req, res) => {
 });
 
 module.exports = router;
+
+
+// En tu archivo de rutas del dashboard en el backend (ej. backend/routes/dashboard.js)
+
+// GET /api/dashboard/all-persons
+router.get('/all-persons', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, first_name, last_name FROM Persons ORDER BY first_name, last_name`
+    );
+    res.json({ persons: rows });
+  } catch (err) {
+    console.error('Error fetching all persons:', err.message);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+// GET /api/dashboard/all-arrests
+router.get('/all-arrests', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT a.id, a.arrest_date, a.falta_administrativa, p.first_name, p.last_name
+       FROM Arrests a
+       JOIN Persons p ON a.person_id = p.id
+       ORDER BY a.arrest_date DESC`
+    );
+    res.json({ arrests: rows });
+  } catch (err) {
+    console.error('Error fetching all arrests:', err.message);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});

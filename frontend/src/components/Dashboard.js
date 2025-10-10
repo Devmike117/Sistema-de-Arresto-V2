@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
+import DashboardModal from "./DashboardModal";
 
 export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
     totalPersons: 0,
     totalArrests: 0,
     topOffenses: [],
-    topPersons: []
+    topPersons: [],
   });
   const [arrests, setArrests] = useState([]);
+  const [modalData, setModalData] = useState({
+    isOpen: false,
+    title: "",
+    data: [],
+    renderItem: () => null,
+  });
 
   const fetchDashboard = async () => {
     try {
@@ -19,19 +26,19 @@ export default function Dashboard({ onMessage }) {
       const recentRes = await fetch("http://localhost:5000/api/dashboard/recent-arrests");
       const recentData = await recentRes.json();
 
-      const recentArrests = recentData.recentArrests.map(a => ({
+      const recentArrests = recentData.recentArrests.map((a) => ({
         ...a,
         person_name: `${a.first_name || ""} ${a.alias ? `"${a.alias}" ` : ""}${a.last_name || ""}`.trim(),
         offense: a.falta_administrativa || "Sin especificar",
         location: a.comunidad || "N/A",
-        bail_status: a.fianza !== undefined ? a.fianza : "N/A"
+        bail_status: a.fianza !== undefined ? a.fianza : "N/A",
       }));
 
       setSummary({
         totalPersons: statsData.totalPersons,
         totalArrests: statsData.totalArrests,
         topOffenses: statsData.topOffenses,
-        topPersons: statsData.topPersons || []
+        topPersons: statsData.topPersons || [],
       });
 
       setArrests(recentArrests);
@@ -44,6 +51,56 @@ export default function Dashboard({ onMessage }) {
   useEffect(() => {
     fetchDashboard();
   }, []);
+
+  const handleOpenModal = async (type) => {
+    let title = "";
+    let data = [];
+    let renderItem = (item) => <div>{JSON.stringify(item)}</div>;
+
+    try {
+      switch (type) {
+        case "persons":
+          title = "Personas Registradas";
+          const personsRes = await fetch("http://localhost:5000/api/dashboard/all-persons");
+          const personsData = await personsRes.json();
+          data = personsData.persons;
+          renderItem = (item, index) => <span>{index + 1}. {item.first_name} {item.last_name}</span>;
+          break;
+        case "arrests":
+          title = "Todos los Arrestos";
+          const arrestsRes = await fetch("http://localhost:5000/api/dashboard/all-arrests");
+          const arrestsData = await arrestsRes.json();
+          data = arrestsData.arrests;
+          renderItem = (item, index) => <span>{index + 1}. {item.first_name} {item.last_name} - {item.falta_administrativa} ({new Date(item.arrest_date).toLocaleDateString()})</span>;
+          break;
+        case "offenses":
+          title = "Distribución de Delitos";
+          data = summary.topOffenses;
+          renderItem = (item) => (
+            <>
+              <span>{item.offense}</span>
+              <span style={{ fontWeight: 'bold' }}>{item.count}</span>
+            </>
+          );
+          break;
+        case "top-persons":
+          title = "Personas con Más Arrestos";
+          data = summary.topPersons;
+          renderItem = (item) => (
+            <>
+              <span>{item.name}</span>
+              <span style={{ fontWeight: 'bold' }}>{item.count} arrestos</span>
+            </>
+          );
+          break;
+        default:
+          return;
+      }
+      setModalData({ isOpen: true, title, data, renderItem });
+    } catch (err) {
+      if (onMessage) onMessage({ type: "error", text: `Error al cargar ${title}` });
+    }
+  };
 
   return (
     <div style={{
@@ -87,12 +144,14 @@ export default function Dashboard({ onMessage }) {
           title="Personas Registradas"
           value={summary.totalPersons}
           gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          onClick={() => handleOpenModal("persons")}
         />
         <StatCard
           icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>gavel</span>}
           title="Arrestos Totales"
           value={summary.totalArrests}
           gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+          onClick={() => handleOpenModal("arrests")}
         />
         <StatCard
           icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>warning</span>}
@@ -100,6 +159,7 @@ export default function Dashboard({ onMessage }) {
           value={summary.topOffenses[0]?.offense || "N/A"}
           subtitle={summary.topOffenses[0] ? `${summary.topOffenses[0].count} casos` : ""}
           gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+          onClick={() => handleOpenModal("offenses")}
         />
         <StatCard
           icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>crown</span>}
@@ -107,6 +167,7 @@ export default function Dashboard({ onMessage }) {
           value={summary.topPersons[0]?.name || "N/A"}
           subtitle={summary.topPersons[0] ? `${summary.topPersons[0].count} arrestos` : ""}
           gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+          onClick={() => handleOpenModal("top-persons")}
         />
       </div>
 
@@ -120,9 +181,9 @@ export default function Dashboard({ onMessage }) {
         <ChartCard title="Distribución de Delitos">
           <Pie
             data={{
-              labels: summary.topOffenses.map(o => o.offense),
+              labels: summary.topOffenses.map((o) => o.offense),
               datasets: [{
-                data: summary.topOffenses.map(o => o.count),
+                data: summary.topOffenses.map((o) => o.count),
                 backgroundColor: [
                   "#667eea",
                   "#764ba2",
@@ -131,7 +192,7 @@ export default function Dashboard({ onMessage }) {
                   "#4facfe",
                   "#00f2fe"
                 ],
-                borderWidth: 0
+                borderWidth: 0,
               }]
             }}
             options={{
@@ -139,8 +200,8 @@ export default function Dashboard({ onMessage }) {
                 legend: {
                   position: "bottom",
                   labels: { color: "#fff", padding: 15, font: { size: 12 } }
-                }
-              }
+                },
+              },
             }}
           />
         </ChartCard>
@@ -148,14 +209,14 @@ export default function Dashboard({ onMessage }) {
         <ChartCard title="Top 5 Personas con Más Arrestos">
           <Bar
             data={{
-              labels: summary.topPersons.map(p => p.name),
+              labels: summary.topPersons.map((p) => p.name),
               datasets: [{
                 label: "Arrestos",
-                data: summary.topPersons.map(p => p.count),
+                data: summary.topPersons.map((p) => p.count),
                 backgroundColor: "rgba(102, 126, 234, 0.8)",
                 borderColor: "#667eea",
                 borderWidth: 2,
-                borderRadius: 8
+                borderRadius: 8,
               }]
             }}
             options={{
@@ -283,11 +344,21 @@ export default function Dashboard({ onMessage }) {
           </table>
         </div>
       </div>
+
+      {/* Modal */}
+      {modalData.isOpen && (
+        <DashboardModal
+          title={modalData.title}
+          data={modalData.data}
+          renderItem={modalData.renderItem}
+          onClose={() => setModalData({ ...modalData, isOpen: false })}
+        />
+      )}
     </div>
   );
 }
 
-function StatCard({ icon, title, value, subtitle, gradient }) {
+function StatCard({ icon, title, value, subtitle, gradient, onClick }) {
   return (
     <div style={{
       background: gradient,
@@ -296,10 +367,11 @@ function StatCard({ icon, title, value, subtitle, gradient }) {
       color: "#fff",
       boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
       transition: "transform 0.2s",
-      cursor: "pointer"
+      cursor: "pointer",
     }}
     onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
     onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+    onClick={onClick}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
         <div style={{

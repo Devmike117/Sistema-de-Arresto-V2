@@ -78,7 +78,7 @@ router.post(
           community || null,
           id_number || null,
           observaciones || null,
-          req.files.photo ? req.files.photo[0].path : null
+          req.files.photo ? `uploads/photos/${req.files.photo[0].filename}` : null
         ]
       );
       const personId = personResult.rows[0].id;
