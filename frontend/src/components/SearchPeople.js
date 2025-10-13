@@ -9,15 +9,24 @@ const SearchPeople = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hasSearched, setHasSearched] = useState(false); // <-- Nuevo estado
   const [showArrestModal, setShowArrestModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setResults([]);
+    setHasSearched(true); // <-- Indicamos que se hizo búsqueda
+
+    if (!firstName && !lastName) {
+      setError('Ingresa un nombre o apellido para buscar');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await axios.get('http://localhost:5000/api/search_face/by_name', {
         params: {
@@ -264,7 +273,8 @@ const SearchPeople = () => {
           </div>
         ))}
 
-        {results.length === 0 && !loading && !error && firstName && lastName && (
+        {/* Mostrar "No se encontraron resultados" solo después de hacer la búsqueda */}
+        {hasSearched && results.length === 0 && !loading && !error && (
           <div style={styles.noResults}>
             <span style={styles.noResultsIcon}>
               <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '24px' }}>search</span>
@@ -391,7 +401,7 @@ const styles = {
   },
 
   searchButton: {
-    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    background: 'linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)',
     color: '#fff',
     border: 'none',
     borderRadius: '10px',

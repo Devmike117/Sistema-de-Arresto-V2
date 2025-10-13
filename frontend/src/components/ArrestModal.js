@@ -613,7 +613,7 @@ const styles = {
   },
 
   saveButton: {
-    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    background: "linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)",
     color: "#fff",
     border: "none",
     borderRadius: "10px",

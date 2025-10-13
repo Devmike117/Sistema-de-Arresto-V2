@@ -270,7 +270,7 @@ export default function HistoryArrestModal({
                                 onClick={() => handleEditSentencia(a.id)}
                                 style={{
                                   padding: '6px 12px',
-                                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                  background: 'linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)',
                                   color: 'white',
                                   border: 'none',
                                   borderRadius: '8px',

@@ -104,12 +104,26 @@ function App() {
 
       {/* Botón centrado debajo */}
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button onClick={handleRegister} style={styles.registerButton}>
-          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>person_add</span>
+        <button
+          type="submit"
+          disabled={loading}
+          onClick={handleRegister}
+          style={{
+            ...styles.registerButton,
+            ...(loading ? styles.registerButtonDisabled : {})
+          }}
+          onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
+          onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{ verticalAlign: 'middle', marginRight: '6px' }}
+          >
+            person_add
+          </span>
           Registrar Persona
         </button>
       </div>
-
     </div>
   ),
 },
@@ -390,18 +404,22 @@ const styles = {
     alignItems: "start"
   },
   registerButton: {
-    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-    color: "#fff",
-    border: "none",
-    borderRadius: "12px",
-    padding: "1rem 2rem",
-    fontSize: "1.1rem",
-    fontWeight: "600",
-    cursor: "pointer",
-    boxShadow: "0 8px 20px rgba(79, 172, 254, 0.4)",
-    transition: "all 0.3s ease",
-    outline: "none",
-    gridColumn: "1 / -1"
+    background: 'linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '0.75rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)',
+    transition: 'all 0.3s ease',
+    outline: 'none',
+    whiteSpace: 'nowrap'
   },
 
   // Footer
