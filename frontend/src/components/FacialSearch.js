@@ -78,7 +78,7 @@ export default function FacialSearch({ onMessage }) {
     }
   };
 
-  {/* Funciones para editar sentencia */}
+  {/* Funciones para editar sentencia LOL */}
 
 const handleEditSentencia = (arrestId) => {
   setEditingSentencia({ ...editingSentencia, [arrestId]: true });
