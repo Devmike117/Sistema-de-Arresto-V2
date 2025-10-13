@@ -45,15 +45,24 @@ router.post('/', upload.single('file'), async (req, res) => {
       contentType: req.file.mimetype,
     });
 
-    const response = await axios.post('http://localhost:8001/generate_embedding/', formData, {
-      headers: formData.getHeaders(),
-    });
+    let embedding = null;
+try {
+  const response = await axios.post('http://localhost:8001/generate_embedding/', formData, {
+    headers: formData.getHeaders(),
+    timeout: 10000,
+  });
+  embedding = response.data.embedding;
+} catch (err) {
+  console.error('[DeepFaceService] Error:', err.message);
+  fs.unlinkSync(photoPath);
+  return res.json({ found: false, person: null, error: 'No se pudo generar el embedding' });
+}
 
-    let embedding = response.data.embedding;
-    if (!embedding) {
-      fs.unlinkSync(photoPath);
-      return res.status(500).json({ error: 'No se pudo generar el embedding' });
-    }
+if (!embedding) {
+  fs.unlinkSync(photoPath);
+  return res.json({ found: false, person: null, error: 'Embedding vacío o inválido' });
+}
+
 
     embedding = normalize(embedding);
 

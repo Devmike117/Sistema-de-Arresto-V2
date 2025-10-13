@@ -78,7 +78,7 @@ export default function FacialSearch({ onMessage }) {
     }
   };
 
-  // AGREGAR ESTAS FUNCIONES AQUÍ (ANTES DEL RETURN):
+  {/* Funciones para editar sentencia */}
 
 const handleEditSentencia = (arrestId) => {
   setEditingSentencia({ ...editingSentencia, [arrestId]: true });
@@ -441,7 +441,7 @@ const handleSaveSentencia = async (arrestId) => {
             ) : (
               <div style={styles.notFound}>
                 <span style={styles.notFoundIcon}>
-                  <span className="material-symbols-outlined">face_6</span>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '20px' }}>face_6</span>
                 </span>
                 <p style={styles.notFoundText}>No se encontró ninguna coincidencia</p>
                 <p style={styles.notFoundSubtext}>Intenta con otra foto o verifica la calidad de la imagen</p>
