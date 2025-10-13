@@ -338,13 +338,17 @@ const styles = {
     alignItems: "center",
     gap: "0.5rem",
     transition: "all 0.2s ease",
-    outline: "none"
+    outline: "none",
+    boxShadow: "none",
   },
+
   navButtonActive: {
     background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-    borderColor: "transparent",
-    boxShadow: "0 4px 15px rgba(245, 87, 108, 0.4)"
+    border: "1px solid #ffffff19", 
+    boxShadow: "0 4px 15px rgba(245, 87, 108, 0.4)",
+    outline: "none",
   },
+
   navIcon: {
     fontSize: "1.2rem"
   },
