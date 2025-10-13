@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const { spawn } = require('child_process');
 
 const app = express();
 app.use(cors());
@@ -29,6 +30,23 @@ app.use('/api/dashboard', dashboardRouter);
 
 // Servir carpeta de fotos como pública
 app.use('/uploads/photos', express.static(path.join(__dirname, 'uploads/photos')));
+
+// Iniciar el microservicio de Python
+const pythonServicePath = path.join(__dirname, 'pythonservice.py');
+console.log('Iniciando el microservicio de Python...');
+const pythonService = spawn('python', [pythonServicePath]);
+
+pythonService.stdout.on('data', (data) => {
+  console.log(`[PythonService]: ${data.toString().trim()}`);
+});
+
+pythonService.stderr.on('data', (data) => {
+  console.error(`[PythonService ERROR]: ${data.toString().trim()}`);
+});
+
+pythonService.on('close', (code) => {
+  console.log(`El microservicio de Python terminó con el código ${code}`);
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
