@@ -12,7 +12,9 @@ const PersonReport = ({ reportData, onBack }) => {
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     const d = new Date(dateStr);
-    return d.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    return d
+      .toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
+      .replace(/\b\w/, c => c.toUpperCase());
   };
 
   return (
@@ -32,10 +34,10 @@ const PersonReport = ({ reportData, onBack }) => {
       <div style={styles.printableArea} className="printable-area">
         {/* Encabezado del Informe Impreso */}
         <div style={styles.printHeader}>
-          <img 
-            src="https://th.bing.com/th/id/R.eb6e5629278a9adf8ffd6d85998747d0?rik=Syphi5ks4Z7ljA&riu=http%3a%2f%2fbe32.mx%2fjsons%2fimg%2fclientes%2fgdhfe-32.jpg&ehk=RPMsfcqAXz8my3Wi2%2bvR0cuElqjAHwjmUzytVmahTVo%3d&risl=&pid=ImgRaw&r=0" 
-            alt="Logo" 
-            style={styles.logo} 
+          <img
+            src="https://th.bing.com/th/id/R.eb6e5629278a9adf8ffd6d85998747d0?rik=Syphi5ks4Z7ljA&riu=http%3a%2f%2fbe32.mx%2fjsons%2fimg%2fclientes%2fgdhfe-32.jpg&ehk=RPMsfcqAXz8my3Wi2%2bvR0cuElqjAHwjmUzytVmahTVo%3d&risl=&pid=ImgRaw&r=0"
+            alt="Logo"
+            style={styles.logo}
           />
           <div>
             <h2 style={styles.printTitle}>Informe Confidencial de Persona</h2>
@@ -48,10 +50,10 @@ const PersonReport = ({ reportData, onBack }) => {
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Datos Personales</h3>
           <div style={styles.personDetails}>
-            <img 
-              src={`http://localhost:5000/${person.photo_path}`} 
-              alt="Foto" 
-              style={styles.personPhoto} 
+            <img
+              src={`http://localhost:5000/${person.photo_path}`}
+              alt="Foto"
+              style={styles.personPhoto}
             />
             <div style={styles.infoGrid}>
               <InfoItem label="Nombre Completo" value={`${person.first_name} ${person.last_name}`} />
@@ -130,57 +132,102 @@ const styles = {
   mainTitle: { fontSize: '2rem', margin: 0 },
   backButton: { ...baseButton, background: 'rgba(255, 255, 255, 0.1)', color: '#fff' },
   printButton: { ...baseButton, background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)', color: '#fff' },
-  
-  printableArea: { background: '#fff', color: '#333', borderRadius: '8px', padding: '2rem', fontFamily: 'Arial, sans-serif' },
-  
-  printHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #ccc', paddingBottom: '1rem', marginBottom: '2rem' },
+
+  printableArea: {
+    background: 'rgba(10, 25, 41, 0.7)',
+    color: '#fff',
+    borderRadius: '8px',
+    padding: '2rem',
+    fontFamily: 'Arial, sans-serif',
+    border: '1px solid rgba(255, 255, 255, 0.2)'
+  },
+
+  printHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    borderBottom: '2px solid rgba(255,255,255,0.2)',
+    paddingBottom: '1rem',
+    marginBottom: '2rem'
+  },
   logo: { width: '60px', height: '60px', borderRadius: '50%' },
-  printTitle: { fontSize: '1.5rem', margin: 0, color: '#1e3c72' },
-  printSubtitle: { margin: 0, color: '#555' },
-  printDate: { textAlign: 'right', color: '#555' },
+  printTitle: { fontSize: '1.5rem', margin: 0, color: '#fff' },
+  printSubtitle: { margin: 0, color: 'rgba(255, 255, 255, 0.8)' },
+  printDate: { textAlign: 'right', color: 'rgba(255, 255, 255, 0.8)' },
 
   section: { marginBottom: '2rem' },
-  sectionTitle: { fontSize: '1.25rem', color: '#2a5298', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem', marginBottom: '1rem' },
-  
+  sectionTitle: { fontSize: '1.25rem', color: '#3a7bd5', borderBottom: '1px solid rgba(255, 255, 255, 0.3)', paddingBottom: '0.5rem', marginBottom: '1rem' },
+
   personDetails: { display: 'flex', gap: '2rem', alignItems: 'flex-start' },
-  personPhoto: { width: '150px', height: '150px', borderRadius: '8px', objectFit: 'cover', border: '3px solid #ddd' },
+  personPhoto: { width: '150px', height: '150px', borderRadius: '8px', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.3)' },
   infoGrid: { flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' },
-  infoLabel: { margin: 0, fontWeight: 'bold', color: '#555', fontSize: '0.9rem' },
+  infoLabel: { margin: 0, fontWeight: 'bold', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' },
   infoValue: { margin: 0, fontSize: '1rem' },
 
   table: { width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' },
-  th: { background: '#f2f2f2', padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd' },
-  td: { padding: '12px', borderBottom: '1px solid #eee' },
-  
-  noRecords: { fontStyle: 'italic', color: '#777' },
+  th: { background: 'rgba(58, 123, 213, 0.2)', padding: '12px', textAlign: 'left', borderBottom: '2px solid rgba(58, 123, 213, 0.5)', color: '#fff' },
+  td: { padding: '12px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff' },
 
-  printFooter: { textAlign: 'center', marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #ccc', fontSize: '0.8rem', color: '#888' },
+  noRecords: { fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.7)' },
+
+  printFooter: {
+    textAlign: 'center',
+    marginTop: '2rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+    fontSize: '0.8rem',
+    color: 'rgba(255, 255, 255, 0.7)'
+  },
 };
 
+// === Estilos para impresión ===
 const printStyles = `
   @media print {
+    @page {
+      margin: -0.5; /* Elimina los márgenes de la página */
+      size: A4;
+    }
+
     body * {
       visibility: hidden;
     }
+
     .printable-area, .printable-area * {
       visibility: visible;
     }
+
     .printable-area {
-      position: absolute;
+      position: absolute; /* Posicionamiento absoluto para control total */
+      top: -250px; /* Ajusta según sea necesario */
       left: 0;
-      top: 0;
       width: 100%;
       margin: 0;
-      padding: 1.5cm;
+      padding: 1cm 1.5cm; /* Mantenemos el padding interno para que el contenido no se pegue a los bordes */
       box-sizing: border-box;
       background: #fff !important;
       color: #000 !important;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.4;
     }
+
+
+    .printable-area table, .printable-area th, .printable-area td {
+      border-color: #ddd !important;
+      color: #000 !important;
+    }
+
+    .printable-area h2, .printable-area h3, .printable-area p, .printable-area span, .printable-area th, .printable-area td {
+      color: #000 !important;
+    }
+    
+    .printable-area .infoLabel, .printable-area .printSubtitle, .printable-area .printDate { color: #555 !important; }
+    .printable-area .sectionTitle { color: #1e3c72 !important; }
+    .printable-area .th { background: #f2f2f2 !important; }
+    .printable-area .personPhoto { border-color: #ddd !important; }
+
     .no-print {
       display: none !important;
-    }
-    .printable-area h2, .printable-area h3, .printable-area p, .printable-area span, .printable-area th, .printable-area td {
-        color: #000 !important;
     }
   }
 `;
