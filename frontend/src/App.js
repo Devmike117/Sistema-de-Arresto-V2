@@ -29,7 +29,7 @@ function App() {
   // Cerrar sesión de administrador
   const handleLogout = () => {
     setIsAdminAuthenticated(false);
-    setCurrentSection(1); // Vuelve a una sección por defecto, ej: "Buscar Personas"
+    setCurrentSection(0); // Vuelve a una sección por defecto, ej: "Buscar Personas"
     setMessage({ type: 'success', text: 'Sesión cerrada correctamente.' });
   };
 
@@ -77,85 +77,83 @@ function App() {
     }
   };
 
-  let sections = [
-    // El Dashboard siempre está en la lista, pero se muestra condicionalmente
-    {
-      id: "dashboard",
-      title: "Dashboard",
-      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
-      content: <Dashboard onMessage={setMessage} />,
-    },
-    {
-      id: "inicio",
-      title: "Búsqueda Facial",
-      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>familiar_face_and_zone</span>,
-      content: <FacialSearch onMessage={setMessage} />,
-    },
-    {
-      id: "buscar",
-      title: "Buscar Personas",
-      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>group_search</span>,
-      content: <SearchPeople onMessage={setMessage} HistoryArrestModal={HistoryArrestModal} />,
-    },
-    {
-      id: "registro",
-      title: "Registro",
-      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>person_add</span>,
-      content: <RegisterForm onNext={handleNextFromRegister} onMessage={setMessage} />,
-    },
-    {
-
-      id: "biometria",
-      title: "Biometría",
-      icon: <span className="material-symbols-outlined">fingerprint</span>,
-      content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-          <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
-            <div style={styles.biometricContainer}>
-              <FacialCapture
-                photoFile={photoFile}
-                setPhotoFile={setPhotoFile}
-                onMessage={setMessage}
-              />
-            </div>
-            <div style={styles.biometricContainer}>
-              <FingerprintScan
-                fingerprintFile={fingerprintFile}
-                setFingerprintFile={setFingerprintFile}
-                onMessage={setMessage}
-              />
-            </div>
+let sections = [
+  {
+    id: "inicio",
+    title: "Búsqueda Facial",
+    icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>familiar_face_and_zone</span>,
+    content: <FacialSearch onMessage={setMessage} />,
+  },
+  {
+    id: "buscar",
+    title: "Buscar Personas",
+    icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>group_search</span>,
+    content: <SearchPeople onMessage={setMessage} HistoryArrestModal={HistoryArrestModal} />,
+  },
+  {
+    id: "registro",
+    title: "Registro",
+    icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>person_add</span>,
+    content: <RegisterForm onNext={handleNextFromRegister} onMessage={setMessage} />,
+  },
+  {
+    id: "biometria",
+    title: "Biometría",
+    icon: <span className="material-symbols-outlined">fingerprint</span>,
+    content: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+        <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
+          <div style={styles.biometricContainer}>
+            <FacialCapture
+              photoFile={photoFile}
+              setPhotoFile={setPhotoFile}
+              onMessage={setMessage}
+            />
           </div>
+          <div style={styles.biometricContainer}>
+            <FingerprintScan
+              fingerprintFile={fingerprintFile}
+              setFingerprintFile={setFingerprintFile}
+              onMessage={setMessage}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <button
+            type="submit"
+            disabled={loading}
+            onClick={handleRegister}
+            onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
+            onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
+            style={{
+              ...styles.registerButton,
+              ...(loading ? styles.registerButtonDisabled : {}),
+              transition: 'transform 0.2s ease-in-out'
+            }}
+          >
+            <span style={styles.buttonIcon}>
+              {loading ? (
+                <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
+                  autorenew
+                </span>
+              ) : (
+                <span className="material-symbols-outlined">person_add</span>
+              )}
+            </span>
+            {loading ? "Registrando..." : "Registrar Persona"}
+          </button>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
+    content: <Dashboard onMessage={setMessage} />,
+  },
+];
 
-<div style={{ display: 'flex', justifyContent: 'center' }}>
-  <button
-    type="submit"
-    disabled={loading}
-    onClick={handleRegister}
-    onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
-    onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
-    style={{
-      ...styles.registerButton,
-      ...(loading ? styles.registerButtonDisabled : {}),
-      transition: 'transform 0.2s ease-in-out'
-    }}
-  >
-    <span style={styles.buttonIcon}>
-      {loading ? (
-        <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
-          autorenew
-        </span>
-      ) : (
-        <span className="material-symbols-outlined">person_add</span>
-      )}
-    </span>
-    {loading ? "Registrando..." : "Registrar Persona"}
-  </button>
-</div>
-    </div>
-  ),
-},
-  ];
 
   if (loading) return <Loader onFinish={handleLoaderFinish} />;
 
@@ -168,7 +166,7 @@ function App() {
           onLogin={() => {
             setIsAdminAuthenticated(true);
             setShowAdminLogin(false); // Oculta el login y vuelve a la app
-            setCurrentSection(0); // Va al dashboard por defecto
+            setCurrentSection(4); // ir a la seccion de busqueda facial
           }}
           onMessage={setMessage}
           onBack={() => setShowAdminLogin(false)} // <-- Añadido: para volver a la app
