@@ -236,16 +236,21 @@ function App() {
             {isAdminAuthenticated ? (
               <button
                 style={{
-                  ...styles.navButton,
-                  background: 'rgba(245, 87, 108, 0.2)',
-                  border: '1px solid rgba(245, 87, 108, 0.4)',
+                  ...styles.navButton, // Hereda estilos base
+                  background: 'rgba(245, 87, 108, 0.3)',
+                  border: '1px solid rgba(245, 87, 108, 0.5)',
+                  padding: '0.6rem', // Padding reducido
+                  width: '45px',     // Ancho fijo
+                  height: '45px',    // Altura fija
+                  borderRadius: '50%', // Lo hacemos circular
+                  justifyContent: 'center', // Centramos el ícono
                 }}
                 onClick={handleLogout}
+                title="Cerrar Sesión" // Tooltip para accesibilidad
               >
                 <span style={styles.navIcon}>
                   <span className="material-symbols-outlined">logout</span>
                 </span>
-                <span style={styles.navText}>Cerrar Sesión</span>
               </button>
             ) : (
               <button
