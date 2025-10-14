@@ -118,7 +118,7 @@ const PersonReport = ({ reportData, onBack }) => {
                   <th style={styles.th}>Falta Administrativa</th>
                   <th style={styles.th}>Comunidad</th>
                   <th style={styles.th}>Oficial</th>
-                  <th style={styles.th}>Sentencia</th>
+                  <th style={styles.th}>Fianza</th>
                 </tr>
               </thead>
               <tbody>

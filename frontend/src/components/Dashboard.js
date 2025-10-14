@@ -3,6 +3,7 @@ import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import DashboardModal from "./DashboardModal";
 import PersonReport from "./PersonReport";
+import DashboardReport from "./DashboardReport"; // Importar el nuevo componente
 
 // Componente CustomSelect mejorado
 function CustomSelect({ value, options, onChange, placeholder }) {
@@ -117,6 +118,7 @@ export default function Dashboard({ onMessage }) {
   const [reportSearchResults, setReportSearchResults] = useState([]);
   const [isSearchingReport, setIsSearchingReport] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [showDashboardReport, setShowDashboardReport] = useState(false); // Estado para el reporte del dashboard
   const [arrests, setArrests] = useState([]);
   const [modalData, setModalData] = useState({
     isOpen: false,
@@ -290,6 +292,8 @@ export default function Dashboard({ onMessage }) {
     }
   };
 
+  if (showDashboardReport) return <DashboardReport summary={summary} filter={filter} onBack={() => setShowDashboardReport(false)} />;
+
   if (reportData) return <PersonReport reportData={reportData} onBack={() => setReportData(null)} />;
 
   return (
@@ -353,6 +357,14 @@ export default function Dashboard({ onMessage }) {
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete_sweep</span>
             Limpiar
+          </button>
+          {/* Botón para imprimir reporte del dashboard */}
+          <button 
+            onClick={() => setShowDashboardReport(true)}
+            style={{...styles.clearFilterButton, background: 'rgba(58, 123, 213, 0.3)', border: '1px solid rgba(58, 123, 213, 0.5)'}}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>print</span>
+            Imprimir Reporte
           </button>
         </div>
       </div>
