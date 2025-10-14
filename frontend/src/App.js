@@ -7,6 +7,7 @@ import Dashboard from "./components/Dashboard";
 import Notification from "./components/Notification";
 import FacialSearch from "./components/FacialSearch";
 import SearchPeople from "./components/SearchPeople";
+import Login from "./components/Login";
 import './styles/global.css';
 
 function App() {
@@ -19,8 +20,17 @@ function App() {
   const [fingerprintFile, setFingerprintFile] = useState(null);
 
   const [message, setMessage] = useState(null);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false); // Nuevo estado para mostrar el login
 
   const handleLoaderFinish = () => setLoading(false);
+
+  // Cerrar sesión de administrador
+  const handleLogout = () => {
+    setIsAdminAuthenticated(false);
+    setCurrentSection(1); // Vuelve a una sección por defecto, ej: "Buscar Personas"
+    setMessage({ type: 'success', text: 'Sesión cerrada correctamente.' });
+  };
 
   // Guardar datos de RegisterForm
   const handleNextFromRegister = (data) => {
@@ -66,7 +76,7 @@ function App() {
     }
   };
 
-  const sections = [
+  let sections = [
     {
       id: "inicio",
       title: "Búsqueda Facial",
@@ -137,17 +147,37 @@ function App() {
     </div>
   ),
 },
-    
+  ];
 
-    {
+  // Si el admin está autenticado, añadimos la sección del Dashboard al principio
+  if (isAdminAuthenticated) {
+    sections.unshift({
       id: "dashboard",
       title: "Dashboard",
       icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
       content: <Dashboard onMessage={setMessage} />,
-    },
-  ];
+    });
+  }
 
   if (loading) return <Loader onFinish={handleLoaderFinish} />;
+
+  // Si se hace clic en el botón de admin, muestra la página de Login
+  if (showAdminLogin) {
+    return (
+      <>
+        <Notification message={message} onClose={() => setMessage(null)} />
+        <Login
+          onLogin={() => {
+            setIsAdminAuthenticated(true);
+            setShowAdminLogin(false); // Oculta el login y vuelve a la app
+            setCurrentSection(0); // Va al dashboard por defecto
+          }}
+          onMessage={setMessage}
+          onBack={() => setShowAdminLogin(false)} // <-- Añadido: para volver a la app
+        />
+      </>
+    );
+  }
 
   if (!started)
     return (
@@ -204,6 +234,32 @@ function App() {
                 <span style={styles.navText}>{sec.title}</span>
               </button>
             ))}
+            {/* Botón condicional: Administrador o Cerrar Sesión */}
+            {isAdminAuthenticated ? (
+              <button
+                style={{
+                  ...styles.navButton,
+                  background: 'rgba(245, 87, 108, 0.2)',
+                  border: '1px solid rgba(245, 87, 108, 0.4)',
+                }}
+                onClick={handleLogout}
+              >
+                <span style={styles.navIcon}>
+                  <span className="material-symbols-outlined">logout</span>
+                </span>
+                <span style={styles.navText}>Cerrar Sesión</span>
+              </button>
+            ) : (
+              <button
+                style={{ ...styles.navButton, background: 'rgba(245, 87, 108, 0.2)', border: '1px solid rgba(245, 87, 108, 0.4)' }}
+                onClick={() => setShowAdminLogin(true)}
+              >
+                <span style={styles.navIcon}>
+                  <span className="material-symbols-outlined">admin_panel_settings</span>
+                </span>
+                <span style={styles.navText}>Administrador</span>
+              </button>
+            )}
           </nav>
         </div>
       </header>
