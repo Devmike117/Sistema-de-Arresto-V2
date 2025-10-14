@@ -60,6 +60,9 @@ const PersonReport = ({ reportData, onBack }) => {
       </div>
 
       <div style={styles.printableArea} className="printable-area">
+        {/* Marca de agua */}
+        <div style={styles.watermark}>CONFIDENCIAL</div>
+
         {/* Encabezado del Informe Impreso */}
         <div style={styles.printHeader}>
           <img
@@ -231,14 +234,29 @@ const styles = {
     fontSize: '0.8rem',
     color: 'rgba(255, 255, 255, 0.7)'
   },
+
+  watermark: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%) rotate(-45deg)',
+    fontSize: '6rem',
+    color: 'rgba(255, 255, 255, 0.05)',
+    fontWeight: 'bold',
+    pointerEvents: 'none',
+    zIndex: 0,
+    textTransform: 'uppercase',
+    letterSpacing: '1rem',
+    whiteSpace: 'nowrap'
+  },
 };
 
 // === Estilos para impresión ===
 const printStyles = `
   @media print {
     @page {
-      margin: 0;
       size: A4;
+      margin: 0;
     }
 
     body * {
@@ -279,6 +297,10 @@ const printStyles = `
     
     .printable-area canvas {
       border-color: #ddd !important;
+    }
+
+    .printable-area .watermark {
+      color: rgba(0, 0, 0, 0.08) !important;
     }
 
     .no-print {
