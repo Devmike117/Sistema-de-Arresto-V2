@@ -238,9 +238,9 @@ function App() {
             {isAdminAuthenticated ? (
               <button
                 style={{
-                  ...styles.navButton, // Hereda estilos base
-                  background: 'rgba(245, 87, 108, 0.3)',
-                  border: '1px solid rgba(245, 87, 108, 0.5)',
+                  ...styles.navButton,
+                  background: 'rgba(211, 47, 47, 0.3)',
+                  border: '1px solid rgba(211, 47, 47, 0.5)',
                   padding: '0.5rem', // Padding reducido
                   width: '40px',     // Ancho fijo
                   height: '40px',    // Altura fija
@@ -257,7 +257,11 @@ function App() {
               </button>
             ) : (
               <button
-                style={{ ...styles.navButton, background: 'rgba(245, 87, 108, 0.2)', border: '1px solid rgba(245, 87, 108, 0.4)' }}
+                style={{
+                  ...styles.navButton,
+                  background: 'rgba(58, 123, 213, 0.2)',
+                  border: '1px solid rgba(58, 123, 213, 0.4)',
+                }}
                 onClick={() => setShowAdminLogin(true)}
               >
                 <span style={styles.navIcon}>
@@ -290,7 +294,7 @@ const styles = {
   // Welcome Screen
   welcomeContainer: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #2c3e50 0%, #4b6cb7 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -346,7 +350,7 @@ const styles = {
     fontSize: "1.5rem"
   },
   welcomeButton: {
-    background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    background: "linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)",
     color: "#fff",
     border: "none",
     borderRadius: "12px",
@@ -354,7 +358,7 @@ const styles = {
     fontSize: "1.1rem",
     fontWeight: "600",
     cursor: "pointer",
-    boxShadow: "0 8px 20px rgba(245, 87, 108, 0.4)",
+    boxShadow: "0 8px 20px rgba(58, 123, 213, 0.4)",
     transition: "all 0.3s ease",
     outline: "none"
   },
@@ -362,7 +366,7 @@ const styles = {
   // Main App
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #2c3e50 0%, #4b6cb7 100%)",
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     display: "flex",
     flexDirection: "column"
@@ -370,7 +374,7 @@ const styles = {
 
   // Header
   header: {
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "rgba(10, 25, 41, 0.5)",
     backdropFilter: "blur(10px)",
     borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
     padding: "1rem 2rem",
@@ -430,9 +434,9 @@ const styles = {
   },
 
   navButtonActive: {
-    background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    background: "linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)",
     border: "1px solid #ffffff19",
-    boxShadow: "0 4px 15px rgba(245, 87, 108, 0.4)",
+    boxShadow: "0 4px 15px rgba(58, 123, 213, 0.4)",
     outline: "none",
   },
 
@@ -461,7 +465,7 @@ const styles = {
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)"
   },
   sectionContent: {
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "rgba(10, 25, 41, 0.3)",
     backdropFilter: "blur(10px)",
     borderRadius: "16px",
     padding: "2rem",
@@ -477,7 +481,7 @@ const styles = {
     alignItems: "start"
   },
   registerButton: {
-    background: 'linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)',
+    background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)',
     color: '#fff',
     border: 'none',
     borderRadius: '10px',
@@ -489,7 +493,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)',
+    boxShadow: '0 4px 15px rgba(58, 123, 213, 0.4)',
     transition: 'all 0.3s ease',
     outline: 'none',
     whiteSpace: 'nowrap'

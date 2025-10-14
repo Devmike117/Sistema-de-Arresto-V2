@@ -105,7 +105,7 @@ export default function Dashboard({ onMessage }) {
   return (
     <div style={{
       padding: "2rem",
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      background: "linear-gradient(135deg, #2c3e50 0%, #4b6cb7 100%)",
       minHeight: "100vh",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     }}>
@@ -143,14 +143,14 @@ export default function Dashboard({ onMessage }) {
           icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>people</span>}
           title="Personas Registradas"
           value={summary.totalPersons}
-          gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          gradient="linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)"
           onClick={() => handleOpenModal("persons")}
         />
         <StatCard
           icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>gavel</span>}
           title="Arrestos Totales"
           value={summary.totalArrests}
-          gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+          gradient="linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
           onClick={() => handleOpenModal("arrests")}
         />
         <StatCard
@@ -158,7 +158,7 @@ export default function Dashboard({ onMessage }) {
           title="Delito Más Común"
           value={summary.topOffenses[0]?.offense || "N/A"}
           subtitle={summary.topOffenses[0] ? `${summary.topOffenses[0].count} casos` : ""}
-          gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+          gradient="linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%)"
           onClick={() => handleOpenModal("offenses")}
         />
         <StatCard
@@ -166,7 +166,7 @@ export default function Dashboard({ onMessage }) {
           title="Persona con Más Arrestos"
           value={summary.topPersons[0]?.name || "N/A"}
           subtitle={summary.topPersons[0] ? `${summary.topPersons[0].count} arrestos` : ""}
-          gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+          gradient="linear-gradient(135deg, #525252 0%, #3d72b4 100%)"
           onClick={() => handleOpenModal("top-persons")}
         />
       </div>
@@ -185,12 +185,12 @@ export default function Dashboard({ onMessage }) {
               datasets: [{
                 data: summary.topOffenses.map((o) => o.count),
                 backgroundColor: [
-                  "#667eea",
-                  "#764ba2",
-                  "#f093fb",
-                  "#f5576c",
-                  "#4facfe",
-                  "#00f2fe"
+                  "#007bff",
+                  "#1e3c72",
+                  "#3a7bd5",
+                  "#4e8cff",
+                  "#2a5298",
+                  "#00d2ff"
                 ],
                 borderWidth: 0,
               }]
@@ -213,8 +213,8 @@ export default function Dashboard({ onMessage }) {
               datasets: [{
                 label: "Arrestos",
                 data: summary.topPersons.map((p) => p.count),
-                backgroundColor: "rgba(102, 126, 234, 0.8)",
-                borderColor: "#667eea",
+                backgroundColor: "rgba(58, 123, 213, 0.8)",
+                borderColor: "#3a7bd5",
                 borderWidth: 2,
                 borderRadius: 8,
               }]
@@ -241,7 +241,7 @@ export default function Dashboard({ onMessage }) {
 
       {/* Tabla de arrestos recientes */}
       <div style={{
-        background: "rgba(255,255,255,0.1)",
+        background: "rgba(10, 25, 41, 0.5)",
         backdropFilter: "blur(10px)",
         borderRadius: "16px",
         padding: "1.5rem",
@@ -316,7 +316,7 @@ export default function Dashboard({ onMessage }) {
                   <td style={tdStyle}>{a.person_name}</td>
                   <td style={tdStyle}>
                     <span style={{
-                      background: "rgba(245, 87, 108, 0.2)",
+                      background: "rgba(211, 47, 47, 0.3)",
                       padding: "0.25rem 0.75rem",
                       borderRadius: "12px",
                       fontSize: "0.85rem",
@@ -329,7 +329,7 @@ export default function Dashboard({ onMessage }) {
                   <td style={tdStyle}>{a.arresting_officer || "N/A"}</td>
                   <td style={tdStyle}>
                     <span style={{
-                      background: "rgba(102, 126, 234, 0.2)",
+                      background: "rgba(58, 123, 213, 0.3)",
                       padding: "0.25rem 0.75rem",
                       borderRadius: "12px",
                       fontSize: "0.85rem",
@@ -418,7 +418,7 @@ function StatCard({ icon, title, value, subtitle, gradient, onClick }) {
 function ChartCard({ title, children }) {
   return (
     <div style={{
-      background: "rgba(255,255,255,0.1)",
+      background: "rgba(10, 25, 41, 0.5)",
       backdropFilter: "blur(10px)",
       borderRadius: "16px",
       padding: "1.5rem",

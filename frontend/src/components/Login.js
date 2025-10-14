@@ -70,10 +70,10 @@ const Login = ({ onLogin, onMessage, onBack }) => {
 const styles = {
     loginContainer: {
         display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #2c3e50 0%, #4b6cb7 100%)',
     },
     loginCard: {
-        background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', borderRadius: '16px',
+        background: 'rgba(10, 25, 41, 0.5)', backdropFilter: 'blur(10px)', borderRadius: '16px',
         padding: '2.5rem', width: '100%', maxWidth: '400px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)',
         color: '#fff', textAlign: 'center',
@@ -87,7 +87,7 @@ const styles = {
         background: 'rgba(255, 255, 255, 0.1)', color: '#fff', fontSize: '1rem', boxSizing: 'border-box'
     },
     button: {
-        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: '#fff', border: 'none',
+        background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)', color: '#fff', border: 'none',
         borderRadius: '10px', padding: '0.75rem', fontSize: '1rem', fontWeight: '600', cursor: 'pointer',
         transition: 'all 0.3s ease', marginTop: '1rem'
     },
