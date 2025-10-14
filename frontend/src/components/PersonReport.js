@@ -71,6 +71,10 @@ const PersonReport = ({ reportData, onBack }) => {
             style={styles.logo}
           />
           <div style={{ flex: 1 }}>
+            {/* <h3 style={styles.subTitle}>Sistema Modular de Comando</h3> ponerlo en encabezado y no en cuerpo*/}
+
+            <h4 style={styles.mainEncabezado}>Dirección de Seguridad Pública Desarrollado Víal y Tránsito Municipal</h4>
+
             <h2 style={styles.printTitle}>Informe Confidencial de Persona</h2>
             <p style={styles.printSubtitle}>Generado por: Sistema Modular de Comando</p>
           </div>
@@ -214,6 +218,12 @@ const styles = {
   section: { marginBottom: '2rem' },
   sectionTitle: { fontSize: '1.25rem', color: '#3a7bd5', borderBottom: '1px solid rgba(255, 255, 255, 0.3)', paddingBottom: '0.5rem', marginBottom: '1rem' },
 
+  sectiontEncabezado: { display: 'block', fontSize: '1.2rem', margin: 0, color: '#fff' },
+  subTitle: { fontSize: '1rem', margin: 0, color: 'rgba(255, 255, 255, 0.8)' },
+  mainEncabezado: { fontSize: '1.1rem', margin: '0.2rem 0', color: '#fff', fontWeight: '600' },
+
+
+
   personDetails: { display: 'flex', gap: '2rem', alignItems: 'flex-start' },
   personPhoto: { width: '150px', height: '150px', borderRadius: '8px', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.3)' },
   infoGrid: { flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' },
@@ -241,7 +251,7 @@ const styles = {
     left: '50%',
     transform: 'translate(-50%, -50%) rotate(-45deg)',
     fontSize: '6rem',
-    color: 'rgba(255, 255, 255, 0.05)',
+    color: 'rgba(255, 255, 255, 0.15)',
     fontWeight: 'bold',
     pointerEvents: 'none',
     zIndex: 0,
