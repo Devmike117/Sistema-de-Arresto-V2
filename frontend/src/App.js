@@ -154,7 +154,6 @@ let sections = [
   },
 ];
 
-
   if (loading) return <Loader onFinish={handleLoaderFinish} />;
 
   // Si se hace clic en el botón de admin, muestra la página de Login
