@@ -135,7 +135,7 @@ const PersonReport = ({ reportData, onBack }) => {
         </div>
 
         <div style={styles.printFooter}>
-          <p>© {new Date().getFullYear()} BioRegistro - Documento Confidencial</p>
+          <p>© {new Date().getFullYear()} Sistema Modular de Comando - Documento Confidencial</p>
         </div>
       </div>
     </div>

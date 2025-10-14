@@ -281,7 +281,7 @@ let sections = [
       </section>
 
       <footer style={styles.footer}>
-        <p style={styles.footerText}>© 2025 BioRegistro. Todos los derechos reservados.</p>
+        <p style={styles.footerText}>© 2025 Sistema Modular de Comando. Todos los derechos reservados.</p>
       </footer>
     </main>
   );
