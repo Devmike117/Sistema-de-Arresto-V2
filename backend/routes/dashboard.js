@@ -74,6 +74,32 @@ router.get('/recent-arrests', async (req, res) => {
   }
 });
 
+// =============================
+// Endpoint: Get full report for a single person
+// =============================
+router.get('/person-report/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Get person details
+    const personRes = await pool.query('SELECT * FROM Persons WHERE id = $1', [id]);
+    if (personRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Persona no encontrada' });
+    }
+    const person = personRes.rows[0];
+
+    // Get all arrests for that person
+    const arrestsRes = await pool.query(
+      'SELECT * FROM Arrests WHERE person_id = $1 ORDER BY arrest_date DESC',
+      [id]
+    );
+    
+    res.json({ person, arrests: arrestsRes.rows });
+  } catch (err) {
+    console.error(`Error en /dashboard/person-report/${id}:`, err);
+    res.status(500).json({ error: 'Error al generar el informe de la persona' });
+  }
+});
+
 module.exports = router;
 
 

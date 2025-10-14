@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import DashboardModal from "./DashboardModal";
+import PersonReport from "./PersonReport"; // Importar el nuevo componente
 
 export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
@@ -10,6 +11,10 @@ export default function Dashboard({ onMessage }) {
     topOffenses: [],
     topPersons: [],
   });
+  const [reportSearchTerm, setReportSearchTerm] = useState('');
+  const [reportSearchResults, setReportSearchResults] = useState([]);
+  const [isSearchingReport, setIsSearchingReport] = useState(false);
+  const [reportData, setReportData] = useState(null); // Estado para el informe
   const [arrests, setArrests] = useState([]);
   const [modalData, setModalData] = useState({
     isOpen: false,
@@ -64,7 +69,21 @@ export default function Dashboard({ onMessage }) {
           const personsRes = await fetch("http://localhost:5000/api/dashboard/all-persons");
           const personsData = await personsRes.json();
           data = personsData.persons;
-          renderItem = (item, index) => <span>{index + 1}. {item.first_name} {item.last_name}</span>;
+          renderItem = (item, index) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <span>{index + 1}. {item.first_name} {item.last_name}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleGenerateReport(item.id);
+                }}
+                style={{ padding: '5px 10px', background: '#3a7bd5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+              >
+                <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '16px' }}>description</span>
+                Generar Informe
+              </button>
+            </div>
+          );
           break;
         case "arrests":
           title = "Todos los Arrestos";
@@ -101,6 +120,45 @@ export default function Dashboard({ onMessage }) {
       if (onMessage) onMessage({ type: "error", text: `Error al cargar ${title}` });
     }
   };
+
+  const handleGenerateReport = async (personId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/dashboard/person-report/${personId}`);
+      if (!res.ok) throw new Error('No se pudo cargar el informe.');
+      const data = await res.json();
+      setReportData(data);
+      setModalData({ isOpen: false, title: "", data: [], renderItem: () => null }); // Cierra el modal
+    } catch (err) {
+      if (onMessage) onMessage({ type: "error", text: err.message });
+    }
+  };
+
+  const handleReportSearch = async (e) => {
+    e.preventDefault();
+    if (!reportSearchTerm.trim()) {
+      if (onMessage) onMessage({ type: 'warning', text: 'Ingrese un nombre para buscar.' });
+      return;
+    }
+    setIsSearchingReport(true);
+    setReportSearchResults([]);
+    try {
+      // Usamos un solo parámetro 'q' para la búsqueda general
+      const res = await fetch(`http://localhost:5000/api/search_face/by_name?q=${encodeURIComponent(reportSearchTerm)}`);
+      if (!res.ok) throw new Error('Error en la búsqueda');
+      
+      const data = await res.json();
+      setReportSearchResults(data.results);
+      if (data.results.length === 0 && onMessage) {
+        onMessage({ type: 'info', text: 'No se encontraron personas con ese nombre.' });
+      }
+    } catch (err) {
+      if (onMessage) onMessage({ type: 'error', text: err.message });
+    } finally {
+      setIsSearchingReport(false);
+    }
+  };
+
+  if (reportData) return <PersonReport reportData={reportData} onBack={() => setReportData(null)} />;
 
   return (
     <div style={{
@@ -169,6 +227,65 @@ export default function Dashboard({ onMessage }) {
           gradient="linear-gradient(135deg, #525252 0%, #3d72b4 100%)"
           onClick={() => handleOpenModal("top-persons")}
         />
+      </div>
+
+      {/* Nueva Sección: Generar Reporte */}
+      <div style={{
+        background: "rgba(10, 25, 41, 0.5)",
+        backdropFilter: "blur(10px)",
+        borderRadius: "16px",
+        padding: "1.5rem 2rem",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+        marginBottom: "2rem"
+      }}>
+        <h3 style={{ ...styles.chartTitle, marginBottom: '1.5rem' }}>
+          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '24px' }}>description</span>
+          Generar Reporte por Persona
+        </h3>
+        <form onSubmit={handleReportSearch} style={styles.reportSearchForm}>
+          <input
+            type="text"
+            style={styles.reportSearchInput}
+            placeholder="Buscar por nombre o apellido..."
+            value={reportSearchTerm}
+            onChange={(e) => setReportSearchTerm(e.target.value)}
+          />
+          <button type="submit" style={styles.reportSearchButton} disabled={isSearchingReport}>
+            {isSearchingReport ? (
+              <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
+            ) : (
+              <span className="material-symbols-outlined">search</span>
+            )}
+          </button>
+        </form>
+
+        {/* Resultados de la búsqueda */}
+        {reportSearchResults.length > 0 && (
+          <div style={styles.reportResultsContainer}>
+            {reportSearchResults.map(person => (
+              <div key={person.id} style={styles.reportResultItem}>
+                <div style={styles.reportResultInfo}>
+                  <img 
+                    src={`http://localhost:5000/${person.photo_path}`} 
+                    alt="foto" 
+                    style={styles.reportResultPhoto} 
+                  />
+                  <div>
+                    <span style={styles.reportResultName}>{person.first_name} {person.last_name}</span>
+                    <span style={styles.reportResultId}>ID: {person.id_number || 'N/A'}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleGenerateReport(person.id)}
+                  style={styles.generateReportButton}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                  Generar Informe
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Gráficos */}
@@ -436,6 +553,75 @@ function ChartCard({ title, children }) {
     </div>
   );
 }
+
+const styles = {
+  reportSearchForm: {
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '1.5rem',
+  },
+  reportSearchInput: {
+    flex: 1,
+    padding: '0.75rem 1rem',
+    fontSize: '1rem',
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    color: '#fff',
+    outline: 'none',
+  },
+  reportSearchButton: {
+    padding: '0.75rem',
+    background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#fff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reportResultsContainer: {
+    maxHeight: '300px',
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    paddingRight: '10px',
+  },
+  reportResultItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255, 255, 255, 0.05)',
+    padding: '0.75rem',
+    borderRadius: '8px',
+  },
+  reportResultInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+  },
+  reportResultPhoto: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+  },
+  reportResultName: {
+    fontWeight: '600',
+    color: '#fff',
+    display: 'block',
+  },
+  reportResultId: {
+    fontSize: '0.8rem',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  generateReportButton: {
+    padding: '8px 12px', background: '#3a7bd5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+  },
+  chartTitle: { color: "#fff", fontSize: "1.25rem", marginBottom: "1.5rem", fontWeight: "600" }
+};
 
 const thStyle = {
   padding: "1rem",

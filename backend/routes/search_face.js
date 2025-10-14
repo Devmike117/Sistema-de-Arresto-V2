@@ -143,8 +143,8 @@ if (!embedding) {
 
 // Búsqueda por nombre y apellido
 router.get('/by_name', async (req, res) => {
-  const { first_name, last_name } = req.query;
-  if (!first_name && !last_name) {
+  const { first_name, last_name, q } = req.query;
+  if (!first_name && !last_name && !q) {
     return res.status(400).json({ error: 'Debe proporcionar al menos un nombre o apellido' });
   }
 
@@ -154,13 +154,20 @@ router.get('/by_name', async (req, res) => {
                      FROM Persons WHERE 1=1 `;
     const queryParams = [];
 
-    if (first_name) {
-      queryParams.push(`%${first_name}%`);
-      queryText += ` AND LOWER(first_name) LIKE LOWER($${queryParams.length})`;
-    }
-    if (last_name) {
-      queryParams.push(`%${last_name}%`);
-      queryText += ` AND LOWER(last_name) LIKE LOWER($${queryParams.length})`;
+    if (q) {
+      // Búsqueda general con un solo término
+      queryParams.push(`%${q}%`);
+      queryText += ` AND (LOWER(first_name) LIKE LOWER($1) OR LOWER(last_name) LIKE LOWER($1) OR LOWER(alias) LIKE LOWER($1))`;
+    } else {
+      // Búsqueda específica por campos separados
+      if (first_name) {
+        queryParams.push(`%${first_name}%`);
+        queryText += ` AND LOWER(first_name) LIKE LOWER($${queryParams.length})`;
+      }
+      if (last_name) {
+        queryParams.push(`%${last_name}%`);
+        queryText += ` AND LOWER(last_name) LIKE LOWER($${queryParams.length})`;
+      }
     }
 
     const { rows } = await pool.query(
