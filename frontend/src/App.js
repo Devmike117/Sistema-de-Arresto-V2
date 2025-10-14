@@ -9,6 +9,7 @@ import FacialSearch from "./components/FacialSearch";
 import SearchPeople from "./components/SearchPeople";
 import Login from "./components/Login";
 import './styles/global.css';
+import HistoryArrestModal from "./components/HistoryArrestModal";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -77,6 +78,13 @@ function App() {
   };
 
   let sections = [
+    // El Dashboard siempre está en la lista, pero se muestra condicionalmente
+    {
+      id: "dashboard",
+      title: "Dashboard",
+      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
+      content: <Dashboard onMessage={setMessage} />,
+    },
     {
       id: "inicio",
       title: "Búsqueda Facial",
@@ -87,7 +95,7 @@ function App() {
       id: "buscar",
       title: "Buscar Personas",
       icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>group_search</span>,
-      content: <SearchPeople onMessage={setMessage} />,
+      content: <SearchPeople onMessage={setMessage} HistoryArrestModal={HistoryArrestModal} />,
     },
     {
       id: "registro",
@@ -103,14 +111,14 @@ function App() {
       content: (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
           <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
-            <div style={styles}>
+            <div style={styles.biometricContainer}>
               <FacialCapture
                 photoFile={photoFile}
                 setPhotoFile={setPhotoFile}
                 onMessage={setMessage}
               />
             </div>
-            <div style={styles}>
+            <div style={styles.biometricContainer}>
               <FingerprintScan
                 fingerprintFile={fingerprintFile}
                 setFingerprintFile={setFingerprintFile}
@@ -147,15 +155,7 @@ function App() {
     </div>
   ),
 },
-    
-
-    {
-      id: "dashboard",
-      title: "Dashboard",
-      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
-      content: <Dashboard onMessage={setMessage} />,
-    });
-  }
+  ];
 
   if (loading) return <Loader onFinish={handleLoaderFinish} />;
 
@@ -219,19 +219,21 @@ function App() {
             <h1 style={styles.title}>Sistema Modular de Comando</h1>
           </div>
           <nav style={styles.nav}>
-            {sections.map((sec, idx) => (
-              <button
-                key={sec.id}
-                style={{
-                  ...styles.navButton,
-                  ...(currentSection === idx ? styles.navButtonActive : {})
-                }}
-                onClick={() => setCurrentSection(idx)}
-              >
-                <span style={styles.navIcon}>{sec.icon}</span>
-                <span style={styles.navText}>{sec.title}</span>
-              </button>
-            ))}
+            {sections
+              .filter(sec => isAdminAuthenticated || sec.id !== 'dashboard')
+              .map((sec) => {
+                const originalIndex = sections.findIndex(s => s.id === sec.id);
+                return (
+                  <button
+                    key={sec.id}
+                    style={{ ...styles.navButton, ...(currentSection === originalIndex ? styles.navButtonActive : {}) }}
+                    onClick={() => setCurrentSection(originalIndex)}
+                  >
+                    <span style={styles.navIcon}>{sec.icon}</span>
+                    <span style={styles.navText}>{sec.title}</span>
+                  </button>
+                );
+              })}
             {/* Botón condicional: Administrador o Cerrar Sesión */}
             {isAdminAuthenticated ? (
               <button
@@ -239,9 +241,9 @@ function App() {
                   ...styles.navButton, // Hereda estilos base
                   background: 'rgba(245, 87, 108, 0.3)',
                   border: '1px solid rgba(245, 87, 108, 0.5)',
-                  padding: '0.6rem', // Padding reducido
-                  width: '45px',     // Ancho fijo
-                  height: '45px',    // Altura fija
+                  padding: '0.5rem', // Padding reducido
+                  width: '40px',     // Ancho fijo
+                  height: '40px',    // Altura fija
                   borderRadius: '50%', // Lo hacemos circular
                   justifyContent: 'center', // Centramos el ícono
                 }}
@@ -251,6 +253,7 @@ function App() {
                 <span style={styles.navIcon}>
                   <span className="material-symbols-outlined">logout</span>
                 </span>
+                {/* <span style={styles.navText}>Cerrar Sesión</span> */}
               </button>
             ) : (
               <button
