@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
 
 const PersonReport = ({ reportData, onBack }) => {
   if (!reportData) return null;
 
   const { person, arrests } = reportData;
+  const qrCanvasRef = useRef(null);
 
   const handlePrint = () => {
     window.print();
@@ -16,6 +18,32 @@ const PersonReport = ({ reportData, onBack }) => {
       .toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
       .replace(/\b\w/, c => c.toUpperCase());
   };
+
+  // Generar código QR
+  useEffect(() => {
+    if (qrCanvasRef.current) {
+      const qrData = {
+        nombre: `${person.first_name} ${person.last_name}`,
+        id: person.id_number || 'N/A',
+        fechaNacimiento: person.dob || 'N/A',
+        fechaReporte: new Date().toISOString(),
+        totalArrestos: arrests.length
+      };
+
+      const qrText = JSON.stringify(qrData);
+
+      QRCode.toCanvas(qrCanvasRef.current, qrText, {
+        width: 150,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      }, (error) => {
+        if (error) console.error('Error generando QR:', error);
+      });
+    }
+  }, [person, arrests]);
 
   return (
     <div style={styles.reportContainer}>
@@ -39,11 +67,15 @@ const PersonReport = ({ reportData, onBack }) => {
             alt="Logo"
             style={styles.logo}
           />
-          <div>
+          <div style={{ flex: 1 }}>
             <h2 style={styles.printTitle}>Informe Confidencial de Persona</h2>
             <p style={styles.printSubtitle}>Generado por: Sistema Modular de Comando</p>
           </div>
-          <p style={styles.printDate}>Fecha: {new Date().toLocaleDateString('es-MX')}</p>
+          <div style={styles.qrSection}>
+            <canvas ref={qrCanvasRef} style={styles.qrCanvas}></canvas>
+            <p style={styles.qrLabel}>Código de Verificación</p>
+            <p style={styles.printDate}>Fecha: {new Date().toLocaleDateString('es-MX')}</p>
+          </div>
         </div>
 
         {/* Sección de Datos Personales */}
@@ -147,6 +179,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
+    gap: '1rem',
     borderBottom: '2px solid rgba(255,255,255,0.2)',
     paddingBottom: '1rem',
     marginBottom: '2rem'
@@ -154,7 +187,26 @@ const styles = {
   logo: { width: '60px', height: '60px', borderRadius: '50%' },
   printTitle: { fontSize: '1.5rem', margin: 0, color: '#fff' },
   printSubtitle: { margin: 0, color: 'rgba(255, 255, 255, 0.8)' },
-  printDate: { textAlign: 'right', color: 'rgba(255, 255, 255, 0.8)' },
+  
+  qrSection: { 
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
+  qrCanvas: { 
+    border: '3px solid rgba(255,255,255,0.3)',
+    borderRadius: '8px',
+    background: '#fff',
+    padding: '5px'
+  },
+  qrLabel: { 
+    fontSize: '0.75rem', 
+    color: 'rgba(255, 255, 255, 0.8)',
+    margin: 0,
+    fontWeight: 'bold'
+  },
+  printDate: { textAlign: 'center', color: 'rgba(255, 255, 255, 0.8)', margin: 0, fontSize: '0.85rem' },
 
   section: { marginBottom: '2rem' },
   sectionTitle: { fontSize: '1.25rem', color: '#3a7bd5', borderBottom: '1px solid rgba(255, 255, 255, 0.3)', paddingBottom: '0.5rem', marginBottom: '1rem' },
@@ -185,7 +237,7 @@ const styles = {
 const printStyles = `
   @media print {
     @page {
-      margin: -0.5; /* Elimina los márgenes de la página */
+      margin: 0;
       size: A4;
     }
 
@@ -198,19 +250,18 @@ const printStyles = `
     }
 
     .printable-area {
-      position: absolute; /* Posicionamiento absoluto para control total */
-      top: -250px; /* Ajusta según sea necesario */
+      position: absolute;
+      top: -250px;
       left: 0;
       width: 100%;
       margin: 0;
-      padding: 1cm 1.5cm; /* Mantenemos el padding interno para que el contenido no se pegue a los bordes */
+      padding: 1cm 1.5cm;
       box-sizing: border-box;
       background: #fff !important;
       color: #000 !important;
       font-family: Arial, Helvetica, sans-serif;
       line-height: 1.4;
     }
-
 
     .printable-area table, .printable-area th, .printable-area td {
       border-color: #ddd !important;
@@ -225,6 +276,10 @@ const printStyles = `
     .printable-area .sectionTitle { color: #1e3c72 !important; }
     .printable-area .th { background: #f2f2f2 !important; }
     .printable-area .personPhoto { border-color: #ddd !important; }
+    
+    .printable-area canvas {
+      border-color: #ddd !important;
+    }
 
     .no-print {
       display: none !important;
