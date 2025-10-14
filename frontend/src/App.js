@@ -85,60 +85,58 @@ function App() {
       icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>person_add</span>,
       content: <RegisterForm onNext={handleNextFromRegister} onMessage={setMessage} />,
     },
-   {
+    {
 
-  id: "biometria",
-  title: "Biometría",
-  icon: <span className="material-symbols-outlined">fingerprint</span>,
-  content: (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-      <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
-        <div style={styles}>
-          <FacialCapture 
-            photoFile={photoFile} 
-            setPhotoFile={setPhotoFile} 
-            onMessage={setMessage} 
-          />
+      id: "biometria",
+      title: "Biometría",
+      icon: <span className="material-symbols-outlined">fingerprint</span>,
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+          <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
+            <div style={styles}>
+              <FacialCapture
+                photoFile={photoFile}
+                setPhotoFile={setPhotoFile}
+                onMessage={setMessage}
+              />
+            </div>
+            <div style={styles}>
+              <FingerprintScan
+                fingerprintFile={fingerprintFile}
+                setFingerprintFile={setFingerprintFile}
+                onMessage={setMessage}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button
+              type="submit"
+              disabled={loading}
+              onClick={handleRegister}
+              onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
+              onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
+              style={{
+                ...styles.registerButton,
+                ...(loading ? styles.registerButtonDisabled : {}),
+                transition: 'transform 0.2s ease-in-out'
+              }}
+            >
+              <span style={styles.buttonIcon}>
+                {loading ? (
+                  <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
+                    autorenew
+                  </span>
+                ) : (
+                  <span className="material-symbols-outlined">person_add</span>
+                )}
+              </span>
+              {loading ? "Registrando..." : "Registrar Persona"}
+            </button>
+          </div>
         </div>
-        <div style={styles}>
-          <FingerprintScan 
-            fingerprintFile={fingerprintFile} 
-            setFingerprintFile={setFingerprintFile} 
-            onMessage={setMessage} 
-          />
-        </div>
-      </div>
-
-<div style={{ display: 'flex', justifyContent: 'center' }}>
-  <button
-    type="submit"
-    disabled={loading}
-    onClick={handleRegister}
-    onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
-    onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
-    style={{
-      ...styles.registerButton,
-      ...(loading ? styles.registerButtonDisabled : {}),
-      transition: 'transform 0.2s ease-in-out'
-    }}
-  >
-    <span style={styles.buttonIcon}>
-      {loading ? (
-        <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
-          autorenew
-        </span>
-      ) : (
-        <span className="material-symbols-outlined">person_add</span>
-      )}
-    </span>
-    {loading ? "Registrando..." : "Registrar Persona"}
-  </button>
-</div>
-    </div>
-  ),
-},
-    
-
+      ),
+    },
     {
       id: "dashboard",
       title: "Dashboard",
@@ -175,18 +173,18 @@ function App() {
         <div style={styles.headerContent}>
           <div style={styles.logoContainer}>
             <div style={styles.logo}>
-                           {/* imagen logo */}
-             <img
-              src="https://th.bing.com/th/id/R.eb6e5629278a9adf8ffd6d85998747d0?rik=Syphi5ks4Z7ljA&riu=http%3a%2f%2fbe32.mx%2fjsons%2fimg%2fclientes%2fgdhfe-32.jpg&ehk=RPMsfcqAXz8my3Wi2%2bvR0cuElqjAHwjmUzytVmahTVo%3d&risl=&pid=ImgRaw&r=0"
-              alt="Logo"
-              style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                display: 'block'
-              }}
-            />
+              {/* imagen logo */}
+              <img
+                src="https://th.bing.com/th/id/R.eb6e5629278a9adf8ffd6d85998747d0?rik=Syphi5ks4Z7ljA&riu=http%3a%2f%2fbe32.mx%2fjsons%2fimg%2fclientes%2fgdhfe-32.jpg&ehk=RPMsfcqAXz8my3Wi2%2bvR0cuElqjAHwjmUzytVmahTVo%3d&risl=&pid=ImgRaw&r=0"
+                alt="Logo"
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
             </div>
             <h1 style={styles.title}>Sistema Modular de Comando</h1>
           </div>
@@ -315,7 +313,7 @@ const styles = {
     position: "sticky",
     top: 0,
     zIndex: 100,
-    padding: "0.9rem 1.9rem", 
+    padding: "0.9rem 1.9rem",
   },
   headerContent: {
     maxWidth: "1400px",
@@ -324,7 +322,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: "0.5rem" 
+    gap: "0.5rem"
   },
   logoContainer: {
     display: "flex",
@@ -369,7 +367,7 @@ const styles = {
 
   navButtonActive: {
     background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-    border: "1px solid #ffffff19", 
+    border: "1px solid #ffffff19",
     boxShadow: "0 4px 15px rgba(245, 87, 108, 0.4)",
     outline: "none",
   },
