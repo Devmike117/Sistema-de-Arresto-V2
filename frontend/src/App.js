@@ -97,29 +97,43 @@ function App() {
           <FacialCapture 
             photoFile={photoFile} 
             setPhotoFile={setPhotoFile} 
-            onMessage={setMessage} // aquí pasas setMessage
+            onMessage={setMessage} 
           />
         </div>
         <div style={styles}>
           <FingerprintScan 
             fingerprintFile={fingerprintFile} 
             setFingerprintFile={setFingerprintFile} 
-            onMessage={setMessage} // igual si quieres notificaciones
+            onMessage={setMessage} 
           />
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button
-          type="submit"
-          disabled={loading}
-          onClick={handleRegister}
-          style={{ ...styles.registerButton, ...(loading ? styles.registerButtonDisabled : {}) }}
-        >
-          <span className="material-symbols-outlined" style={{ marginRight: '6px' }}>person_add</span>
-          Registrar Persona
-        </button>
-      </div>
+<div style={{ display: 'flex', justifyContent: 'center' }}>
+  <button
+    type="submit"
+    disabled={loading}
+    onClick={handleRegister}
+    onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
+    onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
+    style={{
+      ...styles.registerButton,
+      ...(loading ? styles.registerButtonDisabled : {}),
+      transition: 'transform 0.2s ease-in-out'
+    }}
+  >
+    <span style={styles.buttonIcon}>
+      {loading ? (
+        <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
+          autorenew
+        </span>
+      ) : (
+        <span className="material-symbols-outlined">person_add</span>
+      )}
+    </span>
+    {loading ? "Registrando..." : "Registrar Persona"}
+  </button>
+</div>
     </div>
   ),
 },
