@@ -299,16 +299,16 @@ export default function RegisterForm({ onNext, onMessage }) {
         {/* Nombre completo */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm">Nombres</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Nombres</label>
             <input name="first_name" value={form.first_name} onChange={handleChange} className="mt-1 input" />
           </div>
 
            <div>
-            <label className="block text-sm">Apellidos</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Apellidos</label>
             <input name="last_name" value={form.last_name} onChange={handleChange} className="mt-1 input" />
           </div>
           <div>
-            <label className="block text-sm">Alias</label> {/* Cambiado */}
+            <label className="block text-sm" style={{ color: '#fff' }}>Alias</label> {/* Cambiado */}
             <input name="alias" value={form.alias} onChange={handleChange} className="mt-1 input" /> {/* Cambiado */}
           </div>
          
@@ -317,11 +317,11 @@ export default function RegisterForm({ onNext, onMessage }) {
         {/* Fecha, género, nacionalidad */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm">Fecha de nacimiento</label>
+            <label className="block text-sm" style={{color: '#fff'}}>Fecha de nacimiento</label>
             <input type="date" name="dob" value={form.dob} onChange={handleChange} className="mt-1 input" />
           </div>
           <div>
-            <label className="block text-sm">Género</label>
+            <label className="block text-sm" style={{color: '#fff'}}>Género</label>
             <select name="gender" value={form.gender} onChange={handleChange} className="mt-1 input">
               <option value="">Selecciona Genero</option>
               <option>Masculino</option>
@@ -330,7 +330,7 @@ export default function RegisterForm({ onNext, onMessage }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm">Nacionalidad</label>
+            <label className="block text-sm" style={{color: '#fff'}}>Nacionalidad</label>
             <select name="nationality" value={form.nationality} onChange={handleChange} className="mt-1 input">
               <option>Mexicana</option>
               <option>Extranjera</option>
@@ -342,39 +342,35 @@ export default function RegisterForm({ onNext, onMessage }) {
         {/* Estado, municipio, comunidad */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm">Estado</label>
+            <label className="block text-sm" style={{color: '#fff'}}>Estado</label>
             <select name="state" value={form.state} onChange={handleChange} className="mt-1 input">
               <option value="">Selecciona un estado</option>
               {mexicoData.map((e, i) => <option key={i} value={e.nombre}>{e.nombre}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm">Municipio</label>
+            <label className="block text-sm" style={{color: '#fff'}}>Municipio</label>
             <select name="municipality" value={form.municipality} onChange={handleChange} className="mt-1 input">
               <option value="">Selecciona un municipio</option>
               {municipios.map((m, i) => <option key={i} value={m.nombre}>{m.nombre}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm">Comunidad</label>
+            <label className="block text-sm" style={{color: '#fff'}}>Comunidad</label>
             <select name="community" value={form.community} onChange={handleChange} className="mt-1 input">
               <option value="">Selecciona una comunidad</option>
               {localidades.map((l, i) => <option key={i} value={l.nombre}>{l.nombre}</option>)}
             </select>
           </div>
         </div>
-    
-
-
-
         {/* ID y observaciones */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm">ID (INE / Pasaporte)</label>
+            <label className="block text-sm" style={{color: '#fff'}}>ID (INE / Pasaporte)</label>
             <input name="id_number" value={form.id_number} onChange={handleChange} className="mt-1 input" />
           </div>
           <div>
-            <label className="block text-sm">Observaciones "Señas Particulares" </label>
+            <label className="block text-sm" style={{color: '#fff'}}>Observaciones "Señas Particulares" </label>
             <input name="observaciones" value={form.observaciones} onChange={handleChange} className="mt-1 input" />
           </div>
         </div>
@@ -396,7 +392,7 @@ export default function RegisterForm({ onNext, onMessage }) {
         {/* Arresto: falta administrativa, comunidad, oficial */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm">Falta administrativa</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Falta administrativa</label>
             <select
               name="falta_administrativa"
               value={form.falta_administrativa}
@@ -420,21 +416,21 @@ export default function RegisterForm({ onNext, onMessage }) {
             )}
           </div>
           <div>
-            <label className="block text-sm">Comunidad del arresto</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Comunidad del arresto</label>
             <select
               name="arrest_community"
               value={form.arrest_community}
               onChange={handleChange}
               className="mt-1 input select-scroll"
             >
-              <option value="">Selecciona una comunidad</option>
+              <option value="" style={{ color: '#fff' }}>Selecciona una comunidad</option>
               {comunidadesArresto.map(com => (
                 <option key={com} value={com}>{com}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm">Turno</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Turno</label>
             <select
               name="turno"
               value={form.turno || ""}
@@ -442,14 +438,14 @@ export default function RegisterForm({ onNext, onMessage }) {
               className="mt-1 input"
               required
             >
-              <option value="">Selecciona un turno</option>
+              <option value="" style={{ color: '#fff' }}>Selecciona un turno</option>
               {turnos.map((t, i) => (
                 <option key={i} value={t}>{t}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm">Oficial</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Oficial</label>
             <select
               name="arresting_officer"
               value={form.arresting_officer}
@@ -458,7 +454,7 @@ export default function RegisterForm({ onNext, onMessage }) {
               required
               disabled={!form.turno}
             >
-              <option value="">Selecciona un oficial</option>
+              <option value="" style={{ color: '#fff' }}>Selecciona un oficial</option>
               {oficiales.map((o) => (
                 <option key={o.id} value={o.name}>{o.name}</option>
               ))}
@@ -469,15 +465,15 @@ export default function RegisterForm({ onNext, onMessage }) {
         {/* Folio, RND, sentencia */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm">Folio</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Folio</label>
             <input name="folio" value={form.folio} onChange={handleChange} className="mt-1 input" />
           </div>
           <div>
-            <label className="block text-sm">RND</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>RND</label>
             <input name="rnd" value={form.rnd} onChange={handleChange} className="mt-1 input" />
           </div>
           <div>
-            <label className="block text-sm">Sentencia</label>
+            <label className="block text-sm" style={{ color: '#fff' }}>Sentencia</label>
             <input name="sentencia" value={form.sentencia} onChange={handleChange} className="mt-1 input" />
           </div>
         </div>
@@ -521,6 +517,7 @@ export default function RegisterForm({ onNext, onMessage }) {
 
 
 const styles = {
+  // === Botones ===
   baseButton: {
     background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     color: '#fff',
@@ -535,7 +532,8 @@ const styles = {
     gap: '0.5rem',
     boxShadow: '0 4px 15px rgba(245, 87, 108, 0.4)',
     transition: 'all 0.3s ease',
-    outline: 'none'
+    outline: 'none',
+    userSelect: 'none',
   },
   secondaryButton: {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -551,11 +549,66 @@ const styles = {
     gap: '0.5rem',
     boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
     transition: 'all 0.3s ease',
-    outline: 'none'
+    outline: 'none',
+    userSelect: 'none',
   },
   buttonIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+
+  // === Formulario ===
+  formContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.2rem',
+    maxWidth: '500px',
+    margin: '0 auto',
+    padding: '2rem',
+    background: '#fff',
+    borderRadius: '12px',
+    boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.3rem',
+  },
+  label: {
+    fontSize: '0.95rem',
+    fontWeight: '500',
+    color: '#333',
+  },
+  input: {
+    padding: '0.65rem 1rem',
+    fontSize: '0.95rem',
+    borderRadius: '8px',
+    border: '1px solid #ccc',
+    outline: 'none',
+    transition: 'all 0.2s ease',
+    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.05)',
+  },
+  inputFocus: {
+    borderColor: '#667eea',
+    boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)',
+  },
+  textarea: {
+    padding: '0.65rem 1rem',
+    fontSize: '0.95rem',
+    borderRadius: '8px',
+    border: '1px solid #ccc',
+    outline: 'none',
+    resize: 'vertical',
+    minHeight: '100px',
+    transition: 'all 0.2s ease',
+  },
+
+  // === Sección de botones del formulario ===
+  formActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '1rem',
+    marginTop: '1rem',
+  },
 };
