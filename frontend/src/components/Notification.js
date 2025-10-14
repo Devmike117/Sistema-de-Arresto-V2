@@ -44,6 +44,7 @@ export default function Notification({ message, onClose }) {
     } else {
       return { ...baseStyle, ...styles.info };
     }
+    
   };
 
   const getIcon = () => {

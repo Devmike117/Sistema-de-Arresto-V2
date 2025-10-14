@@ -50,7 +50,7 @@ if (fs.existsSync(pythonServicePath)) {
     console.log(`El microservicio DeepFace terminó con el código ${code}`);
   });
 } else {
-  console.warn(`⚠️ Archivo no encontrado: ${pythonServicePath}. Verifica la ruta o crea el archivo.`);
+  console.warn(` Archivo no encontrado: ${pythonServicePath}. Verifica la ruta o crea el archivo.`);
 }
 
 const PORT = process.env.PORT || 5000;

@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function FacialCapture({ photoFile, setPhotoFile }) {
+export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [captured, setCaptured] = useState(false);
   const [camOn, setCamOn] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(1.0); // Zoom digital
+  const [zoomLevel, setZoomLevel] = useState(1.0);
 
   useEffect(() => {
     async function startCamera() {
@@ -18,6 +18,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
         }
       } catch (err) {
         console.error('Error al acceder a la cámara:', err);
+        onMessage?.({ text: 'No se pudo acceder a la cámara', type: 'error' });
       }
     }
 
@@ -30,33 +31,52 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
     };
   }, [captured]);
 
-  const capturePhoto = () => {
-  const video = videoRef.current;
-  const canvas = canvasRef.current;
-  if (!video || !canvas) return;
+  const capturePhoto = async () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
 
-  const context = canvas.getContext('2d');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-  const zoom = zoomLevel;
-  const cropWidth = canvas.width / zoom;
-  const cropHeight = canvas.height / zoom;
-  const cropX = (canvas.width - cropWidth) / 2;
-  const cropY = (canvas.height - cropHeight) / 2;
+    const zoom = zoomLevel;
+    const cropWidth = canvas.width / zoom;
+    const cropHeight = canvas.height / zoom;
+    const cropX = (canvas.width - cropWidth) / 2;
+    const cropY = (canvas.height - cropHeight) / 2;
 
-  // Foto capturada en modo espejo
-  context.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
-  context.scale(-1, 1); // Voltear horizontalmente
-  context.drawImage(canvas, -canvas.width, 0);
+    context.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+    context.scale(-1, 1);
+    context.drawImage(canvas, -canvas.width, 0);
 
-  canvas.toBlob(blob => {
-    const file = new File([blob], `photo_${Date.now()}.png`, { type: 'image/png' });
-    setPhotoFile(file);
-    setCaptured(true);
-  }, 'image/png');
-};
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], `photo_${Date.now()}.png`, { type: 'image/png' });
 
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('http://localhost:8001/generate_embedding/', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          onMessage?.({ text: 'No se reconoció una cara', type: 'error' });
+          return;
+        }
+
+        setPhotoFile(file);
+        setCaptured(true);
+        onMessage?.({ text: 'Foto capturada correctamente', type: 'success' });
+
+      } catch (err) {
+        console.error('Error al enviar la imagen al backend:', err);
+        onMessage?.({ text: 'Ocurrió un error al procesar la imagen', type: 'error' });
+      }
+    }, 'image/png');
+  };
 
   const retakePhoto = () => {
     setPhotoFile(null);
@@ -77,7 +97,10 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
             setCamOn(true);
           }
         })
-        .catch(err => console.error('Error al acceder a la cámara:', err));
+        .catch(err => {
+          console.error('Error al acceder a la cámara:', err);
+          onMessage?.({ text: 'No se pudo acceder a la cámara', type: 'error' });
+        });
     }
   };
 
@@ -100,16 +123,15 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
           <>
             <div style={styles.videoContainer}>
               <video 
-              ref={videoRef} 
-              autoPlay 
-              style={{
-                ...styles.video,
-                transform: `scaleX(-1) scale(${zoomLevel})`,
-                transformOrigin: 'center center',
-                transition: 'transform 0.3s ease-in-out'
-              }}
-            />
-
+                ref={videoRef} 
+                autoPlay 
+                style={{
+                  ...styles.video,
+                  transform: `scaleX(-1) scale(${zoomLevel})`,
+                  transformOrigin: 'center center',
+                  transition: 'transform 0.3s ease-in-out'
+                }}
+              />
               <div style={styles.videoOverlay}>
                 <div style={styles.faceOutline}></div>
               </div>
@@ -178,13 +200,6 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
                 Retomar Foto
               </button>
             </div>
-
-            <div style={styles.successMessage}>
-              <span style={styles.successIcon}>
-                <span className="material-symbols-outlined">check_circle</span>
-              </span>
-              Foto capturada correctamente
-            </div>
           </>
         )}
       </div>
@@ -192,7 +207,7 @@ export default function FacialCapture({ photoFile, setPhotoFile }) {
   );
 }
 
-// Puedes mantener tus estilos como los tenías o modularizarlos en otro archivo.
+
 
 const styles = {
 container: {

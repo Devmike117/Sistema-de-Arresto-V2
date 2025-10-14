@@ -10,7 +10,6 @@ export default function FacialSearch({ onMessage }) {
   const [editingSentencia, setEditingSentencia] = useState({});
   const [sentenciaValues, setSentenciaValues] = useState({});  
 
-
   const handleSearch = async () => {
     if (!photoFile) {
       onMessage({ type: "error", text: "Primero captura la foto." });
@@ -33,6 +32,9 @@ export default function FacialSearch({ onMessage }) {
 
       if (!res.ok) {
         onMessage({ type: "error", text: data.error || "Error en la búsqueda" });
+      } else if (!data.person) {
+        // Aquí detectamos que no se encontró rostro o no hay coincidencias
+        onMessage({ type: "error", text: "No se detectó un rostro en la imagen o no hay coincidencias" });
       } else {
         setResult(data);
         onMessage({ type: "success", text: "Búsqueda completada" });
@@ -78,48 +80,44 @@ export default function FacialSearch({ onMessage }) {
     }
   };
 
-  {/* Funciones para editar sentencia LOL */}
+  // Funciones para editar sentencia
+  const handleEditSentencia = (arrestId) => {
+    setEditingSentencia({ ...editingSentencia, [arrestId]: true });
+    const arrest = result.person.arrests.find(a => a.id === arrestId);
+    setSentenciaValues({ ...sentenciaValues, [arrestId]: arrest?.sentencia || "" });
+  };
 
-const handleEditSentencia = (arrestId) => {
-  setEditingSentencia({ ...editingSentencia, [arrestId]: true });
-  const arrest = result.person.arrests.find(a => a.id === arrestId);
-  setSentenciaValues({ ...sentenciaValues, [arrestId]: arrest?.sentencia || "" });
-};
+  const handleCancelEditSentencia = (arrestId) => {
+    setEditingSentencia({ ...editingSentencia, [arrestId]: false });
+    setSentenciaValues({ ...sentenciaValues, [arrestId]: "" });
+  };
 
-const handleCancelEditSentencia = (arrestId) => {
-  setEditingSentencia({ ...editingSentencia, [arrestId]: false });
-  setSentenciaValues({ ...sentenciaValues, [arrestId]: "" });
-};
+  const handleSaveSentencia = async (arrestId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}/sentencia`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentencia: sentenciaValues[arrestId] || "" }),
+      });
 
-const handleSaveSentencia = async (arrestId) => {
-  try {
-    const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}/sentencia`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sentencia: sentenciaValues[arrestId] || "" }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      onMessage({ type: "success", text: "Sentencia actualizada correctamente" });
-      setEditingSentencia({ ...editingSentencia, [arrestId]: false });
-      handleSearch();
-    } else {
-      onMessage({ type: "error", text: data.error || "Error al actualizar sentencia" });
+      const data = await res.json();
+      if (res.ok) {
+        onMessage({ type: "success", text: "Sentencia actualizada correctamente" });
+        setEditingSentencia({ ...editingSentencia, [arrestId]: false });
+        handleSearch();
+      } else {
+        onMessage({ type: "error", text: data.error || "Error al actualizar sentencia" });
+      }
+    } catch (err) {
+      console.error(err);
+      onMessage({ type: "error", text: "Error al actualizar sentencia" });
     }
-  } catch (err) {
-    console.error(err);
-    onMessage({ type: "error", text: "Error al actualizar sentencia" });
-  }
-};
-
-  
+  };
 
   return (
     <div style={styles.mainContainer}>
-      {/* Columna Izquierda - Siempre visible */}
       <div style={styles.leftColumn}>
-        <FacialCapture photoFile={photoFile} setPhotoFile={setPhotoFile} />
+        <FacialCapture photoFile={photoFile} setPhotoFile={setPhotoFile} onMessage={onMessage} />
 
         <button
           onClick={handleSearch}
@@ -141,7 +139,6 @@ const handleSaveSentencia = async (arrestId) => {
           {loading ? "Buscando..." : "Buscar Persona"}
         </button>
 
-        {/* Mensaje de instrucción cuando no hay resultados */}
         {!result && (
           <div style={styles.instructionBox}>
             <span style={styles.instructionIcon}>
@@ -153,6 +150,9 @@ const handleSaveSentencia = async (arrestId) => {
           </div>
         )}
       </div>
+
+
+
 
       {/* Columna Derecha - Solo cuando hay resultados */}
       {result && (

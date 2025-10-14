@@ -86,47 +86,44 @@ function App() {
       content: <RegisterForm onNext={handleNextFromRegister} onMessage={setMessage} />,
     },
    {
+
   id: "biometria",
   title: "Biometría",
-  icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>fingerprint</span>,
+  icon: <span className="material-symbols-outlined">fingerprint</span>,
   content: (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-      
-      {/* Paneles lado a lado */}
       <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
-        <div style={styles}> {/* Aquí usas los estilos de FacialCapture */}
-          <FacialCapture photoFile={photoFile} setPhotoFile={setPhotoFile} />
+        <div style={styles}>
+          <FacialCapture 
+            photoFile={photoFile} 
+            setPhotoFile={setPhotoFile} 
+            onMessage={setMessage} // aquí pasas setMessage
+          />
         </div>
-        <div style={styles}> {/* Aquí usas los estilos de FingerprintScan */}
-          <FingerprintScan fingerprintFile={fingerprintFile} setFingerprintFile={setFingerprintFile} />
+        <div style={styles}>
+          <FingerprintScan 
+            fingerprintFile={fingerprintFile} 
+            setFingerprintFile={setFingerprintFile} 
+            onMessage={setMessage} // igual si quieres notificaciones
+          />
         </div>
       </div>
 
-      {/* Botón centrado debajo */}
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <button
           type="submit"
           disabled={loading}
           onClick={handleRegister}
-          style={{
-            ...styles.registerButton,
-            ...(loading ? styles.registerButtonDisabled : {})
-          }}
-          onMouseEnter={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
-          onMouseLeave={(e) => !loading && (e.target.style.transform = 'scale(1)')}
+          style={{ ...styles.registerButton, ...(loading ? styles.registerButtonDisabled : {}) }}
         >
-          <span
-            className="material-symbols-outlined"
-            style={{ verticalAlign: 'middle', marginRight: '6px' }}
-          >
-            person_add
-          </span>
+          <span className="material-symbols-outlined" style={{ marginRight: '6px' }}>person_add</span>
           Registrar Persona
         </button>
       </div>
     </div>
   ),
 },
+    
 
     {
       id: "dashboard",
