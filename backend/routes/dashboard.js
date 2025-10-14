@@ -7,25 +7,43 @@ const pool = require('../db'); // tu conexión a PostgreSQL
 // =============================
 router.get('/stats', async (req, res) => {
   try {
-    // Total de personas
+    const { year, month, day } = req.query;
+
+    let dateFilter = 'WHERE 1=1';
+    const params = [];
+
+    if (year && year !== 'all') {
+      params.push(year);
+      dateFilter += ` AND EXTRACT(YEAR FROM a.arrest_date) = $${params.length}`;
+    }
+    if (month && month !== 'all') {
+      params.push(month);
+      dateFilter += ` AND EXTRACT(MONTH FROM a.arrest_date) = $${params.length}`;
+    }
+    if (day && day !== 'all') {
+      params.push(day);
+      dateFilter += ` AND EXTRACT(DAY FROM a.arrest_date) = $${params.length}`;
+    }
+
+    // Total de personas (no se filtra por fecha)
     const personsRes = await pool.query('SELECT COUNT(*) FROM Persons');
     const totalPersons = parseInt(personsRes.rows[0].count, 10);
 
-    // Total de arrestos
-    const arrestsRes = await pool.query('SELECT COUNT(*) FROM Arrests');
+    // Total de arrestos (filtrado)
+    const arrestsRes = await pool.query(`SELECT COUNT(*) FROM Arrests a ${dateFilter}`, params);
     const totalArrests = parseInt(arrestsRes.rows[0].count, 10);
 
-    // Top 5 faltas administrativas (delitos)
+    // Top 5 faltas administrativas (delitos) (filtrado)
     const offensesRes = await pool.query(`
-      SELECT falta_administrativa AS offense, COUNT(*) AS count
-      FROM Arrests
-      WHERE falta_administrativa IS NOT NULL AND falta_administrativa <> ''
-      GROUP BY falta_administrativa
+      SELECT a.falta_administrativa AS offense, COUNT(*) AS count
+      FROM Arrests a
+      ${dateFilter} AND a.falta_administrativa IS NOT NULL AND a.falta_administrativa <> ''
+      GROUP BY a.falta_administrativa
       ORDER BY count DESC
       LIMIT 5
-    `);
+    `, params);
 
-    // Top 5 personas con más arrestos
+    // Top 5 personas con más arrestos (filtrado)
     const topPersonsRes = await pool.query(`
       SELECT 
         p.id,
@@ -33,10 +51,11 @@ router.get('/stats', async (req, res) => {
         COUNT(a.id) AS count
       FROM Persons p
       JOIN Arrests a ON a.person_id = p.id
+      ${dateFilter}
       GROUP BY p.id, p.first_name, p.alias, p.last_name
       ORDER BY count DESC
       LIMIT 5
-    `);
+    `, params);
 
     res.json({
       totalPersons,
@@ -55,6 +74,24 @@ router.get('/stats', async (req, res) => {
 // =============================
 router.get('/recent-arrests', async (req, res) => {
   try {
+    const { year, month, day } = req.query;
+
+    let dateFilter = 'WHERE 1=1';
+    const params = [];
+
+    if (year && year !== 'all') {
+      params.push(year);
+      dateFilter += ` AND EXTRACT(YEAR FROM a.arrest_date) = $${params.length}`;
+    }
+    if (month && month !== 'all') {
+      params.push(month);
+      dateFilter += ` AND EXTRACT(MONTH FROM a.arrest_date) = $${params.length}`;
+    }
+    if (day && day !== 'all') {
+      params.push(day);
+      dateFilter += ` AND EXTRACT(DAY FROM a.arrest_date) = $${params.length}`;
+    }
+
     const recentRes = await pool.query(`
       SELECT a.id, a.arrest_date,
              COALESCE(NULLIF(a.falta_administrativa, ''), 'Sin especificar') AS falta_administrativa,
@@ -63,9 +100,10 @@ router.get('/recent-arrests', async (req, res) => {
              p.first_name, p.alias, p.last_name
       FROM Arrests a
       JOIN Persons p ON p.id = a.person_id
+      ${dateFilter}
       ORDER BY a.arrest_date DESC
       LIMIT 5
-    `);
+    `, params);
 
     res.json({ recentArrests: recentRes.rows });
   } catch (err) {

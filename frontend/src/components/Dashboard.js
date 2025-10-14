@@ -2,7 +2,103 @@ import React, { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import DashboardModal from "./DashboardModal";
-import PersonReport from "./PersonReport"; // Importar el nuevo componente
+import PersonReport from "./PersonReport";
+
+// Componente CustomSelect mejorado
+function CustomSelect({ value, options, onChange, placeholder }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState(placeholder);
+
+  useEffect(() => {
+    const selected = options.find(opt => opt.value === value);
+    setSelectedLabel(selected ? selected.label : placeholder);
+  }, [value, options, placeholder]);
+
+  const handleSelect = (optionValue) => {
+    onChange(optionValue);
+    setIsOpen(false);
+  };
+
+  return (
+    <div style={{ position: 'relative', flex: 1, minWidth: '150px' }}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          width: '100%',
+          padding: '0.75rem 2.5rem 0.75rem 1rem',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '10px',
+          color: '#fff',
+          fontSize: '0.95rem',
+          fontWeight: '600',
+          cursor: 'pointer',
+          textAlign: 'left',
+          position: 'relative',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        {selectedLabel}
+        <span style={{
+          position: 'absolute',
+          right: '0.75rem',
+          top: '50%',
+          transform: `translateY(-50%) rotate(${isOpen ? '180deg' : '0deg'})`,
+          transition: 'transform 0.2s',
+        }}>▼</span>
+      </button>
+
+      {isOpen && (
+        <>
+          <div 
+            onClick={() => setIsOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 998,
+            }}
+          />
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 0.5rem)',
+            left: 0,
+            right: 0,
+            background: '#2c3e50',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '10px',
+            maxHeight: '250px',
+            overflowY: 'auto',
+            zIndex: 999,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          }}>
+            {options.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => handleSelect(option.value)}
+                style={{
+                  padding: '0.75rem 1rem',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  background: value === option.value ? 'rgba(102, 126, 234, 0.3)' : 'transparent',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(102, 126, 234, 0.5)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = value === option.value ? 'rgba(102, 126, 234, 0.3)' : 'transparent'}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
@@ -11,10 +107,16 @@ export default function Dashboard({ onMessage }) {
     topOffenses: [],
     topPersons: [],
   });
+  const [filter, setFilter] = useState({
+    year: 'all',
+    month: 'all',
+    day: 'all',
+  });
+
   const [reportSearchTerm, setReportSearchTerm] = useState('');
   const [reportSearchResults, setReportSearchResults] = useState([]);
   const [isSearchingReport, setIsSearchingReport] = useState(false);
-  const [reportData, setReportData] = useState(null); // Estado para el informe
+  const [reportData, setReportData] = useState(null);
   const [arrests, setArrests] = useState([]);
   const [modalData, setModalData] = useState({
     isOpen: false,
@@ -23,13 +125,44 @@ export default function Dashboard({ onMessage }) {
     renderItem: () => null,
   });
 
+  // Opciones para los filtros
+  const yearOptions = [
+    { value: 'all', label: 'Todos los Años' },
+    ...Array.from({ length: 5 }, (_, i) => {
+      const year = new Date().getFullYear() - i;
+      return { value: year.toString(), label: year.toString() };
+    })
+  ];
+
+  const monthOptions = [
+    { value: 'all', label: 'Todos los Meses' },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      value: (i + 1).toString(),
+      label: new Date(0, i).toLocaleString('es-MX', { month: 'long' })
+    }))
+  ];
+
+  const dayOptions = [
+    { value: 'all', label: 'Todos los Días' },
+    ...Array.from({ length: 31 }, (_, i) => ({
+      value: (i + 1).toString(),
+      label: (i + 1).toString()
+    }))
+  ];
+
   const fetchDashboard = async () => {
     try {
-      const statsRes = await fetch("http://localhost:5000/api/dashboard/stats");
+      const queryParams = new URLSearchParams(filter).toString();
+
+      const statsRes = await fetch(`http://localhost:5000/api/dashboard/stats?${queryParams}`);
       const statsData = await statsRes.json();
 
-      const recentRes = await fetch("http://localhost:5000/api/dashboard/recent-arrests");
+      const recentRes = await fetch(`http://localhost:5000/api/dashboard/recent-arrests?${queryParams}`);
       const recentData = await recentRes.json();
+
+      if (!statsRes.ok || !recentRes.ok) {
+        throw new Error('Error al cargar los datos del dashboard');
+      }
 
       const recentArrests = recentData.recentArrests.map((a) => ({
         ...a,
@@ -55,7 +188,7 @@ export default function Dashboard({ onMessage }) {
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [filter]);
 
   const handleOpenModal = async (type) => {
     let title = "";
@@ -127,7 +260,7 @@ export default function Dashboard({ onMessage }) {
       if (!res.ok) throw new Error('No se pudo cargar el informe.');
       const data = await res.json();
       setReportData(data);
-      setModalData({ isOpen: false, title: "", data: [], renderItem: () => null }); // Cierra el modal
+      setModalData({ isOpen: false, title: "", data: [], renderItem: () => null });
     } catch (err) {
       if (onMessage) onMessage({ type: "error", text: err.message });
     }
@@ -142,7 +275,6 @@ export default function Dashboard({ onMessage }) {
     setIsSearchingReport(true);
     setReportSearchResults([]);
     try {
-      // Usamos un solo parámetro 'q' para la búsqueda general
       const res = await fetch(`http://localhost:5000/api/search_face/by_name?q=${encodeURIComponent(reportSearchTerm)}`);
       if (!res.ok) throw new Error('Error en la búsqueda');
       
@@ -190,6 +322,60 @@ export default function Dashboard({ onMessage }) {
         </p>
       </div>
 
+      {/* Filtros */}
+      <div style={{...styles.filterContainer, position: 'relative', zIndex: 10}}>
+        <h3 style={styles.filterTitle}>
+          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '24px' }}>filter_alt</span>
+          Filtrar Arrestos por Fecha
+        </h3>
+        <div style={styles.filterControls}>
+          <CustomSelect
+            value={filter.year}
+            options={yearOptions}
+            onChange={(value) => setFilter(prev => ({ ...prev, year: value }))}
+            placeholder="Todos los Años"
+          />
+          <CustomSelect
+            value={filter.month}
+            options={monthOptions}
+            onChange={(value) => setFilter(prev => ({ ...prev, month: value }))}
+            placeholder="Todos los Meses"
+          />
+          <CustomSelect
+            value={filter.day}
+            options={dayOptions}
+            onChange={(value) => setFilter(prev => ({ ...prev, day: value }))}
+            placeholder="Todos los Días"
+          />
+          <button 
+            onClick={() => setFilter({ year: 'all', month: 'all', day: 'all' })}
+            style={styles.clearFilterButton}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete_sweep</span>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      {/* Mensaje de filtros activos */}
+      { (filter.year !== 'all' || filter.month !== 'all' || filter.day !== 'all') &&
+        <div style={styles.activeFilterMessage}>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>filter_alt</span>
+          Mostrando resultados para: 
+          {filter.day !== 'all' && ` día ${filter.day}`}
+          {filter.month !== 'all' && ` de ${monthOptions.find(m => m.value === filter.month)?.label}`}
+          {filter.year !== 'all' && ` de ${filter.year}`}
+        </div>
+      }
+
+      {/* Divisor */}
+      <div style={{
+        height: '1px',
+        background: 'rgba(255, 255, 255, 0.2)',
+        margin: '2rem 0'
+      }}>
+      </div>
+
       {/* Cards resumen */}
       <div style={{
         display: "grid",
@@ -229,7 +415,7 @@ export default function Dashboard({ onMessage }) {
         />
       </div>
 
-      {/* Nueva Sección: Generar Reporte */}
+      {/* Sección: Generar Reporte */}
       <div style={{
         background: "rgba(10, 25, 41, 0.5)",
         backdropFilter: "blur(10px)",
@@ -259,7 +445,6 @@ export default function Dashboard({ onMessage }) {
           </button>
         </form>
 
-        {/* Resultados de la búsqueda */}
         {reportSearchResults.length > 0 && (
           <div style={styles.reportResultsContainer}>
             {reportSearchResults.map(person => (
@@ -462,7 +647,6 @@ export default function Dashboard({ onMessage }) {
         </div>
       </div>
 
-      {/* Modal */}
       {modalData.isOpen && (
         <DashboardModal
           title={modalData.title}
@@ -618,9 +802,65 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.7)',
   },
   generateReportButton: {
-    padding: '8px 12px', background: '#3a7bd5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+    padding: '8px 12px',
+    background: '#3a7bd5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
   },
-  chartTitle: { color: "#fff", fontSize: "1.25rem", marginBottom: "1.5rem", fontWeight: "600" }
+  chartTitle: {
+    color: "#fff",
+    fontSize: "1.25rem",
+    marginBottom: "1.5rem",
+    fontWeight: "600"
+  },
+  filterContainer: {
+    background: "rgba(10, 25, 41, 0.5)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "16px",
+    padding: "1.5rem 2rem",
+    marginBottom: "1rem",
+  },
+  filterTitle: {
+    color: "#fff",
+    fontSize: "1.2rem",
+    margin: "0 0 1rem 0",
+    fontWeight: "600",
+  },
+  filterControls: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap',
+  },
+  clearFilterButton: {
+    padding: '0.75rem 1.5rem',
+    background: 'rgba(211, 47, 47, 0.3)',
+    border: '1px solid rgba(211, 47, 47, 0.5)',
+    borderRadius: '8px',
+    color: '#fff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+  },
+  activeFilterMessage: {
+    background: 'rgba(58, 123, 213, 0.2)',
+    color: '#fff',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '10px',
+    textAlign: 'center',
+    fontSize: '0.9rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  }
 };
 
 const thStyle = {
