@@ -132,7 +132,7 @@ router.get('/person-report/:id', async (req, res) => {
       'SELECT * FROM Arrests WHERE person_id = $1 ORDER BY arrest_date DESC',
       [id]
     );
-    
+
     res.json({ person, arrests: arrestsRes.rows });
   } catch (err) {
     console.error(`Error en /dashboard/person-report/${id}:`, err);
@@ -185,7 +185,8 @@ Los datos personales recabados no serán transferidos a terceros, salvo en los c
     if (person.privacy_notice_path && fs.existsSync(person.privacy_notice_path)) {
       doc.image(person.privacy_notice_path, {
         fit: [200, 100],
-        align: 'center'
+        x: 200,
+        y: doc.y
       });
     } else {
       doc.text('(Sin firma digital registrada)', { align: 'center' });
