@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
 const pool = require('../db'); // tu conexión a PostgreSQL
 
 // =============================
@@ -138,6 +140,66 @@ router.get('/person-report/:id', async (req, res) => {
   }
 });
 
+// =============================
+// Endpoint: Generar PDF de Aviso de Privacidad
+// =============================
+router.get('/privacy-notice/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const personRes = await pool.query('SELECT * FROM Persons WHERE id = $1', [id]);
+    if (personRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Persona no encontrada' });
+    }
+    const person = personRes.rows[0];
+
+    const doc = new PDFDocument({ margin: 50 });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=aviso_privacidad_${person.first_name}_${person.last_name}.pdf`);
+
+    doc.pipe(res);
+
+    // Título
+    doc.fontSize(16).font('Helvetica-Bold').text('ACUERDO DE CONFIDENCIALIDAD DE DATOS PERSONALES', { align: 'center' });
+    doc.moveDown(2);
+
+    // Contenido del aviso (texto genérico)
+    const privacyText = `
+Con fundamento en los artículos 6, Base A y 16, segundo párrafo, de la Constitución Política de los Estados Unidos Mexicanos; 3°, fracción XXXIII, 4°, 16, 17 y 18 de la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados; 1, 8 y 25 de la Ley de Transparencia y Acceso a la Información Pública del Estado de México y Municipios; así como los artículos 1, 2 fracción IV, 3, 4, 11, 12, 13, 14 y 15 de la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados del Estado de México y Municipios, se hace de su conocimiento que los datos personales recabados serán utilizados para las siguientes finalidades: registrar y dar seguimiento a los arrestos administrativos, generar estadísticas y cumplir con las obligaciones legales correspondientes.
+
+Los datos personales recabados no serán transferidos a terceros, salvo en los casos previstos por la ley. Usted tiene derecho a conocer qué datos personales tenemos de usted, para qué los utilizamos y las condiciones del uso que les damos (Acceso). Asimismo, es su derecho solicitar la corrección de su información personal en caso de que esté desactualizada, sea inexacta o incompleta (Rectificación); que la eliminemos de nuestros registros o bases de datos cuando considere que la misma no está siendo utilizada adecuadamente (Cancelación); así como oponerse al uso de sus datos personales para fines específicos (Oposición). Estos derechos se conocen como derechos ARCO.
+`;
+    doc.fontSize(10).font('Helvetica').text(privacyText, { align: 'justify' });
+    doc.moveDown(3);
+
+    // Información de la persona y aceptación
+    doc.fontSize(12).font('Helvetica-Bold').text('Datos de la Persona:', { underline: true });
+    doc.fontSize(10).font('Helvetica').text(`Nombre: ${person.first_name} ${person.last_name}`);
+    doc.text(`Fecha de Aceptación: ${person.created_at ? new Date(person.created_at).toLocaleDateString('es-MX') : 'No especificada'}`);
+    doc.moveDown();
+
+    doc.fontSize(10).font('Helvetica').text('He leído y acepto los términos del presente acuerdo de confidencialidad.');
+    doc.moveDown(2);
+
+    // Firma
+    if (person.privacy_notice_path && fs.existsSync(person.privacy_notice_path)) {
+      doc.image(person.privacy_notice_path, {
+        fit: [200, 100],
+        align: 'center'
+      });
+    } else {
+      doc.text('(Sin firma digital registrada)', { align: 'center' });
+    }
+    doc.fontSize(8).font('Helvetica').text('___________________________', { align: 'center' });
+    doc.text('Firma', { align: 'center' });
+
+    doc.end();
+  } catch (err) {
+    console.error(`Error en /dashboard/privacy-notice/${id}:`, err);
+    res.status(500).json({ error: 'Error al generar el PDF del aviso de privacidad' });
+  }
+});
+
 module.exports = router;
 
 
@@ -155,6 +217,7 @@ router.get('/all-persons', async (req, res) => {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
+
 
 // GET /api/dashboard/all-arrests
 router.get('/all-arrests', async (req, res) => {
