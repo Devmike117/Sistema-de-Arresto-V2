@@ -185,39 +185,51 @@ export default function RegisterForm({ onNext, onMessage }) {
       .catch(err => console.error('Error al cargar México.json:', err));
   }, []);
 
- // Reemplaza tus funciones startDrawing, draw y stopDrawing con estas:
-
+ // Manejo optimizado de dibujo en canvas
 const startDrawing = (e) => {
-  if (!canvasRef.current) return;
-  
-  const rect = canvasRef.current.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  
-  const ctx = canvasRef.current.getContext('2d');
+  const canvas = canvasRef.current;
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const { x, y } = getRelativeCoords(e, canvas);
+
   ctx.beginPath();
   ctx.moveTo(x, y);
   setIsDrawing(true);
 };
 
 const draw = (e) => {
-  if (!isDrawing || !canvasRef.current) return;
-  
-  const rect = canvasRef.current.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  
-  const ctx = canvasRef.current.getContext('2d');
+  if (!isDrawing) return;
+
+  const canvas = canvasRef.current;
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const { x, y } = getRelativeCoords(e, canvas);
+
   ctx.lineTo(x, y);
   ctx.stroke();
 };
 
 const stopDrawing = () => {
   if (!canvasRef.current) return;
-  
+
   const ctx = canvasRef.current.getContext('2d');
   ctx.closePath();
   setIsDrawing(false);
+};
+
+const getRelativeCoords = (e, canvas) => {
+  const rect = canvas.getBoundingClientRect();
+
+  // manejo de escalas para firma correcta
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
 };
 
   const guardarFirma = () => {
