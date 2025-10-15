@@ -16,7 +16,7 @@ CREATE TABLE Persons (
     photo_path VARCHAR(255),
     observaciones TEXT,        -- Antes era notes
     privacy_notice BOOLEAN DEFAULT FALSE,
-    privacy_notice_path VARCHAR(255),
+    privacy_notice_path TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

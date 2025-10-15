@@ -11,15 +11,18 @@ const FormData = require('form-data');
 // Crear carpetas si no existen
 const photoDir = path.join(__dirname, '../uploads/photos');
 const fingerprintDir = path.join(__dirname, '../uploads/fingerprints');
+const signatureDir = path.join(__dirname, '../uploads/signatures');
 
 if (!fs.existsSync(photoDir)) fs.mkdirSync(photoDir, { recursive: true });
 if (!fs.existsSync(fingerprintDir)) fs.mkdirSync(fingerprintDir, { recursive: true });
+if (!fs.existsSync(signatureDir)) fs.mkdirSync(signatureDir, { recursive: true });
 
 // Configuración de Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === 'photo') cb(null, photoDir);
     else if (file.fieldname === 'fingerprint') cb(null, fingerprintDir);
+    else if (file.fieldname === 'signature') cb(null, signatureDir);
     else cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
@@ -33,7 +36,8 @@ router.post(
   '/',
   upload.fields([
     { name: 'photo', maxCount: 1 },
-    { name: 'fingerprint', maxCount: 1 }
+    { name: 'fingerprint', maxCount: 1 },
+    { name: 'signature', maxCount: 1 }
   ]),
   async (req, res) => {
     const client = await pool.connect();
@@ -48,24 +52,41 @@ router.post(
         nationality,
         state,
         municipality,
-        community,           // comunidad de la persona
+        community,
         id_number,
         observaciones,
         falta_administrativa,
-        arrest_community,    // comunidad del arresto
+        arrest_community,
         arresting_officer,
         folio,
         rnd,
-        sentencia
+        sentencia,
+        privacy_notice,
+        firma // <-- Recibimos la firma como dataURL
       } = req.body;
 
       await client.query('BEGIN');
 
+      // --- Lógica para guardar la firma como imagen ---
+      let signaturePath = null;
+      if (firma) {
+        // 1. Extraer los datos base64 de la dataURL
+        const base64Data = firma.replace(/^data:image\/png;base64,/, "");
+        // 2. Crear un nombre de archivo único
+        const signatureFilename = `signature_${Date.now()}.png`;
+        // 3. Definir la ruta completa donde se guardará
+        const fullSignaturePath = path.join(signatureDir, signatureFilename);
+        // 4. Guardar el archivo en el servidor
+        fs.writeFileSync(fullSignaturePath, base64Data, 'base64');
+        // 5. Guardar la ruta relativa para la base de datos
+        signaturePath = `uploads/signatures/${signatureFilename}`;
+      }
+
       // 1️⃣ Guardar persona
       const personResult = await client.query(
-        `INSERT INTO Persons 
-          (first_name, last_name, alias, dob, gender, nationality, state, municipality, community, id_number, observaciones, photo_path)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        `INSERT INTO Persons
+          (first_name, last_name, alias, dob, gender, nationality, state, municipality, community, id_number, observaciones, photo_path, privacy_notice_path, privacy_notice)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id`,
         [
           first_name,
           last_name,
@@ -78,20 +99,22 @@ router.post(
           community || null,
           id_number || null,
           observaciones || null,
-          req.files.photo ? `uploads/photos/${req.files.photo[0].filename}` : null
+          req.files.photo ? `uploads/photos/${req.files.photo[0].filename}` : null, // Ruta de la foto
+          signaturePath, // <-- Guardamos la RUTA de la firma
+          privacy_notice === 'true' // <-- booleano de aceptación
         ]
       );
       const personId = personResult.rows[0].id;
 
       // 2️⃣ Guardar arresto
       await client.query(
-        `INSERT INTO Arrests 
+        `INSERT INTO Arrests
           (person_id, falta_administrativa, comunidad, arresting_officer, folio, rnd, sentencia)
          VALUES ($1,$2,$3,$4,$5,$6,$7)`,
         [
           personId,
           falta_administrativa || null,
-          arrest_community || null, // ✅ comunidad del arresto
+          arrest_community || null,
           arresting_officer || null,
           folio || null,
           rnd || null,
@@ -143,7 +166,7 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: 'Registro completo: persona, arresto, huella y embedding facial',
+        message: 'Registro completo: persona, arresto, huella, embedding facial y firma',
         personId
       });
     } catch (err) {
