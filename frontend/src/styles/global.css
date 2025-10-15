@@ -10,3 +10,6 @@ html, body {
     'GRAD' 0,
     'opsz' 24;
 }
+* {
+  box-sizing: border-box;
+}
