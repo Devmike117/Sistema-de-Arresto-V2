@@ -185,37 +185,40 @@ export default function RegisterForm({ onNext, onMessage }) {
       .catch(err => console.error('Error al cargar México.json:', err));
   }, []);
 
-  const startDrawing = (e) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const ctx = canvas.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    setIsDrawing(true);
-  };
+ // Reemplaza tus funciones startDrawing, draw y stopDrawing con estas:
 
-  const draw = (e) => {
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const ctx = canvas.getContext('2d');
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  };
+const startDrawing = (e) => {
+  if (!canvasRef.current) return;
+  
+  const rect = canvasRef.current.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  const ctx = canvasRef.current.getContext('2d');
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  setIsDrawing(true);
+};
 
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
+const draw = (e) => {
+  if (!isDrawing || !canvasRef.current) return;
+  
+  const rect = canvasRef.current.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  const ctx = canvasRef.current.getContext('2d');
+  ctx.lineTo(x, y);
+  ctx.stroke();
+};
+
+const stopDrawing = () => {
+  if (!canvasRef.current) return;
+  
+  const ctx = canvasRef.current.getContext('2d');
+  ctx.closePath();
+  setIsDrawing(false);
+};
 
   const guardarFirma = () => {
     const canvas = canvasRef.current;
@@ -601,7 +604,9 @@ export default function RegisterForm({ onNext, onMessage }) {
 
           {firma && (
             <div style={styles.signaturePreview}>
-              <p style={styles.signatureLabel}>✓ Firma guardada:</p>
+              <p style={styles.signatureLabel}>
+                <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '18px', marginRight: '6px' }}>check_circle</span>
+                Firma guardada:</p>
               <img src={firma} alt="Firma digital" style={styles.signatureImg} />
             </div>
           )}
@@ -768,7 +773,6 @@ const styles = {
     padding: '0.75rem 1.5rem',
     fontSize: '0.95rem',
     fontWeight: '600',
-    cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
