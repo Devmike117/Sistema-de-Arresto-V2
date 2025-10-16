@@ -512,7 +512,7 @@ console.log(data);
 
 #### Búsqueda por Texto:
 1. Ir a **Buscar Personas**
-2. Escribir nombre, CURP o ID
+2. Escribir nombre o apellido
 3. Ver resultados en tabla
 4. Hacer clic en "Ver Historial" para ver arrestos
 
@@ -534,7 +534,8 @@ console.log(data);
    - Total de arrestos
    - Faltas más comunes
    - Personas con más arrestos
-5. Exportar a Excel o generar reportes PDF
+5. Exportar el reporte generado en PDF
+6. Exportar el repoter de cada persona registrada, incluyendo un código QR con los datos releevantes
 
 ---
 
@@ -638,6 +639,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 Hecho con ❤️
 
 </div>
+
 
 
 
