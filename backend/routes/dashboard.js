@@ -201,6 +201,48 @@ Los datos personales recabados no serán transferidos a terceros, salvo en los c
   }
 });
 
+// =============================
+// Endpoint: Borrar todos los registros (¡PELIGROSO!)
+// =============================
+router.delete('/delete-all-records', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Borrar registros de las tablas en orden o usando CASCADE
+    // Usar TRUNCATE ... CASCADE es más rápido y resetea los contadores de ID.
+    await client.query('TRUNCATE TABLE Arrests, FacialData, Fingerprints, Persons RESTART IDENTITY CASCADE');
+
+    // 2. Borrar archivos físicos de las carpetas de uploads
+    const uploadsDir = path.join(__dirname, '../uploads');
+    const subfolders = ['photos', 'fingerprints', 'signatures'];
+
+    for (const folder of subfolders) {
+      const dirPath = path.join(uploadsDir, folder);
+      if (fs.existsSync(dirPath)) {
+        const files = fs.readdirSync(dirPath);
+        for (const file of files) {
+          fs.unlinkSync(path.join(dirPath, file));
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.status(200).json({
+      success: true,
+      message: 'Todos los registros y archivos han sido eliminados permanentemente.'
+    });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error en /dashboard/delete-all-records:', err);
+    res.status(500).json({ error: 'Error al intentar borrar todos los registros.' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
 
 

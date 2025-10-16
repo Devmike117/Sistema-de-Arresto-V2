@@ -118,4 +118,65 @@ router.post(
   }
 );
 
+// =============================
+// Endpoint: Borrar una persona y todos sus datos asociados
+// =============================
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // 1. Obtener todas las rutas de archivos asociados a la persona
+    const personQuery = await client.query('SELECT photo_path, privacy_notice_path FROM Persons WHERE id = $1', [id]);
+    if (personQuery.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Persona no encontrada.' });
+    }
+
+    const facialDataQuery = await client.query('SELECT image_path FROM FacialData WHERE person_id = $1', [id]);
+
+    // Construir una lista única de todos los archivos a eliminar
+    const filesToDelete = new Set();
+    const { photo_path, privacy_notice_path } = personQuery.rows[0];
+    if (photo_path) filesToDelete.add(photo_path);
+    if (privacy_notice_path) filesToDelete.add(privacy_notice_path);
+    // Añadir fotos de datos faciales a la lista de borrado
+    facialDataQuery.rows.forEach(row => {
+      if (row.image_path) filesToDelete.add(row.image_path);
+    });
+
+    // 2. Borrar registros dependientes explícitamente
+    // Esto es más seguro que depender de ON DELETE CASCADE si no se ha configurado.
+    await client.query('DELETE FROM Arrests WHERE person_id = $1', [id]);
+    await client.query('DELETE FROM FacialData WHERE person_id = $1', [id]);
+    await client.query('DELETE FROM Fingerprints WHERE person_id = $1', [id]);
+
+    // 3. Ahora sí, borrar a la persona
+    await client.query('DELETE FROM Persons WHERE id = $1', [id]);
+
+
+    // 4. Borrar los archivos físicos asociados
+    for (const relativePath of filesToDelete) {
+      const fullPath = path.join(__dirname, '..', relativePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.status(200).json({
+      success: true,
+      message: `Persona con ID ${id} y todos sus registros asociados han sido eliminados.`,
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(`Error al eliminar persona con ID ${id}:`, err);
+    res.status(500).json({ success: false, error: 'Error interno del servidor al eliminar la persona.' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;

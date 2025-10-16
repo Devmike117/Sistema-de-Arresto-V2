@@ -77,4 +77,26 @@ router.put('/:id/sentencia', async (req, res) => {
   }
 });
 
+// DELETE /api/arrests/:id (eliminar un arresto)
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deleteQuery = 'DELETE FROM Arrests WHERE id = $1 RETURNING *';
+    const { rows } = await pool.query(deleteQuery, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Arresto no encontrado." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Arresto con ID ${id} ha sido eliminado.`,
+    });
+  } catch (err) {
+    console.error("Error al eliminar arresto:", err);
+    res.status(500).json({ success: false, error: "Error interno del servidor al eliminar el arresto." });
+  }
+});
+
 module.exports = router;

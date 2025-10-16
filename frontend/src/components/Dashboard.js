@@ -101,6 +101,85 @@ function CustomSelect({ value, options, onChange, placeholder }) {
   );
 }
 
+function StatCard({ icon, title, value, subtitle, gradient, onClick }) {
+  return (
+    <div style={{
+      background: gradient,
+      borderRadius: "16px",
+      padding: "1.5rem",
+      color: "#fff",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+      transition: "transform 0.2s",
+      cursor: "pointer",
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+    onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+    onClick={onClick}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+        <div style={{
+          background: "rgba(255,255,255,0.2)",
+          padding: "0.75rem",
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "2rem"
+        }}>
+          {icon}
+        </div>
+        <h4 style={{
+          fontSize: "0.9rem",
+          fontWeight: "500",
+          opacity: 0.9,
+          margin: 0
+        }}>
+          {title}
+        </h4>
+      </div>
+      <p style={{
+        fontSize: "2rem",
+        fontWeight: "700",
+        margin: "0.5rem 0",
+        wordBreak: "break-word"
+      }}>
+        {value}
+      </p>
+      {subtitle && (
+        <p style={{
+          fontSize: "0.85rem",
+          opacity: 0.8,
+          margin: 0
+        }}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ChartCard({ title, children }) {
+  return (
+    <div style={{
+      background: "rgba(10, 25, 41, 0.5)",
+      backdropFilter: "blur(10px)",
+      borderRadius: "16px",
+      padding: "1.5rem",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+    }}>
+      <h3 style={{
+        color: "#fff",
+        fontSize: "1.25rem",
+        marginBottom: "1.5rem",
+        fontWeight: "600"
+      }}>
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
 export default function Dashboard({ onMessage }) {
   const [summary, setSummary] = useState({
     totalPersons: 0,
@@ -126,6 +205,10 @@ export default function Dashboard({ onMessage }) {
     data: [],
     renderItem: () => null,
   });
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [allArrests, setAllArrests] = useState([]);
+  const [allPersons, setAllPersons] = useState([]);
+
 
   // Opciones para los filtros
   const yearOptions = [
@@ -313,6 +396,82 @@ export default function Dashboard({ onMessage }) {
       setIsSearchingReport(false);
     }
   };
+
+  const openManageModal = async (type) => {
+    try {
+      if (type === 'arrests') {
+        const res = await fetch('http://localhost:5000/api/dashboard/all-arrests');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al cargar arrestos.');
+        setAllArrests(data.arrests);
+        setAllPersons([]); // Limpiar el otro estado
+      } else if (type === 'persons') {
+        const res = await fetch('http://localhost:5000/api/dashboard/all-persons');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al cargar personas.');
+        setAllPersons(data.persons);
+        setAllArrests([]); // Limpiar el otro estado
+      } else {
+        return;
+      }
+
+      setShowManageModal(true);
+    } catch (err) {
+      onMessage({ type: 'error', text: err.message });
+    }
+  };
+
+  const handleDeleteArrest = async (arrestId) => {
+    // Simple confirmación para evitar clics accidentales
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar el arresto ID: ${arrestId}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Error al eliminar el arresto.');
+
+      onMessage({ type: 'success', text: data.message || 'Arresto eliminado correctamente.' });
+
+      // Actualizar la lista en el modal y los datos del dashboard
+      setAllArrests(prev => prev.filter(a => a.id !== arrestId));
+      fetchDashboard();
+
+    } catch (err) {
+      onMessage({ type: 'error', text: err.message });
+    }
+  };
+
+  const handleDeletePerson = async (personId) => {
+    if (!window.confirm(`¡ACCIÓN IRREVERSIBLE! ¿Estás seguro de que quieres eliminar a la persona con ID: ${personId}? Se borrarán todos sus arrestos, fotos y datos asociados.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/persons/${personId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Error al eliminar la persona.');
+
+      onMessage({ type: 'success', text: data.message || 'Persona eliminada correctamente.' });
+
+      // Actualizar la lista en el modal y los datos del dashboard
+      setAllPersons(prev => prev.filter(p => p.id !== personId));
+      fetchDashboard();
+
+    } catch (err) {
+      onMessage({ type: 'error', text: err.message });
+    }
+  };
+
 
   if (showDashboardReport) return <DashboardReport summary={summary} filter={filter} onBack={() => setShowDashboardReport(false)} />;
 
@@ -694,85 +853,104 @@ export default function Dashboard({ onMessage }) {
           onClose={() => setModalData({ ...modalData, isOpen: false })}
         />
       )}
-    </div>
-  );
-}
 
-function StatCard({ icon, title, value, subtitle, gradient, onClick }) {
-  return (
-    <div style={{
-      background: gradient,
-      borderRadius: "16px",
-      padding: "1.5rem",
-      color: "#fff",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-      transition: "transform 0.2s",
-      cursor: "pointer",
-    }}
-    onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
-    onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
-    onClick={onClick}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
-        <div style={{
-          background: "rgba(255,255,255,0.2)",
-          padding: "0.75rem",
-          borderRadius: "12px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "2rem"
-        }}>
-          {icon}
-        </div>
-        <h4 style={{
-          fontSize: "0.9rem",
-          fontWeight: "500",
-          opacity: 0.9,
-          margin: 0
-        }}>
-          {title}
-        </h4>
-      </div>
-      <p style={{
-        fontSize: "2rem",
-        fontWeight: "700",
-        margin: "0.5rem 0",
-        wordBreak: "break-word"
-      }}>
-        {value}
-      </p>
-      {subtitle && (
-        <p style={{
-          fontSize: "0.85rem",
-          opacity: 0.8,
-          margin: 0
-        }}>
-          {subtitle}
+      {/* Divisor */}
+      <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.2)', margin: '3rem 0' }} />
+
+      {/* Zona de Gestión */}
+      <div style={styles.dangerZone}>
+        <h3 style={styles.dangerZoneTitle}>
+          <span className="material-symbols-outlined">settings</span>
+          Zona de Gestión
+        </h3>
+        <p style={styles.dangerZoneText}>
+          Aquí puedes gestionar los registros existentes, como eliminar un arresto incorrecto.
         </p>
-      )}
-    </div>
-  );
-}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => openManageModal('persons')}
+            style={{...styles.dangerButton, background: '#d32f2f'}}
+          >
+            <span className="material-symbols-outlined">person_remove</span>
+            Gestionar Personas
+          </button>
+          <button
+            onClick={() => openManageModal('arrests')}
+            style={styles.dangerButton}
+          >
+            <span className="material-symbols-outlined">edit_document</span>
+            Gestionar Arrestos
+          </button>
+        </div>
+      </div>
 
-function ChartCard({ title, children }) {
-  return (
-    <div style={{
-      background: "rgba(10, 25, 41, 0.5)",
-      backdropFilter: "blur(10px)",
-      borderRadius: "16px",
-      padding: "1.5rem",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
-    }}>
-      <h3 style={{
-        color: "#fff",
-        fontSize: "1.25rem",
-        marginBottom: "1.5rem",
-        fontWeight: "600"
-      }}>
-        {title}
-      </h3>
-      {children}
+      {/* Modal de Gestión de Arrestos */}
+      {showManageModal && (
+        <DashboardModal
+          title="Gestionar Arrestos"
+          data={allArrests}
+          onClose={() => { setShowManageModal(false); setAllArrests([]); }}
+          renderItem={(item, index) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '1rem' }}>
+              <span style={{ flex: 1, fontSize: '0.9rem' }}>
+                <strong>ID: {item.id}</strong> - {item.first_name} {item.last_name} - <em>{item.falta_administrativa}</em> ({new Date(item.arrest_date).toLocaleDateString()})
+              </span>
+              <button
+                onClick={() => handleDeleteArrest(item.id)}
+                style={{
+                  padding: '8px 12px',
+                  background: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+                title="Eliminar este arresto"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                Eliminar
+              </button>
+            </div>
+          )}
+        />
+      )}
+
+      {/* Modal de Gestión de Personas */}
+      {showManageModal && allPersons.length > 0 && (
+        <DashboardModal
+          title="Gestionar Personas"
+          data={allPersons}
+          onClose={() => { setShowManageModal(false); setAllPersons([]); }}
+          renderItem={(item, index) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '1rem' }}>
+              <span style={{ flex: 1, fontSize: '0.9rem' }}>
+                <strong>ID: {item.id}</strong> - {item.first_name} {item.last_name}
+              </span>
+              <button
+                onClick={() => handleDeletePerson(item.id)}
+                style={{
+                  padding: '8px 12px',
+                  background: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+                title="Eliminar esta persona y todos sus datos"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete_forever</span>
+                Eliminar
+              </button>
+            </div>
+          )}
+        />
+      )}
     </div>
   );
 }
@@ -933,7 +1111,41 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-  }
+  },
+  dangerZone: {
+    background: 'rgba(255, 193, 7, 0.1)',
+    border: '1px solid rgba(255, 193, 7, 0.3)',
+    borderRadius: '16px',
+    padding: '1.5rem 2rem',
+    textAlign: 'center',
+  },
+  dangerZoneTitle: {
+    color: '#ffca28',
+    fontSize: '1.2rem',
+    margin: '0 0 0.5rem 0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+  },
+  dangerZoneText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    margin: '0 0 1.5rem 0',
+    fontSize: '0.9rem',
+  },
+  dangerButton: {
+    background: '#ffa000',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '0.75rem 1.5rem',
+    cursor: 'pointer',
+    fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'all 0.2s',
+  },
 };
 
 const thStyle = {
