@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const { spawn } = require('child_process');
+const os = require('os');
 const fs = require('fs');
 
 const app = express();
@@ -54,6 +55,23 @@ if (fs.existsSync(pythonServicePath)) {
 }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+const HOST = '0.0.0.0'; // Escuchar en todas las interfaces de red
+
+app.listen(PORT, HOST, () => {
+  console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
+  console.log('   Puedes acceder desde las siguientes URLs:');
+  console.log(`   - Local:   http://localhost:${PORT}`);
+
+  // Obtener y mostrar la IP de la red local
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+      const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4;
+      if (net.family === familyV4Value && !net.internal) {
+        console.log(`   - Network: http://${net.address}:${PORT}`);
+      }
+    }
+  }
+  console.log('Presiona CTRL+C para detener el servidor.');
 });
