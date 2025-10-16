@@ -184,9 +184,9 @@ Los datos personales recabados no serán transferidos a terceros, salvo en los c
     // Firma
     if (person.privacy_notice_path && fs.existsSync(person.privacy_notice_path)) {
       doc.image(person.privacy_notice_path, {
-        fit: [200, 100],
-        x: 200,
-        y: doc.y
+        fit: [500, 250], // Aumentado el tamaño de la firma
+        align: 'center', // Centra la firma en la página
+        y: doc.y + 25
       });
     } else {
       doc.text('(Sin firma digital registrada)', { align: 'center' });

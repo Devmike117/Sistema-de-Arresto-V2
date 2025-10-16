@@ -494,13 +494,27 @@ export default function Dashboard({ onMessage }) {
                     <span style={styles.reportResultId}>ID: {person.id_number || 'N/A'}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleGenerateReport(person.id)}
-                  style={styles.generateReportButton}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
-                  Generar Informe
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => window.open(`http://localhost:5000/api/dashboard/privacy-notice/${person.id}`, '_blank')}
+                    style={{
+                      ...styles.generateReportButton,
+                      background: '#667eea',
+                    }}
+                    title="Generar Aviso de Privacidad"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>shield_person</span>
+                    Aviso
+                  </button>
+                  <button
+                    onClick={() => handleGenerateReport(person.id)}
+                    style={styles.generateReportButton}
+                    title="Generar Informe de Persona"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                    Informe
+                  </button>
+                </div>
               </div>
             ))}
           </div>
