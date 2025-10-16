@@ -438,7 +438,7 @@ POST   /api/files/upload               # Subir archivo
 
 ```javascript
 // Búsqueda por nombre
-const response = await fetch('http://localhost:5000/api/persons/search?q=Juan');
+const response = await fetch('http://localhost:5000/api/persons/search?q=Elena');
 const data = await response.json();
 console.log(data);
 ```
@@ -607,17 +607,7 @@ uvicorn deepface_service:app --reload --port 8001
 
 ---
 
-## 🤝 Contribución
-
-¡Las contribuciones son bienvenidas! Para contribuir:
-
-1. Fork el proyecto
-2. Crea tu rama de característica (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-### Guías de Estilo
+### ✨ Guías de Estilo
 
 - Seguir las convenciones de [ESTRUCTURA_CODIGO.md](ESTRUCTURA_CODIGO.md)
 - Usar nombres descriptivos para variables y funciones
@@ -632,36 +622,22 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
 
-**DevMike117**
+**Devmike117**
 - GitHub: [@Devmike117](https://github.com/Devmike117)
-- Repositorio: [Sistema-de-Arresto-V2](https://github.com/Devmike117/Sistema-de-Arresto-V2)
+  
+**Nextefer**
+- GitHub: [@Nextefer](https://github.com/Nextefer)
 
----
-
-## 🙏 Agradecimientos
-
-- **DeepFace** - Framework de reconocimiento facial
-- **Chart.js** - Librería de gráficos
-- **Material Symbols** - Iconografía
-- **PostgreSQL** - Sistema de base de datos
-- **React Community** - Framework y ecosistema
-
----
-
-## 📞 Soporte
-
-¿Tienes preguntas? Abre un [issue](https://github.com/Devmike117/Sistema-de-Arresto-V2/issues) en GitHub.
 
 ---
 
 <div align="center">
 
-**⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub ⭐**
-
-Hecho con ❤️ por DevMike117
+Hecho con ❤️
 
 </div>
+
 
 
