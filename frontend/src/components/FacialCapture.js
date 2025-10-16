@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import API_BASE_URL from '../config';
 
 export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
   const videoRef = useRef(null);
@@ -75,7 +76,9 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('http://localhost:8001/generate_embedding/', {
+        // Construir la URL del servicio de Python usando la misma IP base pero con el puerto 8001
+        const pythonServiceUrl = API_BASE_URL.replace(':5000', ':8001');
+        const response = await fetch(`${pythonServiceUrl}/generate_embedding/`, {
           method: 'POST',
           body: formData
         });
