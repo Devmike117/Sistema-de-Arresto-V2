@@ -7,6 +7,8 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
   const [captured, setCaptured] = useState(false);
   const [camOn, setCamOn] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [countdown, setCountdown] = useState(0);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
     async function startCamera() {
@@ -31,7 +33,23 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
     };
   }, [captured]);
 
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0 && isCapturing) {
+      executeCapture();
+    }
+  }, [countdown, isCapturing]);
+
   const capturePhoto = async () => {
+    setIsCapturing(true);
+    setCountdown(3);
+  };
+
+  const executeCapture = async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
@@ -64,16 +82,19 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
 
         if (!response.ok) {
           onMessage?.({ text: 'No se reconoció una cara', type: 'error' });
+          setIsCapturing(false);
           return;
         }
 
         setPhotoFile(file);
         setCaptured(true);
+        setIsCapturing(false);
         onMessage?.({ text: 'Foto capturada correctamente', type: 'success' });
 
       } catch (err) {
         console.error('Error al enviar la imagen al backend:', err);
         onMessage?.({ text: 'Ocurrió un error al procesar la imagen', type: 'error' });
+        setIsCapturing(false);
       }
     }, 'image/png');
   };
@@ -135,6 +156,29 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
               <div style={styles.videoOverlay}>
                 <div style={styles.faceOutline}></div>
               </div>
+              {countdown > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  pointerEvents: 'none'
+                }}>
+                  <div style={{
+                    fontSize: '4rem',
+                    fontWeight: '800',
+                    color: '#fff',
+                    textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
+                  }}>
+                    {countdown}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{ marginTop: '1rem' }}>
@@ -152,20 +196,30 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
 
             <div style={styles.buttonGroup}>
               <button 
-                onClick={capturePhoto} 
-                style={styles.captureButton}
-                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                onClick={capturePhoto}
+                disabled={isCapturing}
+                style={{
+                  ...styles.captureButton,
+                  opacity: isCapturing ? 0.6 : 1,
+                  cursor: isCapturing ? 'not-allowed' : 'pointer'
+                }}
+                onMouseEnter={(e) => !isCapturing && (e.target.style.transform = 'scale(1.05)')}
+                onMouseLeave={(e) => !isCapturing && (e.target.style.transform = 'scale(1)')}
               >
                 <span className='material-symbols-outlined'>camera_alt</span>
-                Tomar Foto
+                {isCapturing ? `Tomando foto en ${countdown}...` : 'Tomar Foto'}
               </button>
 
               <button 
-                onClick={toggleCamera} 
-                style={styles.toggleButton}
-                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.25)'}
-                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+                onClick={toggleCamera}
+                disabled={isCapturing}
+                style={{
+                  ...styles.toggleButton,
+                  opacity: isCapturing ? 0.6 : 1,
+                  cursor: isCapturing ? 'not-allowed' : 'pointer'
+                }}
+                onMouseEnter={(e) => !isCapturing && (e.target.style.background = 'rgba(255, 255, 255, 0.25)')}
+                onMouseLeave={(e) => !isCapturing && (e.target.style.background = 'rgba(255, 255, 255, 0.15)')}
               >
                 <span className="material-symbols-outlined">{camOn ? 'no_photography' : 'photo_camera'}</span>
                 {camOn ? 'Apagar Cámara' : 'Encender Cámara'}
@@ -210,20 +264,20 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
 
 
 const styles = {
-container: {
+  container: {
     background: 'rgba(255, 255, 255, 0.1)',
     backdropFilter: 'blur(10px)',
     borderRadius: '16px',
-    padding: '0.5rem',
+    padding: '1.5rem',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 40%',   // ahora ocupa 40% del ancho
-    minWidth: '250px', // se hace un poco más pequeño
+    flex: '1 1 48%',   // ocupa aprox. la mitad del ancho
+    minWidth: '300px',  // evita que sea demasiado pequeño
     boxSizing: 'border-box',
-},
+  },
 
   header: {
     display: 'flex',
@@ -240,6 +294,10 @@ container: {
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+  },
+
+  icon: {
+    fontSize: '2rem'
   },
 
   icon: {

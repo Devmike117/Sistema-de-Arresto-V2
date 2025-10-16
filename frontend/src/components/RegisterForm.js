@@ -344,6 +344,19 @@ const getRelativeCoords = (e, canvas) => {
     }}>
       <div style={styles.formContainer}>
         
+        {/* ===== HEADER CON ÍCONO ===== */}
+        <div style={styles.header}>
+          <div style={styles.iconContainer}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#fff' }}>person_add</span>
+          </div>
+          <div>
+            <h3 style={styles.title}>Registro de Persona</h3>
+            <p style={styles.subtitle}>
+              Ingresa los datos personales y biométricos del arrestado
+            </p>
+          </div>
+        </div>
+
         {/* ===== DATOS PERSONALES ===== */}
         <div>
           <div style={styles.sectionDivider}>
@@ -525,7 +538,7 @@ const getRelativeCoords = (e, canvas) => {
           </button>
 
             <a
-              href="https://www.gob.mx/cms/uploads/attachment/file/961645/ACUERDO_DE_CONFIDENCIALIDAD_DE_DATOS_PERSONALES.pdf"
+              href="/pdf/aviso_privacidad.pdf"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -537,13 +550,14 @@ const getRelativeCoords = (e, canvas) => {
               onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
               onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
             >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
               <span>Descargar PDF</span>
             </a>
           </div>
 
           {showPDF && (
             <iframe
-              src="https://www.gob.mx/cms/uploads/attachment/file/961645/ACUERDO_DE_CONFIDENCIALIDAD_DE_DATOS_PERSONALES.pdf"
+              src="/pdf/aviso_privacidad.pdf"
               title="Acuerdo de Privacidad"
               style={styles.pdfFrame}
             />
@@ -600,7 +614,7 @@ const getRelativeCoords = (e, canvas) => {
               onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>refresh</span>
-            Limpiar
+            Reintentar Firma
             </button>
             <button
               type="button"
@@ -757,6 +771,7 @@ const getRelativeCoords = (e, canvas) => {
             onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
           >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>restart_alt</span>
             Limpiar
           </button>
           <button
@@ -766,6 +781,7 @@ const getRelativeCoords = (e, canvas) => {
             onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
           >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
             Guardar y continuar
           </button>
         </div>
@@ -829,6 +845,41 @@ const styles = {
     boxSizing: 'border-box',
   },
 
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginBottom: '1.5rem'
+  },
+
+  iconContainer: {
+    background: 'linear-gradient(135deg, #871195ff 0%, #f5576c 100%)',
+    padding: '1rem',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 15px rgba(245, 87, 108, 0.3)'
+  },
+
+  icon: {
+    fontSize: '2rem'
+  },
+
+  title: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#fff',
+    margin: 0,
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+  },
+
+  subtitle: {
+    fontSize: '0.9rem',
+    color: 'rgba(255, 255, 255, 0.8)',
+    margin: '0.25rem 0 0 0'
+  },
+
   formGroup: {
     display: 'flex',
     flexDirection: 'column',
@@ -886,14 +937,6 @@ const styles = {
     textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
     fontSize: '1.1rem',
     borderRadius: '8px',
-  },
-
-  pdfContainer: {
-    marginTop: '1.5rem',
-    padding: '1.5rem',
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '2px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: '12px',
   },
 
   pdfHeader: {
