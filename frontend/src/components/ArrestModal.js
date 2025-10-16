@@ -244,6 +244,7 @@ export default function ArrestModal({ person, onClose, onSave }) {
                   <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>person</span>
                 
                 {person.first_name} {person.last_name}
+                {person.alias && ` "${person.alias}"`}
               </p>
             </div>
           </div>

@@ -170,7 +170,7 @@ const SearchPeople = () => {
             {/* Información */}
             <div style={styles.personInfo}>
               <h3 style={styles.personName}>
-                {person.first_name} {person.last_name}
+                {person.full_name || `${person.first_name} ${person.last_name}`}
                 {person.alias && <span style={styles.alias}> "{person.alias}"</span>}
               </h3>
 

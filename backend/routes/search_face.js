@@ -149,7 +149,9 @@ router.get('/by_name', async (req, res) => {
   }
 
   try {
-    let queryText = `SELECT id, first_name, last_name, alias, dob, gender, nationality,
+    let queryText = `SELECT id, first_name, last_name, 
+                            TRIM(CONCAT(first_name, ' ', last_name, CASE WHEN alias IS NOT NULL AND alias <> '' THEN CONCAT(' "', alias, '"') ELSE '' END)) as full_name,
+                            alias, dob, gender, nationality,
                             state, municipality, community, id_number, photo_path, observaciones, created_at
                      FROM Persons WHERE 1=1 `;
     const queryParams = [];

@@ -168,7 +168,7 @@ export default function Dashboard({ onMessage }) {
 
       const recentArrests = recentData.recentArrests.map((a) => ({
         ...a,
-        person_name: `${a.first_name || ""} ${a.alias ? `"${a.alias}" ` : ""}${a.last_name || ""}`.trim(),
+        person_name: `${a.first_name || ""} ${a.last_name || ""}${a.alias ? ` "${a.alias}"` : ""}`.trim(),
         offense: a.falta_administrativa || "Sin especificar",
         location: a.comunidad || "N/A",
         bail_status: a.fianza !== undefined ? a.fianza : "N/A",

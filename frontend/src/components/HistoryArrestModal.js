@@ -106,6 +106,7 @@ export default function HistoryArrestModal({
                     <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>person</span>
                   </span>
                   {person.first_name} {person.last_name}
+                  {person.alias && ` "${person.alias}"`}
                 </p>
               )}
             </div>

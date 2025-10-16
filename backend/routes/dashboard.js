@@ -49,7 +49,7 @@ router.get('/stats', async (req, res) => {
     const topPersonsRes = await pool.query(`
       SELECT 
         p.id,
-        CONCAT(p.first_name, ' ', COALESCE(NULLIF(p.alias, ''), ''), ' ', p.last_name) AS name,
+        TRIM(CONCAT(p.first_name, ' ', p.last_name, CASE WHEN p.alias IS NOT NULL AND p.alias <> '' THEN CONCAT(' "', p.alias, '"') ELSE '' END)) AS name,
         COUNT(a.id) AS count
       FROM Persons p
       JOIN Arrests a ON a.person_id = p.id
