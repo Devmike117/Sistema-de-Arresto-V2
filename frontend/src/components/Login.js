@@ -59,7 +59,8 @@ const Login = ({ onLogin, onMessage, onBack }) => {
                 </form>
                 {onBack && (
                     <button onClick={onBack} style={styles.backButton}>
-                        ‹ Volver a la página principal
+                        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem' }}>arrow_back</span>
+                        Volver al Inicio
                     </button>
                 )}
             </div>
