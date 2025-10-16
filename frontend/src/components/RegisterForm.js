@@ -5,7 +5,7 @@ import {
   turnos,
   oficialesPrimerTurno,
   oficialesSegundoTurno
-} from '../data/constants';
+} from './constants';
 
 
 export default function RegisterForm({ onNext, onMessage }) {
