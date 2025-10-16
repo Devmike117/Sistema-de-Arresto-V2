@@ -525,7 +525,7 @@ const getRelativeCoords = (e, canvas) => {
           </button>
 
             <a
-              href="https://www.gob.mx/cms/uploads/attachment/file/961645/ACUERDO_DE_CONFIDENCIALIDAD_DE_DATOS_PERSONALES.pdf"
+              href="/pdf/aviso_privacidad.pdf"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -537,13 +537,14 @@ const getRelativeCoords = (e, canvas) => {
               onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
               onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
             >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
               <span>Descargar PDF</span>
             </a>
           </div>
 
           {showPDF && (
             <iframe
-              src="https://www.gob.mx/cms/uploads/attachment/file/961645/ACUERDO_DE_CONFIDENCIALIDAD_DE_DATOS_PERSONALES.pdf"
+              src="/pdf/aviso_privacidad.pdf"
               title="Acuerdo de Privacidad"
               style={styles.pdfFrame}
             />
@@ -600,7 +601,7 @@ const getRelativeCoords = (e, canvas) => {
               onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>refresh</span>
-            Limpiar
+            Reintentar Firma
             </button>
             <button
               type="button"
@@ -757,6 +758,7 @@ const getRelativeCoords = (e, canvas) => {
             onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
           >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>restart_alt</span>
             Limpiar
           </button>
           <button
@@ -766,6 +768,7 @@ const getRelativeCoords = (e, canvas) => {
             onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
           >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
             Guardar y continuar
           </button>
         </div>
@@ -888,13 +891,7 @@ const styles = {
     borderRadius: '8px',
   },
 
-  pdfContainer: {
-    marginTop: '1.5rem',
-    padding: '1.5rem',
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '2px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: '12px',
-  },
+
 
   pdfHeader: {
     display: 'flex',
