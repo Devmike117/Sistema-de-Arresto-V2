@@ -101,16 +101,28 @@ let sections = [
     title: "Biometría",
     icon: <span className="material-symbols-outlined">fingerprint</span>,
     content: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-        <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
-          <div style={styles.biometricContainer}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
+        {/* Contenedor de secciones izquierda/derecha */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            width: '100%',
+            gap: '2rem',
+          }}
+        >
+          {/* Izquierda: Facial */}
+          <div style={{ ...styles.biometricContainer, flex: 1 }}>
             <FacialCapture
               photoFile={photoFile}
               setPhotoFile={setPhotoFile}
               onMessage={setMessage}
             />
           </div>
-          <div style={styles.biometricContainer}>
+
+          {/* Derecha: Huella */}
+          <div style={{ ...styles.biometricContainer, flex: 1 }}>
             <FingerprintScan
               fingerprintFile={fingerprintFile}
               setFingerprintFile={setFingerprintFile}
@@ -118,6 +130,8 @@ let sections = [
             />
           </div>
         </div>
+
+        {/* Botón centrado */}
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button
             type="submit"
@@ -133,7 +147,10 @@ let sections = [
           >
             <span style={styles.buttonIcon}>
               {loading ? (
-                <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ animation: 'spin 1s linear infinite' }}
+                >
                   autorenew
                 </span>
               ) : (
@@ -145,14 +162,14 @@ let sections = [
         </div>
       </div>
     ),
-  },
-  {
-    id: "dashboard",
-    title: "Dashboard",
-    icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
-    content: <Dashboard onMessage={setMessage} />,
-  },
-];
+      },
+    {
+      id: "dashboard",
+      title: "Dashboard",
+      icon: <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', verticalAlign: 'middle' }}>dashboard</span>,
+      content: <Dashboard onMessage={setMessage} />,
+    },
+  ];
 
   if (loading) return <Loader onFinish={handleLoaderFinish} />;
 
