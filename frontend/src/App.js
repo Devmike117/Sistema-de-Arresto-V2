@@ -67,7 +67,10 @@ function App() {
         setPersonData(null);
         setPhotoFile(null);
         setFingerprintFile(null);
-        setCurrentSection(4);
+        {/*Al terminar el registro y k¿mostrar el mensaje mandar a la sección de inicio */}
+        setCurrentSection(null);
+        setCurrentSection(0);
+
       } else {
         setMessage({ type: "error", text: data.error || "Error al registrar." });
       }
