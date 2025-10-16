@@ -141,7 +141,7 @@ router.get('/person-report/:id', async (req, res) => {
 });
 
 // =============================
-// Endpoint: Generar PDF de Aviso de Privacidad
+// Endpoint: Generar PDF de Aviso de Privacidad y firma
 // =============================
 router.get('/privacy-notice/:id', async (req, res) => {
   const { id } = req.params;
