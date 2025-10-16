@@ -325,28 +325,19 @@ export default function Dashboard({ onMessage }) {
       minHeight: "100vh",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     }}>
-      {/* Header */}
-      <div style={{
-        marginBottom: "2rem",
-        textAlign: "center"
-      }}>
-        <h1 style={{
-          fontSize: "2.5rem",
-          fontWeight: "700",
-          color: "#fff",
-          marginBottom: "0.5rem",
-          textShadow: "0 2px 4px rgba(0,0,0,0.2)"
-        }}>
-        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '60px' }}>dashboard_2</span>
-          Dashboard de Monitoreo
-        </h1>
-        <p style={{
-          color: "rgba(255,255,255,0.8)",
-          fontSize: "1rem"
-        }}>
-          Sistema de seguimiento y análisis en tiempo real
-        </p>
-      </div>
+
+      {/* ===== HEADER CON ÍCONO ===== */}
+      <div style={styles.header}>
+        <div style={styles.iconContainer}>
+          <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#fff' }}>Dashboard</span>
+        </div>
+         <div>
+         <h3 style={styles.title}>Dashboard</h3>
+         <p style={styles.subtitle}>
+          Resumen y estadísticas del sistema de arrestos
+          </p>
+        </div>
+       </div>
 
       {/* Filtros */}
       <div style={{...styles.filterContainer, position: 'relative', zIndex: 10}}>
@@ -773,6 +764,40 @@ function ChartCard({ title, children }) {
 }
 
 const styles = {
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginBottom: '1.5rem'
+  },
+
+  iconContainer: {
+    background: 'linear-gradient(135deg, #871195ff 0%, #f5576c 100%)',
+    padding: '1rem',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 15px rgba(245, 87, 108, 0.3)'
+  },
+
+  icon: {
+    fontSize: '2rem'
+  },
+
+  title: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#fff',
+    margin: 0,
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+  },
+
+  subtitle: {
+    fontSize: '0.9rem',
+    color: 'rgba(255, 255, 255, 0.8)',
+    margin: '0.25rem 0 0 0'
+  },
   reportSearchForm: {
     display: 'flex',
     gap: '1rem',
@@ -912,4 +937,5 @@ const tdStyle = {
   padding: "1rem",
   color: "#fff",
   fontSize: "0.95rem"
+
 };
