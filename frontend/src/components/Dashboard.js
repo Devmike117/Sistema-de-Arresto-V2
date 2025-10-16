@@ -1,236 +1,915 @@
-const express = require('express');
-const router = express.Router();
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const pool = require('../db'); // tu conexión a PostgreSQL
+import React, { useEffect, useState } from "react";
+import { Bar, Pie } from "react-chartjs-2";
+import "chart.js/auto";
+import DashboardModal from "./DashboardModal";
+import PersonReport from "./PersonReport";
+import DashboardReport from "./DashboardReport"; // Importar el nuevo componente
 
-// =============================
-// Endpoint: Estadísticas generales
-// =============================
-router.get('/stats', async (req, res) => {
-  try {
-    const { year, month, day } = req.query;
+// Componente CustomSelect mejorado
+function CustomSelect({ value, options, onChange, placeholder }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState(placeholder);
 
-    let dateFilter = 'WHERE 1=1';
-    const params = [];
+  useEffect(() => {
+    const selected = options.find(opt => opt.value === value);
+    setSelectedLabel(selected ? selected.label : placeholder);
+  }, [value, options, placeholder]);
 
-    if (year && year !== 'all') {
-      params.push(year);
-      dateFilter += ` AND EXTRACT(YEAR FROM a.arrest_date) = $${params.length}`;
-    }
-    if (month && month !== 'all') {
-      params.push(month);
-      dateFilter += ` AND EXTRACT(MONTH FROM a.arrest_date) = $${params.length}`;
-    }
-    if (day && day !== 'all') {
-      params.push(day);
-      dateFilter += ` AND EXTRACT(DAY FROM a.arrest_date) = $${params.length}`;
-    }
+  const handleSelect = (optionValue) => {
+    onChange(optionValue);
+    setIsOpen(false);
+  };
 
-    // Total de personas (no se filtra por fecha)
-    const personsRes = await pool.query('SELECT COUNT(*) FROM Persons');
-    const totalPersons = parseInt(personsRes.rows[0].count, 10);
+  return (
+    <div style={{ position: 'relative', flex: 1, minWidth: '150px' }}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          width: '100%',
+          padding: '0.75rem 2.5rem 0.75rem 1rem',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '10px',
+          color: '#fff',
+          fontSize: '0.95rem',
+          fontWeight: '600',
+          cursor: 'pointer',
+          textAlign: 'left',
+          position: 'relative',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        {selectedLabel}
+        <span style={{
+          position: 'absolute',
+          right: '0.75rem',
+          top: '50%',
+          transform: `translateY(-50%) rotate(${isOpen ? '180deg' : '0deg'})`,
+          transition: 'transform 0.2s',
+        }}>▼</span>
+      </button>
 
-    // Total de arrestos (filtrado)
-    const arrestsRes = await pool.query(`SELECT COUNT(*) FROM Arrests a ${dateFilter}`, params);
-    const totalArrests = parseInt(arrestsRes.rows[0].count, 10);
+      {isOpen && (
+        <>
+          <div 
+            onClick={() => setIsOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 998,
+            }}
+          />
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 0.5rem)',
+            left: 0,
+            right: 0,
+            background: '#2c3e50',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '10px',
+            maxHeight: '250px',
+            overflowY: 'auto',
+            zIndex: 999,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          }}>
+            {options.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => handleSelect(option.value)}
+                style={{
+                  padding: '0.75rem 1rem',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  background: value === option.value ? 'rgba(102, 126, 234, 0.3)' : 'transparent',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(102, 126, 234, 0.5)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = value === option.value ? 'rgba(102, 126, 234, 0.3)' : 'transparent'}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
-    // Top 5 faltas administrativas (delitos) (filtrado)
-    const offensesRes = await pool.query(`
-      SELECT a.falta_administrativa AS offense, COUNT(*) AS count
-      FROM Arrests a
-      ${dateFilter} AND a.falta_administrativa IS NOT NULL AND a.falta_administrativa <> ''
-      GROUP BY a.falta_administrativa
-      ORDER BY count DESC
-      LIMIT 5
-    `, params);
+export default function Dashboard({ onMessage }) {
+  const [summary, setSummary] = useState({
+    totalPersons: 0,
+    totalArrests: 0,
+    topOffenses: [],
+    topPersons: [],
+  });
+  const [filter, setFilter] = useState({
+    year: 'all',
+    month: 'all',
+    day: 'all',
+  });
 
-    // Top 5 personas con más arrestos (filtrado)
-    const topPersonsRes = await pool.query(`
-      SELECT 
-        p.id,
-        CONCAT(p.first_name, ' ', COALESCE(NULLIF(p.alias, ''), ''), ' ', p.last_name) AS name,
-        COUNT(a.id) AS count
-      FROM Persons p
-      JOIN Arrests a ON a.person_id = p.id
-      ${dateFilter}
-      GROUP BY p.id, p.first_name, p.alias, p.last_name
-      ORDER BY count DESC
-      LIMIT 5
-    `, params);
+  const [reportSearchTerm, setReportSearchTerm] = useState('');
+  const [reportSearchResults, setReportSearchResults] = useState([]);
+  const [isSearchingReport, setIsSearchingReport] = useState(false);
+  const [reportData, setReportData] = useState(null);
+  const [showDashboardReport, setShowDashboardReport] = useState(false); // Estado para el reporte del dashboard
+  const [arrests, setArrests] = useState([]);
+  const [modalData, setModalData] = useState({
+    isOpen: false,
+    title: "",
+    data: [],
+    renderItem: () => null,
+  });
 
-    res.json({
-      totalPersons,
-      totalArrests,
-      topOffenses: offensesRes.rows,
-      topPersons: topPersonsRes.rows
-    });
-  } catch (err) {
-    console.error('Error en /dashboard/stats:', err);
-    res.status(500).json({ error: 'Error al obtener estadísticas' });
-  }
-});
+  // Opciones para los filtros
+  const yearOptions = [
+    { value: 'all', label: 'Todos los Años' },
+    ...Array.from({ length: 5 }, (_, i) => {
+      const year = new Date().getFullYear() - i;
+      return { value: year.toString(), label: year.toString() };
+    })
+  ];
 
-// =============================
-// Endpoint: Arrestos recientes
-// =============================
-router.get('/recent-arrests', async (req, res) => {
-  try {
-    const { year, month, day } = req.query;
+  const monthOptions = [
+    { value: 'all', label: 'Todos los Meses' },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      value: (i + 1).toString(),
+      label: new Date(0, i).toLocaleString('es-MX', { month: 'long' })
+    }))
+  ];
 
-    let dateFilter = 'WHERE 1=1';
-    const params = [];
+  const dayOptions = [
+    { value: 'all', label: 'Todos los Días' },
+    ...Array.from({ length: 31 }, (_, i) => ({
+      value: (i + 1).toString(),
+      label: (i + 1).toString()
+    }))
+  ];
 
-    if (year && year !== 'all') {
-      params.push(year);
-      dateFilter += ` AND EXTRACT(YEAR FROM a.arrest_date) = $${params.length}`;
-    }
-    if (month && month !== 'all') {
-      params.push(month);
-      dateFilter += ` AND EXTRACT(MONTH FROM a.arrest_date) = $${params.length}`;
-    }
-    if (day && day !== 'all') {
-      params.push(day);
-      dateFilter += ` AND EXTRACT(DAY FROM a.arrest_date) = $${params.length}`;
-    }
+  const fetchDashboard = async () => {
+    try {
+      const queryParams = new URLSearchParams(filter).toString();
 
-    const recentRes = await pool.query(`
-      SELECT a.id, a.arrest_date,
-             COALESCE(NULLIF(a.falta_administrativa, ''), 'Sin especificar') AS falta_administrativa,
-             a.comunidad, a.arresting_officer,
-             a.folio, a.rnd, a.sentencia,
-             p.first_name, p.alias, p.last_name
-      FROM Arrests a
-      JOIN Persons p ON p.id = a.person_id
-      ${dateFilter}
-      ORDER BY a.arrest_date DESC
-      LIMIT 5
-    `, params);
+      const statsRes = await fetch(`http://localhost:5000/api/dashboard/stats?${queryParams}`);
+      const statsData = await statsRes.json();
 
-    res.json({ recentArrests: recentRes.rows });
-  } catch (err) {
-    console.error('Error en /dashboard/recent-arrests:', err);
-    res.status(500).json({ error: 'Error al obtener arrestos recientes' });
-  }
-});
+      const recentRes = await fetch(`http://localhost:5000/api/dashboard/recent-arrests?${queryParams}`);
+      const recentData = await recentRes.json();
 
-// =============================
-// Endpoint: Get full report for a single person
-// =============================
-router.get('/person-report/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    // Get person details
-    const personRes = await pool.query('SELECT * FROM Persons WHERE id = $1', [id]);
-    if (personRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Persona no encontrada' });
-    }
-    const person = personRes.rows[0];
+      if (!statsRes.ok || !recentRes.ok) {
+        throw new Error('Error al cargar los datos del dashboard');
+      }
 
-    // Get all arrests for that person
-    const arrestsRes = await pool.query(
-      'SELECT * FROM Arrests WHERE person_id = $1 ORDER BY arrest_date DESC',
-      [id]
-    );
-    
-    res.json({ person, arrests: arrestsRes.rows });
-  } catch (err) {
-    console.error(`Error en /dashboard/person-report/${id}:`, err);
-    res.status(500).json({ error: 'Error al generar el informe de la persona' });
-  }
-});
+      const recentArrests = recentData.recentArrests.map((a) => ({
+        ...a,
+        person_name: `${a.first_name || ""} ${a.alias ? `"${a.alias}" ` : ""}${a.last_name || ""}`.trim(),
+        offense: a.falta_administrativa || "Sin especificar",
+        location: a.comunidad || "N/A",
+        bail_status: a.fianza !== undefined ? a.fianza : "N/A",
+      }));
 
-// =============================
-// Endpoint: Generar PDF de Aviso de Privacidad y firma
-// =============================
-router.get('/privacy-notice/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const personRes = await pool.query('SELECT * FROM Persons WHERE id = $1', [id]);
-    if (personRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Persona no encontrada' });
-    }
-    const person = personRes.rows[0];
-
-    const doc = new PDFDocument({ margin: 50 });
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=aviso_privacidad_${person.first_name}_${person.last_name}.pdf`);
-
-    doc.pipe(res);
-
-    // Título
-    doc.fontSize(16).font('Helvetica-Bold').text('ACUERDO DE CONFIDENCIALIDAD DE DATOS PERSONALES', { align: 'center' });
-    doc.moveDown(2);
-
-    // Contenido del aviso (texto genérico)
-    const privacyText = `
-Con fundamento en los artículos 6, Base A y 16, segundo párrafo, de la Constitución Política de los Estados Unidos Mexicanos; 3°, fracción XXXIII, 4°, 16, 17 y 18 de la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados; 1, 8 y 25 de la Ley de Transparencia y Acceso a la Información Pública del Estado de México y Municipios; así como los artículos 1, 2 fracción IV, 3, 4, 11, 12, 13, 14 y 15 de la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados del Estado de México y Municipios, se hace de su conocimiento que los datos personales recabados serán utilizados para las siguientes finalidades: registrar y dar seguimiento a los arrestos administrativos, generar estadísticas y cumplir con las obligaciones legales correspondientes.
-
-Los datos personales recabados no serán transferidos a terceros, salvo en los casos previstos por la ley. Usted tiene derecho a conocer qué datos personales tenemos de usted, para qué los utilizamos y las condiciones del uso que les damos (Acceso). Asimismo, es su derecho solicitar la corrección de su información personal en caso de que esté desactualizada, sea inexacta o incompleta (Rectificación); que la eliminemos de nuestros registros o bases de datos cuando considere que la misma no está siendo utilizada adecuadamente (Cancelación); así como oponerse al uso de sus datos personales para fines específicos (Oposición). Estos derechos se conocen como derechos ARCO.
-`;
-    doc.fontSize(10).font('Helvetica').text(privacyText, { align: 'justify' });
-    doc.moveDown(3);
-
-    // Información de la persona y aceptación
-    doc.fontSize(12).font('Helvetica-Bold').text('Datos de la Persona:', { underline: true });
-    doc.fontSize(10).font('Helvetica').text(`Nombre: ${person.first_name} ${person.last_name}`);
-    doc.text(`Fecha de Aceptación: ${person.created_at ? new Date(person.created_at).toLocaleDateString('es-MX') : 'No especificada'}`);
-    doc.moveDown();
-
-    doc.fontSize(10).font('Helvetica').text('He leído y acepto los términos del presente acuerdo de confidencialidad.');
-    doc.moveDown(2);
-
-    // Firma
-    if (person.privacy_notice_path && fs.existsSync(person.privacy_notice_path)) {
-      doc.image(person.privacy_notice_path, {
-        fit: [200, 100],
-        align: 'center'
+      setSummary({
+        totalPersons: statsData.totalPersons,
+        totalArrests: statsData.totalArrests,
+        topOffenses: statsData.topOffenses,
+        topPersons: statsData.topPersons || [],
       });
-    } else {
-      doc.text('(Sin firma digital registrada)', { align: 'center' });
+
+      setArrests(recentArrests);
+    } catch (err) {
+      console.error(err);
+      if (onMessage) onMessage({ type: "error", text: "Error al cargar dashboard" });
     }
-    doc.fontSize(8).font('Helvetica').text('___________________________', { align: 'center' });
-    doc.text('Firma', { align: 'center' });
+  };
 
-    doc.end();
-  } catch (err) {
-    console.error(`Error en /dashboard/privacy-notice/${id}:`, err);
-    res.status(500).json({ error: 'Error al generar el PDF del aviso de privacidad' });
+  useEffect(() => {
+    fetchDashboard();
+  }, [filter]);
+
+  const handleOpenModal = async (type) => {
+    let title = "";
+    let data = [];
+    let renderItem = (item) => <div>{JSON.stringify(item)}</div>;
+
+    try {
+      switch (type) {
+        case "persons":
+          title = "Personas Registradas";
+          const personsRes = await fetch("http://localhost:5000/api/dashboard/all-persons");
+          const personsData = await personsRes.json();
+          data = personsData.persons;
+          renderItem = (item, index) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <span style={{ flex: 1 }}>{index + 1}. {item.first_name} {item.last_name}</span>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`http://localhost:5000/api/dashboard/privacy-notice/${item.id}`, '_blank');
+                  }}
+                  style={{ 
+                    padding: '5px 10px', 
+                    background: '#667eea', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '5px', 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '16px' }}>shield_person</span>
+                  Aviso
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGenerateReport(item.id);
+                  }}
+                  style={{ padding: '5px 10px', background: '#3a7bd5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '16px' }}>description</span>
+                  Informe
+                </button>
+              </div>
+            </div>
+          );
+          break;
+        case "arrests":
+          title = "Todos los Arrestos";
+          const arrestsRes = await fetch("http://localhost:5000/api/dashboard/all-arrests");
+          const arrestsData = await arrestsRes.json();
+          data = arrestsData.arrests;
+          renderItem = (item, index) => <span>{index + 1}. {item.first_name} {item.last_name} - {item.falta_administrativa} ({new Date(item.arrest_date).toLocaleDateString()})</span>;
+          break;
+        case "offenses":
+          title = "Distribución de Delitos";
+          data = summary.topOffenses;
+          renderItem = (item) => (
+            <>
+              <span>{item.offense}</span>
+              <span style={{ fontWeight: 'bold' }}>{item.count}</span>
+            </>
+          );
+          break;
+        case "top-persons":
+          title = "Personas con Más Arrestos";
+          data = summary.topPersons;
+          renderItem = (item) => (
+            <>
+              <span>{item.name}</span>
+              <span style={{ fontWeight: 'bold' }}>{item.count} arrestos</span>
+            </>
+          );
+          break;
+        default:
+          return;
+      }
+      setModalData({ isOpen: true, title, data, renderItem });
+    } catch (err) {
+      if (onMessage) onMessage({ type: "error", text: `Error al cargar ${title}` });
+    }
+  };
+
+  const handleGenerateReport = async (personId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/dashboard/person-report/${personId}`);
+      if (!res.ok) throw new Error('No se pudo cargar el informe.');
+      const data = await res.json();
+      setReportData(data);
+      setModalData({ isOpen: false, title: "", data: [], renderItem: () => null });
+    } catch (err) {
+      if (onMessage) onMessage({ type: "error", text: err.message });
+    }
+  };
+
+  const handleReportSearch = async (e) => {
+    e.preventDefault();
+    if (!reportSearchTerm.trim()) {
+      if (onMessage) onMessage({ type: 'warning', text: 'Ingrese un nombre para buscar.' });
+      return;
+    }
+    setIsSearchingReport(true);
+    setReportSearchResults([]);
+    try {
+      const res = await fetch(`http://localhost:5000/api/search_face/by_name?q=${encodeURIComponent(reportSearchTerm)}`);
+      if (!res.ok) throw new Error('Error en la búsqueda');
+      
+      const data = await res.json();
+      setReportSearchResults(data.results);
+      if (data.results.length === 0 && onMessage) {
+        onMessage({ type: 'info', text: 'No se encontraron personas con ese nombre.' });
+      }
+    } catch (err) {
+      if (onMessage) onMessage({ type: 'error', text: err.message });
+    } finally {
+      setIsSearchingReport(false);
+    }
+  };
+
+  if (showDashboardReport) return <DashboardReport summary={summary} filter={filter} onBack={() => setShowDashboardReport(false)} />;
+
+  if (reportData) return <PersonReport reportData={reportData} onBack={() => setReportData(null)} />;
+
+  return (
+    <div style={{
+      padding: "2rem",
+      background: "linear-gradient(135deg, #2c3e50 0%, #4b6cb7 100%)",
+      minHeight: "100vh",
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    }}>
+      {/* Header */}
+      <div style={{
+        marginBottom: "2rem",
+        textAlign: "center"
+      }}>
+        <h1 style={{
+          fontSize: "2.5rem",
+          fontWeight: "700",
+          color: "#fff",
+          marginBottom: "0.5rem",
+          textShadow: "0 2px 4px rgba(0,0,0,0.2)"
+        }}>
+        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '60px' }}>dashboard_2</span>
+          Dashboard de Monitoreo
+        </h1>
+        <p style={{
+          color: "rgba(255,255,255,0.8)",
+          fontSize: "1rem"
+        }}>
+          Sistema de seguimiento y análisis en tiempo real
+        </p>
+      </div>
+
+      {/* Filtros */}
+      <div style={{...styles.filterContainer, position: 'relative', zIndex: 10}}>
+        <h3 style={styles.filterTitle}>
+          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '24px' }}>filter_alt</span>
+          Filtrar Arrestos por Fecha
+        </h3>
+        <div style={styles.filterControls}>
+          <CustomSelect
+            value={filter.year}
+            options={yearOptions}
+            onChange={(value) => setFilter(prev => ({ ...prev, year: value }))}
+            placeholder="Todos los Años"
+          />
+          <CustomSelect
+            value={filter.month}
+            options={monthOptions}
+            onChange={(value) => setFilter(prev => ({ ...prev, month: value }))}
+            placeholder="Todos los Meses"
+          />
+          <CustomSelect
+            value={filter.day}
+            options={dayOptions}
+            onChange={(value) => setFilter(prev => ({ ...prev, day: value }))}
+            placeholder="Todos los Días"
+          />
+          <button 
+            onClick={() => setFilter({ year: 'all', month: 'all', day: 'all' })}
+            style={styles.clearFilterButton}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete_sweep</span>
+            Limpiar
+          </button>
+          {/* Botón para imprimir reporte del dashboard */}
+          <button 
+            onClick={() => setShowDashboardReport(true)}
+            style={{...styles.clearFilterButton, background: 'rgba(58, 123, 213, 0.3)', border: '1px solid rgba(58, 123, 213, 0.5)'}}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>print</span>
+            Imprimir Reporte
+          </button>
+        </div>
+      </div>
+
+      {/* Mensaje de filtros activos */}
+      { (filter.year !== 'all' || filter.month !== 'all' || filter.day !== 'all') &&
+        <div style={styles.activeFilterMessage}>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>filter_alt</span>
+          Mostrando resultados para: 
+          {filter.day !== 'all' && ` día ${filter.day}`}
+          {filter.month !== 'all' && ` de ${monthOptions.find(m => m.value === filter.month)?.label}`}
+          {filter.year !== 'all' && ` de ${filter.year}`}
+        </div>
+      }
+
+      {/* Divisor */}
+      <div style={{
+        height: '1px',
+        background: 'rgba(255, 255, 255, 0.2)',
+        margin: '2rem 0'
+      }}>
+      </div>
+
+      {/* Cards resumen */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "1.5rem",
+        marginBottom: "2rem"
+      }}>
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>people</span>}
+          title="Personas Registradas"
+          value={summary.totalPersons}
+          gradient="linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)"
+          onClick={() => handleOpenModal("persons")}
+        />
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>gavel</span>}
+          title="Arrestos Totales"
+          value={summary.totalArrests}
+          gradient="linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
+          onClick={() => handleOpenModal("arrests")}
+        />
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>warning</span>}
+          title="Delito Más Común"
+          value={summary.topOffenses[0]?.offense || "N/A"}
+          subtitle={summary.topOffenses[0] ? `${summary.topOffenses[0].count} casos` : ""}
+          gradient="linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%)"
+          onClick={() => handleOpenModal("offenses")}
+        />
+        <StatCard
+          icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>crown</span>}
+          title="Persona con Más Arrestos"
+          value={summary.topPersons[0]?.name || "N/A"}
+          subtitle={summary.topPersons[0] ? `${summary.topPersons[0].count} arrestos` : ""}
+          gradient="linear-gradient(135deg, #525252 0%, #3d72b4 100%)"
+          onClick={() => handleOpenModal("top-persons")}
+        />
+      </div>
+
+      {/* Sección: Generar Reporte */}
+      <div style={{
+        background: "rgba(10, 25, 41, 0.5)",
+        backdropFilter: "blur(10px)",
+        borderRadius: "16px",
+        padding: "1.5rem 2rem",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+        marginBottom: "2rem"
+      }}>
+        <h3 style={{ ...styles.chartTitle, marginBottom: '1.5rem' }}>
+          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '24px' }}>description</span>
+          Generar Reporte por Persona
+        </h3>
+        <form onSubmit={handleReportSearch} style={styles.reportSearchForm}>
+          <input
+            type="text"
+            style={styles.reportSearchInput}
+            placeholder="Buscar por nombre o apellido..."
+            value={reportSearchTerm}
+            onChange={(e) => setReportSearchTerm(e.target.value)}
+          />
+          <button type="submit" style={styles.reportSearchButton} disabled={isSearchingReport}>
+            {isSearchingReport ? (
+              <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
+            ) : (
+              <span className="material-symbols-outlined">search</span>
+            )}
+          </button>
+        </form>
+
+        {reportSearchResults.length > 0 && (
+          <div style={styles.reportResultsContainer}>
+            {reportSearchResults.map(person => (
+              <div key={person.id} style={styles.reportResultItem}>
+                <div style={styles.reportResultInfo}>
+                  <img 
+                    src={`http://localhost:5000/${person.photo_path}`} 
+                    alt="foto" 
+                    style={styles.reportResultPhoto} 
+                  />
+                  <div>
+                    <span style={styles.reportResultName}>{person.first_name} {person.last_name}</span>
+                    <span style={styles.reportResultId}>ID: {person.id_number || 'N/A'}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleGenerateReport(person.id)}
+                  style={styles.generateReportButton}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                  Generar Informe
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Gráficos */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+        gap: "2rem",
+        marginBottom: "2rem"
+      }}>
+        <ChartCard title="Distribución de Delitos">
+          <Pie
+            data={{
+              labels: summary.topOffenses.map((o) => o.offense),
+              datasets: [{
+                data: summary.topOffenses.map((o) => o.count),
+                backgroundColor: [
+                  "#007bff",
+                  "#1e3c72",
+                  "#3a7bd5",
+                  "#4e8cff",
+                  "#2a5298",
+                  "#00d2ff"
+                ],
+                borderWidth: 0,
+              }]
+            }}
+            options={{
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: { color: "#fff", padding: 15, font: { size: 12 } }
+                },
+              },
+            }}
+          />
+        </ChartCard>
+
+        <ChartCard title="Top 5 Personas con Más Arrestos">
+          <Bar
+            data={{
+              labels: summary.topPersons.map((p) => p.name),
+              datasets: [{
+                label: "Arrestos",
+                data: summary.topPersons.map((p) => p.count),
+                backgroundColor: "rgba(58, 123, 213, 0.8)",
+                borderColor: "#3a7bd5",
+                borderWidth: 2,
+                borderRadius: 8,
+              }]
+            }}
+            options={{
+              plugins: {
+                legend: { display: false }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: "#fff" },
+                  grid: { color: "rgba(255,255,255,0.1)" }
+                },
+                x: {
+                  ticks: { color: "#fff", font: { size: 11 } },
+                  grid: { display: false }
+                }
+              }
+            }}
+          />
+        </ChartCard>
+      </div>
+
+      {/* Tabla de arrestos recientes */}
+      <div style={{
+        background: "rgba(10, 25, 41, 0.5)",
+        backdropFilter: "blur(10px)",
+        borderRadius: "16px",
+        padding: "1.5rem",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+      }}>
+        <h3 style={{
+          color: "#fff",
+          fontSize: "1.5rem",
+          marginBottom: "1.5rem",
+          fontWeight: "600"
+        }}>
+          <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem', fontSize: '40px' }}>schedule</span>
+          Arrestos Recientes
+        </h3>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{
+            width: "100%",
+            borderCollapse: "separate",
+            borderSpacing: "0"
+          }}>
+            <thead>
+                <tr>
+                  <th style={thStyle}>
+                    <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    calendar_today
+                  </span>
+                  Fecha
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    people
+                  </span>
+                  Persona
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    warning
+                  </span>
+                  Delito
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    place
+                  </span>
+                  Lugar
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    local_police
+                  </span>
+                  Oficial
+                </th>
+                <th style={thStyle}>
+                  <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px', fontSize: '18px', color: '#fff' }}>
+                    attach_money
+                  </span>
+                  Fianza
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {arrests.map((a, idx) => (
+                <tr key={idx} style={{
+                  background: idx % 2 === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)",
+                  transition: "all 0.2s",
+                  cursor: "pointer"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
+                onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)"}
+                >
+                  <td style={tdStyle}>{new Date(a.arrest_date).toLocaleDateString()}</td>
+                  <td style={tdStyle}>{a.person_name}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      background: "rgba(211, 47, 47, 0.3)",
+                      padding: "0.25rem 0.75rem",
+                      borderRadius: "12px",
+                      fontSize: "0.85rem",
+                      fontWeight: "500"
+                    }}>
+                      {a.offense}
+                    </span>
+                  </td>
+                  <td style={tdStyle}>{a.location}</td>
+                  <td style={tdStyle}>{a.arresting_officer || "N/A"}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      background: "rgba(58, 123, 213, 0.3)",
+                      padding: "0.25rem 0.75rem",
+                      borderRadius: "12px",
+                      fontSize: "0.85rem",
+                      fontWeight: "500"
+                    }}>
+                      {a.bail_status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {modalData.isOpen && (
+        <DashboardModal
+          title={modalData.title}
+          data={modalData.data}
+          renderItem={modalData.renderItem}
+          onClose={() => setModalData({ ...modalData, isOpen: false })}
+        />
+      )}
+    </div>
+  );
+}
+
+function StatCard({ icon, title, value, subtitle, gradient, onClick }) {
+  return (
+    <div style={{
+      background: gradient,
+      borderRadius: "16px",
+      padding: "1.5rem",
+      color: "#fff",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+      transition: "transform 0.2s",
+      cursor: "pointer",
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+    onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+    onClick={onClick}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+        <div style={{
+          background: "rgba(255,255,255,0.2)",
+          padding: "0.75rem",
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "2rem"
+        }}>
+          {icon}
+        </div>
+        <h4 style={{
+          fontSize: "0.9rem",
+          fontWeight: "500",
+          opacity: 0.9,
+          margin: 0
+        }}>
+          {title}
+        </h4>
+      </div>
+      <p style={{
+        fontSize: "2rem",
+        fontWeight: "700",
+        margin: "0.5rem 0",
+        wordBreak: "break-word"
+      }}>
+        {value}
+      </p>
+      {subtitle && (
+        <p style={{
+          fontSize: "0.85rem",
+          opacity: 0.8,
+          margin: 0
+        }}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ChartCard({ title, children }) {
+  return (
+    <div style={{
+      background: "rgba(10, 25, 41, 0.5)",
+      backdropFilter: "blur(10px)",
+      borderRadius: "16px",
+      padding: "1.5rem",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+    }}>
+      <h3 style={{
+        color: "#fff",
+        fontSize: "1.25rem",
+        marginBottom: "1.5rem",
+        fontWeight: "600"
+      }}>
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+const styles = {
+  reportSearchForm: {
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '1.5rem',
+  },
+  reportSearchInput: {
+    flex: 1,
+    padding: '0.75rem 1rem',
+    fontSize: '1rem',
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    color: '#fff',
+    outline: 'none',
+  },
+  reportSearchButton: {
+    padding: '0.75rem',
+    background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#fff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reportResultsContainer: {
+    maxHeight: '300px',
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    paddingRight: '10px',
+  },
+  reportResultItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255, 255, 255, 0.05)',
+    padding: '0.75rem',
+    borderRadius: '8px',
+  },
+  reportResultInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+  },
+  reportResultPhoto: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+  },
+  reportResultName: {
+    fontWeight: '600',
+    color: '#fff',
+    display: 'block',
+  },
+  reportResultId: {
+    fontSize: '0.8rem',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  generateReportButton: {
+    padding: '8px 12px',
+    background: '#3a7bd5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+  chartTitle: {
+    color: "#fff",
+    fontSize: "1.25rem",
+    marginBottom: "1.5rem",
+    fontWeight: "600"
+  },
+  filterContainer: {
+    background: "rgba(10, 25, 41, 0.5)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "16px",
+    padding: "1.5rem 2rem",
+    marginBottom: "1rem",
+  },
+  filterTitle: {
+    color: "#fff",
+    fontSize: "1.2rem",
+    margin: "0 0 1rem 0",
+    fontWeight: "600",
+  },
+  filterControls: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap',
+  },
+  clearFilterButton: {
+    padding: '0.75rem 1.5rem',
+    background: 'rgba(211, 47, 47, 0.3)',
+    border: '1px solid rgba(211, 47, 47, 0.5)',
+    borderRadius: '8px',
+    color: '#fff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+  },
+  activeFilterMessage: {
+    background: 'rgba(58, 123, 213, 0.2)',
+    color: '#fff',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '10px',
+    textAlign: 'center',
+    fontSize: '0.9rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
   }
-});
+};
 
-module.exports = router;
+const thStyle = {
+  padding: "1rem",
+  textAlign: "left",
+  color: "#fff",
+  fontWeight: "600",
+  fontSize: "0.9rem",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  borderBottom: "2px solid rgba(255,255,255,0.2)"
+};
 
-
-// En tu archivo de rutas del dashboard en el backend (ej. backend/routes/dashboard.js)
-
-// GET /api/dashboard/all-persons
-router.get('/all-persons', async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      `SELECT id, first_name, last_name FROM Persons ORDER BY first_name, last_name`
-    );
-    res.json({ persons: rows });
-  } catch (err) {
-    console.error('Error fetching all persons:', err.message);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
-});
-
-
-// GET /api/dashboard/all-arrests
-router.get('/all-arrests', async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      `SELECT a.id, a.arrest_date, a.falta_administrativa, p.first_name, p.last_name
-       FROM Arrests a
-       JOIN Persons p ON a.person_id = p.id
-       ORDER BY a.arrest_date DESC`
-    );
-    res.json({ arrests: rows });
-  } catch (err) {
-    console.error('Error fetching all arrests:', err.message);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
-});
+const tdStyle = {
+  padding: "1rem",
+  color: "#fff",
+  fontSize: "0.95rem"
+};
