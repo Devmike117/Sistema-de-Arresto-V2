@@ -525,8 +525,8 @@ console.log(data);
 ### 3. Dashboard y Estadísticas
 
 1. Hacer clic en **Administrador** (requiere login)
-   - Usuario: `admin@bioregistro.com`
-   - Contraseña: `admin123`
+   - Usuario: `usuario@prueba.com`
+   - Contraseña: `contraseña`
 2. Acceder al **Dashboard**
 3. Aplicar filtros por año/mes/día
 4. Ver gráficos de:
@@ -638,6 +638,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 Hecho con ❤️
 
 </div>
+
 
 
 
