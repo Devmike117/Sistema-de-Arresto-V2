@@ -188,7 +188,9 @@ export default function FacialSearch({ onMessage }) {
                   <div style={styles.personInfo}>
                     <h3 style={styles.personName}>
                       {result.person.first_name} {result.person.last_name}
-                      {result.person.alias && <span style={styles.alias}> "{result.person.alias}"</span>}
+                      {result.person.alias && (
+                        <span style={styles.alias}> "{result.person.alias}"</span>
+                      )}
                     </h3>
 
                     <div style={styles.infoGrid}>

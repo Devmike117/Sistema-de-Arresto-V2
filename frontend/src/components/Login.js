@@ -12,11 +12,10 @@ const Login = ({ onLogin, onMessage, onBack }) => {
             return;
         }
         setLoading(true);
-        // Simulación de llamada a API para autenticación
+
         setTimeout(() => {
-            // En una aplicación real, aquí llamarías a tu backend
             if (email === 'admin@bioregistro.com' && password === 'admin123') {
-                onLogin(); // Llama a la función del padre para actualizar el estado
+                onLogin();
             } else {
                 onMessage({ type: 'error', text: 'Credenciales incorrectas.' });
             }
@@ -28,7 +27,15 @@ const Login = ({ onLogin, onMessage, onBack }) => {
         <div style={styles.loginContainer}>
             <div style={styles.loginCard}>
                 <h2 style={styles.title}>Acceso de Administrador</h2>
-                <form onSubmit={handleSubmit} style={styles.form}>
+                
+                <form
+                    onSubmit={handleSubmit}
+                    style={styles.form}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck="false"
+                >
                     <div style={styles.inputGroup}>
                         <label htmlFor="email" style={styles.label}>Email</label>
                         <input
@@ -39,8 +46,13 @@ const Login = ({ onLogin, onMessage, onBack }) => {
                             style={styles.input}
                             placeholder="admin@bioregistro.com"
                             required
+                            autoComplete="new-email"
+                            autoCorrect="off"
+                            autoCapitalize="none"
+                            spellCheck="false"
                         />
                     </div>
+
                     <div style={styles.inputGroup}>
                         <label htmlFor="password" style={styles.label}>Contraseña</label>
                         <input
@@ -51,15 +63,26 @@ const Login = ({ onLogin, onMessage, onBack }) => {
                             style={styles.input}
                             placeholder="admin123"
                             required
+                            autoComplete="new-password"
+                            autoCorrect="off"
+                            autoCapitalize="none"
+                            spellCheck="false"
                         />
                     </div>
+
                     <button type="submit" disabled={loading} style={styles.button}>
                         {loading ? 'Ingresando...' : 'Iniciar Sesión'}
                     </button>
                 </form>
+
                 {onBack && (
                     <button onClick={onBack} style={styles.backButton}>
-                        <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '0.5rem' }}>arrow_back</span>
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ verticalAlign: 'middle', marginRight: '0.5rem' }}
+                        >
+                            arrow_back
+                        </span>
                         Volver al Inicio
                     </button>
                 )}
@@ -101,7 +124,6 @@ const styles = {
         fontSize: '0.9rem',
         textDecoration: 'underline'
     },
-    
 };
 
 export default Login;
