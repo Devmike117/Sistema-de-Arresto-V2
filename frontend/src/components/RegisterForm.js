@@ -28,8 +28,7 @@ export default function RegisterForm({ onNext, onMessage }) {
     community: '',
     id_number: '',
     observaciones: '',
-    falta_administrativa: '',
-    falta_administrativa_otro: '',
+    faltas_administrativas: [], // Cambiado a array
     arrest_community: '',
     arresting_officer: '',
     turno: '',
@@ -37,6 +36,9 @@ export default function RegisterForm({ onNext, onMessage }) {
     rnd: '',
     sentencia: ''
   });
+
+  const [currentFalta, setCurrentFalta] = useState('');
+  const [otraFaltaInput, setOtraFaltaInput] = useState('');
 
   const [mexicoData, setMexicoData] = useState([]);
   const [municipios, setMunicipios] = useState([]);
@@ -145,15 +147,32 @@ const getRelativeCoords = (e, canvas) => {
     }
   }
 
+  const handleAddFalta = () => {
+    const faltaToAdd = currentFalta === "Otro" ? otraFaltaInput.trim() : currentFalta;
+    if (faltaToAdd && !form.faltas_administrativas.includes(faltaToAdd)) {
+      setForm(prev => ({
+        ...prev,
+        faltas_administrativas: [...prev.faltas_administrativas, faltaToAdd]
+      }));
+      setCurrentFalta('');
+      setOtraFaltaInput('');
+    }
+  };
+
+  const handleRemoveFalta = (faltaToRemove) => {
+    setForm(prev => ({
+      ...prev,
+      faltas_administrativas: prev.faltas_administrativas.filter(f => f !== faltaToRemove)
+    }));
+  };
+
   function handleSave(e) {
     e.preventDefault();
 
-    const falta = form.falta_administrativa === "Otro"
-      ? form.falta_administrativa_otro
-      : form.falta_administrativa;
-
-    if (!form.first_name || !form.last_name || !falta) {
-      if (onMessage) onMessage({ type: 'error', text: 'Completa nombre, apellido y falta administrativa.' });
+    if (!form.first_name || !form.last_name || form.faltas_administrativas.length === 0) {
+      if (onMessage) onMessage({
+        type: 'error', text: 'Completa nombre, apellido y agrega al menos una falta administrativa.'
+      });
       return;
     }
 
@@ -167,7 +186,11 @@ const getRelativeCoords = (e, canvas) => {
       return;
     }
 
-    const formData = { ...form, firma };
+    const formData = {
+      ...form,
+      falta_administrativa: form.faltas_administrativas.join(", "), // Unimos las faltas
+      firma
+    };
     if (onNext) onNext(formData);
     if (onMessage) onMessage({ type: 'success', text: 'Datos personales guardados, ahora captura foto y huellas.' });
   }
@@ -185,8 +208,7 @@ const getRelativeCoords = (e, canvas) => {
       community: '',
       id_number: '',
       observaciones: '',
-      falta_administrativa: '',
-      falta_administrativa_otro: '',
+      faltas_administrativas: [],
       arrest_community: '',
       arresting_officer: '',
       turno: '',
@@ -517,28 +539,50 @@ const getRelativeCoords = (e, canvas) => {
           {/* Falta administrativa */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Falta administrativa *</label>
-              <select
-                name="falta_administrativa"
-                value={form.falta_administrativa}
-                onChange={handleChange}
-                style={styles.input}
-                required
-              >
-                <option value="">Selecciona una opción</option>
-                {faltasAdministrativas.map(falta => (
-                  <option key={falta} value={falta}>{falta}</option>
-                ))}
-              </select>
-              {form.falta_administrativa === "Otro" && (
-                <input
-                  name="falta_administrativa_otro"
-                  value={form.falta_administrativa_otro}
-                  onChange={handleChange}
-                  style={{ ...styles.input, marginTop: '0.5rem' }}
-                  placeholder="Especifica la falta administrativa"
-                />
+              <label style={styles.label}>Faltas administrativas *</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <select
+                  name="currentFalta"
+                  value={currentFalta}
+                  onChange={(e) => setCurrentFalta(e.target.value)}
+                  style={{ ...styles.input, flex: 1 }}
+                >
+                  <option value="">Selecciona una falta para agregar</option>
+                  {faltasAdministrativas.map(falta => (
+                    <option key={falta} value={falta}>{falta}</option>
+                  ))}
+                </select>
+                <button type="button" onClick={handleAddFalta} style={styles.addButton} title="Agregar Falta">
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+              </div>
+              {currentFalta === "Otro" && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <input
+                    name="otraFaltaInput"
+                    value={otraFaltaInput}
+                    onChange={(e) => setOtraFaltaInput(e.target.value)}
+                    style={styles.input}
+                    placeholder="Especifica la otra falta"
+                  />
+                </div>
               )}
+
+              {/* Contenedor de faltas agregadas */}
+              <div style={styles.tagsContainer}>
+                {form.faltas_administrativas.length > 0 ? (
+                  form.faltas_administrativas.map((falta, index) => (
+                    <div key={index} style={styles.tag}>
+                      <span>{falta}</span>
+                      <button type="button" onClick={() => handleRemoveFalta(falta)} style={styles.tagRemoveButton}>
+                        &times;
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <span style={styles.emptyTagsPlaceholder}>No se han agregado faltas.</span>
+                )}
+              </div>
             </div>
             <div style={styles.formGroup}>
               <label style={styles.label}>Comunidad del arresto</label>
@@ -921,4 +965,63 @@ const styles = {
     fontSize: '0.85rem',
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  addButton: {
+    background: 'linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '0 1rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+  },
+  tagsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    background: 'rgba(0,0,0,0.2)',
+    padding: '0.75rem',
+    borderRadius: '10px',
+    marginTop: '1rem',
+    minHeight: '110px', // Altura mínima fija
+    maxHeight: '110px', // Altura máxima fija
+    overflowY: 'auto',
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignContent: 'flex-start', // Alinea los items al inicio
+  },
+  tag: {
+    background: 'rgba(255, 255, 255, 0.9)',
+    color: '#333',
+    padding: '0.4rem 0.8rem',
+    borderRadius: '15px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+  },
+  tagRemoveButton: {
+    background: '#ccc',
+    color: '#555',
+    border: 'none',
+    borderRadius: '50%',
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    lineHeight: '1',
+  },
+  emptyTagsPlaceholder: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: '0.9rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  }
 };
