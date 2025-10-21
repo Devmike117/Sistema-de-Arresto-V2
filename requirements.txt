@@ -28,4 +28,6 @@ numpy           # Operaciones numéricas
 #4. Desactivar el entorno virtual cuando hayas terminado:
 #deactivate
 
+#
+
 
