@@ -174,15 +174,16 @@ const oficialesList = [
 
 export default function ArrestModal({ person, onClose, onSave }) {
   const [formData, setFormData] = useState({
-    falta_administrativa: "",
+    faltas_administrativas: [], // Cambiado a array
     comunidad: "",
     turno: "",
     arresting_officer: "",
     folio: "",
     rnd: "",
-    sentencia: "",
-    otra_falta: "",
+    sentencia: ""
   });
+  const [currentFalta, setCurrentFalta] = useState("");
+  const [otraFalta, setOtraFalta] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -193,24 +194,40 @@ export default function ArrestModal({ person, onClose, onSave }) {
     }));
   };
 
+  const handleAddFalta = () => {
+    let faltaToAdd = currentFalta === "Otro" ? otraFalta.trim() : currentFalta;
+    if (faltaToAdd && !formData.faltas_administrativas.includes(faltaToAdd)) {
+      setFormData(prev => ({
+        ...prev,
+        faltas_administrativas: [...prev.faltas_administrativas, faltaToAdd]
+      }));
+      setCurrentFalta("");
+      setOtraFalta("");
+    }
+  };
+
+  const handleRemoveFalta = (faltaToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      faltas_administrativas: prev.faltas_administrativas.filter(f => f !== faltaToRemove)
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (
-      !formData.falta_administrativa.trim() ||
-      !formData.comunidad.trim() ||
-      (formData.falta_administrativa === "Otro" && !formData.otra_falta.trim())
+      formData.faltas_administrativas.length === 0 ||
+      !formData.comunidad.trim()
     ) {
-      alert("Debes llenar Falta administrativa y Comunidad");
+      alert("Debes agregar al menos una Falta administrativa y seleccionar una Comunidad.");
       return;
     }
 
     const dataToSend = {
       person_id: person.id,
-      falta_administrativa:
-        formData.falta_administrativa === "Otro"
-          ? formData.otra_falta.trim()
-          : formData.falta_administrativa.trim(),
+      // Unimos las faltas en un solo string separado por comas
+      falta_administrativa: formData.faltas_administrativas.join(", "),
       comunidad: formData.comunidad.trim(),
       arresting_officer: formData.arresting_officer.trim() || null,
       folio: formData.folio.trim() || null,
@@ -259,32 +276,52 @@ export default function ArrestModal({ person, onClose, onSave }) {
           <div style={styles.field}>
             <label style={styles.label}>
               <span className="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '6px' }}>gavel</span>
-              Falta Administrativa *</label>
-            <select
-              name="falta_administrativa"
-              value={formData.falta_administrativa}
-              onChange={handleChange}
-              style={styles.select}
-              required
-            >
-              <option value="">Selecciona una opción</option>
-              {faltasAdministrativas.map((falta) => (
-                <option key={falta} value={falta}>{falta}</option>
-              ))}
-            </select>
+              Faltas Administrativas *
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <select
+                name="currentFalta"
+                value={currentFalta}
+                onChange={(e) => setCurrentFalta(e.target.value)}
+                style={{ ...styles.select, flex: 1 }}
+              >
+                <option value="">Selecciona una falta para agregar</option>
+                {faltasAdministrativas.map((falta) => (
+                  <option key={falta} value={falta}>{falta}</option>
+                ))}
+              </select>
+              <button type="button" onClick={handleAddFalta} style={styles.addButton} title="Agregar Falta">
+                <span className="material-symbols-outlined" style={{ color: '#333' }}>add</span>
+              </button>
+            </div>
           </div>
 
-          {formData.falta_administrativa === "Otro" && (
+          {/* Campo para "Otra" falta */}
+          {currentFalta === "Otro" && (
             <div style={styles.field}>
               <label style={styles.label}>Especificar Falta *</label>
               <input
-                name="otra_falta"
+                name="otraFalta"
                 placeholder="Describe la falta administrativa"
-                value={formData.otra_falta}
-                onChange={handleChange}
+                value={otraFalta}
+                onChange={(e) => setOtraFalta(e.target.value)}
                 style={styles.input}
                 required
               />
+            </div>
+          )}
+
+          {/* Contenedor de faltas agregadas */}
+          {formData.faltas_administrativas.length > 0 && (
+            <div style={styles.tagsContainer}>
+                {formData.faltas_administrativas.map((falta, index) => (
+                  <div key={index} style={styles.tag}>
+                    <span>{falta}</span>
+                    <button type="button" onClick={() => handleRemoveFalta(falta)} style={styles.tagRemoveButton}>
+                      &times;
+                    </button>
+                  </div>
+                ))}
             </div>
           )}
 
@@ -446,8 +483,8 @@ const styles = {
     backdropFilter: "blur(20px)",
     borderRadius: "20px",
     width: "100%",
-    maxWidth: "600px",
-    maxHeight: "90vh",
+    maxWidth: "750px",
+    maxHeight: "85vh",
     overflowY: "auto",
     border: "1px solid rgba(255, 255, 255, 0.2)",
     boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
@@ -628,5 +665,52 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "0.5rem"
+  },
+  addButton: {
+    background: 'linear-gradient(135deg, #4facfe 0%, #2ea3a9ff 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '0 1rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+  },
+  tagsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    background: 'rgba(0,0,0,0.2)',
+    padding: '0.75rem',
+    borderRadius: '10px',
+    maxHeight: '110px', 
+    overflowY: 'auto',  
+    marginTop: '1rem',
+  },
+  tag: {
+    background: 'rgba(255, 255, 255, 0.9)',
+    color: '#333',
+    padding: '0.4rem 0.8rem',
+    borderRadius: '15px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+  },
+  tagRemoveButton: {
+    background: '#ccc',
+    color: '#555',
+    border: 'none',
+    borderRadius: '50%',
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    lineHeight: '1',
   }
 };
