@@ -1,0 +1,27 @@
+# PersistentVolumeClaim para datos de PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: arresto-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard  # Para Minikube/Docker Desktop
+---
+# PersistentVolumeClaim para uploads del backend
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-uploads-pvc
+  namespace: arresto-system
+spec:
+  accessModes:
+    - ReadWriteOnce  # Minikube no soporta ReadWriteMany por defecto
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard

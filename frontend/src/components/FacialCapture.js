@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import API_BASE_URL from '../config';
 
 export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
   const videoRef = useRef(null);
@@ -74,8 +75,8 @@ export default function FacialCapture({ photoFile, setPhotoFile, onMessage }) {
       try {
         const formData = new FormData();
         formData.append('file', file);
-
-        const response = await fetch('http://localhost:8001/generate_embedding/', {
+        
+        const response = await fetch(`${API_BASE_URL}/api/deepface/validate`, {
           method: 'POST',
           body: formData
         });

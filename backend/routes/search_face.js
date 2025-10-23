@@ -47,7 +47,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     let embedding = null;
 try {
-  const response = await axios.post('http://localhost:8001/generate_embedding/', formData, {
+  const response = await axios.post('http://127.0.0.1:8001/generate_embedding/', formData, {
     headers: formData.getHeaders(),
     timeout: 10000,
   });

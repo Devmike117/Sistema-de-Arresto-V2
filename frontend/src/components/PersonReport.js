@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
+import API_BASE_URL from '../config';
 
 const PersonReport = ({ reportData, onBack }) => {
   if (!reportData) return null;
@@ -90,7 +91,7 @@ const PersonReport = ({ reportData, onBack }) => {
           <h3 style={styles.sectionTitle}>Datos Personales</h3>
           <div style={styles.personDetails}>
             <img
-              src={`http://localhost:5000/${person.photo_path}`}
+              src={`${API_BASE_URL}/${person.photo_path}`}
               alt="Foto"
               style={styles.personPhoto}
             />

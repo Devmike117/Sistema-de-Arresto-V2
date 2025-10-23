@@ -18,6 +18,7 @@ const statsRoutes = require('./routes/stats');
 const searchFaceRouter = require('./routes/search_face');
 const registerArrestRouter = require('./routes/register_arrest');
 const dashboardRouter = require('./routes/dashboard');
+const deepfaceRouter = require('./routes/deepface');
 
 // Rutas
 app.use('/api/register', registerRoutes);
@@ -28,9 +29,15 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/register_arrest', registerArrestRouter);
 app.use('/api/arrests', registerArrestRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/deepface', deepfaceRouter);
 
 // Servir carpeta de fotos como pública
 app.use('/uploads/photos', express.static(path.join(__dirname, 'uploads/photos')));
+
+// Health check endpoint para Kubernetes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Iniciar el microservicio de Python
 const pythonServicePath = path.join(__dirname, 'python', 'deepface_service.py');

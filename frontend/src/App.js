@@ -10,6 +10,7 @@ import SearchPeople from "./components/SearchPeople";
 import Login from "./components/Login";
 import './styles/global.css';
 import HistoryArrestModal from "./components/HistoryArrestModal";
+import API_BASE_URL from './config';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,7 @@ function App() {
     if (fingerprintFile) formData.append("fingerprint", fingerprintFile);
 
     try {
-      const res = await fetch("http://localhost:5000/api/register", {
+      const res = await fetch(`${API_BASE_URL}/api/register`, {
         method: "POST",
         body: formData,
       });

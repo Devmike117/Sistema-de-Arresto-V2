@@ -1,0 +1,66 @@
+# PersistentVolume y PVC para desarrollo local con hostPath
+# Estos volúmenes almacenan datos directamente en tu máquina
+
+---
+# PersistentVolume para PostgreSQL
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/k8s-postgres-data
+    type: DirectoryOrCreate
+  storageClassName: ""  # Binding manual
+
+---
+# PersistentVolumeClaim para PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: arresto-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: ""  # Binding manual
+  volumeName: postgres-pv  # Vincular explícitamente
+
+---
+# PersistentVolume para uploads del backend
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backend-uploads-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/k8s-backend-uploads
+    type: DirectoryOrCreate
+  storageClassName: ""  # Binding manual
+
+---
+# PersistentVolumeClaim para uploads
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-uploads-pvc
+  namespace: arresto-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: ""  # Binding manual
+  volumeName: backend-uploads-pv  # Vincular explícitamente

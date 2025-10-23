@@ -1,0 +1,15 @@
+# .dockerignore para Backend
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+uploads/*
+!uploads/.gitkeep
+python/__pycache__
+python/*.pyc

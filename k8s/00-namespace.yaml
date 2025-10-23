@@ -1,0 +1,8 @@
+# Namespace para el proyecto
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arresto-system
+  labels:
+    name: arresto-system
+    environment: production
