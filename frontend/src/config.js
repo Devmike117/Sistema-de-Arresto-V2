@@ -1,5 +1,8 @@
 // Define la URL base de tu API.
-// Cambia esta variable si la IP o el puerto de tu backend cambian.
-const API_BASE_URL = 'http://192.168.0.73:5000';
+// Para desarrollo local con port-forward:
+const API_BASE_URL = 'http://localhost:5001';
+
+// Para Kubernetes con NodePort (puede no funcionar en Docker Desktop Windows):
+// const API_BASE_URL = 'http://localhost:30525';
 
 export default API_BASE_URL;

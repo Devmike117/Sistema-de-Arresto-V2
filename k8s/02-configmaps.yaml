@@ -1,0 +1,24 @@
+# ConfigMap para configuración del backend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: arresto-system
+data:
+  DB_HOST: postgres-service
+  DB_PORT: "5432"
+  DB_USER: admin
+  DB_NAME: arrest_registry
+  PORT: "5000"
+  NODE_ENV: production
+  DEEPFACE_API_URL: https://microserviciodeepface-production.up.railway.app
+---
+# ConfigMap para configuración del frontend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: arresto-system
+data:
+  REACT_APP_API_URL: http://localhost:30525  # NodePort del backend en Kubernetes
+  REACT_APP_ENV: development
