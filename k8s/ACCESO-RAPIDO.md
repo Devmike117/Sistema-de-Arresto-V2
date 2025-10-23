@@ -28,8 +28,11 @@ kubectl get pods -n arresto-system -w
 # Cuando veas todos "1/1 Running", presiona Ctrl+C
 
 # 5. Crear tablas de base de datos (SOLO PRIMERA VEZ)
+cd ..
 $POSTGRES_POD = kubectl get pods -n arresto-system -l app=postgres -o jsonpath="{.items[0].metadata.name}"
-kubectl exec $POSTGRES_POD -n arresto-system -- psql -U admin -d arrest_registry -f /docker-entrypoint-initdb.d/init-db.sql
+kubectl cp init-db.sql arresto-system/$POSTGRES_POD:/tmp/init-db.sql
+kubectl exec $POSTGRES_POD -n arresto-system -- psql -U admin -d arrest_registry -f /tmp/init-db.sql
+cd k8s
 
 # 6. Iniciar port-forwards
 .\port-forward.ps1
@@ -195,7 +198,25 @@ kubectl exec -it deployment/postgres -n arresto-system -- /bin/bash
 kubectl exec -it deployment/postgres -n arresto-system -- psql -U admin -d arrest_registry
 ```
 
-### Port Forwarding (Alternativa)
+### Port Forwarding Manual (Si el script no funciona)
+
+> ⚠️ **Nota:** Si `.\port-forward.ps1` da error de firma digital, usa estos comandos:
+
+```powershell
+# Frontend en puerto local 3000
+Start-Job -Name "frontend-pf" -ScriptBlock { kubectl port-forward -n arresto-system svc/frontend-service 3000:80 }
+
+# Backend en puerto local 5001
+Start-Job -Name "backend-pf" -ScriptBlock { kubectl port-forward -n arresto-system svc/backend-service 5001:5000 }
+
+# PostgreSQL en puerto local 5432
+Start-Job -Name "postgres-pf" -ScriptBlock { kubectl port-forward -n arresto-system svc/postgres-service 5432:5432 }
+
+# Ver estado de los jobs
+Get-Job
+```
+
+### Port Forwarding Individual (Alternativa)
 ```bash
 # Frontend en puerto local 8080
 kubectl port-forward svc/frontend-service 8080:80 -n arresto-system
@@ -236,6 +257,18 @@ kubectl get pods -l app=postgres -n arresto-system
 
 # Probar conexión
 kubectl exec deployment/backend -n arresto-system -- nc -zv postgres-service 5432
+```
+
+### Error "relation persons does not exist" (Tablas no creadas)
+```powershell
+# Si ves errores de tablas faltantes, créalas manualmente:
+cd C:\Users\mikea\Desktop\Sistema-de-Arresto-V2
+$POSTGRES_POD = kubectl get pods -n arresto-system -l app=postgres -o jsonpath="{.items[0].metadata.name}"
+kubectl cp init-db.sql arresto-system/${POSTGRES_POD}:/tmp/init-db.sql
+kubectl exec $POSTGRES_POD -n arresto-system -- psql -U admin -d arrest_registry -f /tmp/init-db.sql
+
+# Verificar que las tablas existan
+kubectl exec $POSTGRES_POD -n arresto-system -- psql -U admin -d arrest_registry -c "\dt"
 ```
 
 ### Reconstruir Imágenes
@@ -329,4 +362,4 @@ Si encuentras problemas:
 
 ---
 
-**Última actualización:** 22 de octubre de 2025
+**Última actualización:** 23 de octubre de 2025
