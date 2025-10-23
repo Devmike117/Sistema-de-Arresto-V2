@@ -61,7 +61,7 @@ chmod +x deploy-local.sh
 ```bash
 kubectl get svc frontend-service -n arresto-system
 # Busca el NodePort (ejemplo: 80:30080/TCP)
-# Abre: http://localhost:30080
+# Abre: http://localhost:30103
 ```
 
 ### Minikube:

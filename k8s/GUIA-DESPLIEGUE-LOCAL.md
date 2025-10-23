@@ -691,3 +691,34 @@ Después del despliegue, verifica:
 **Última actualización:** 23 de Octubre de 2025  
 **Versión del sistema:** 2.0  
 **Autor:** Sistema de Arresto V2 Team
+
+
+Configuración de pgAdmin
+Paso 1: Asegúrate que el port-forward esté activo
+El port-forward ya está corriendo. Si se cierra, ejecuta:
+
+kubectl port-forward -n arresto-system svc/postgres-service 5432:5432
+
+
+
+
+Paso 2: Abrir pgAdmin y crear nueva conexión
+Clic derecho en "Servers" → "Register" → "Server"
+
+Paso 3: Configuración en pgAdmin
+Pestaña "General":
+Name: Sistema Arresto - Local K8s
+Pestaña "Connection":
+Host name/address: localhost o 127.0.0.1
+Port: 5432
+Maintenance database: arrest_registry
+Username: admin
+Password: YourSecurePassword123!
+✅ Save password (opcional)
+
+
+
+Pestaña "Advanced":
+DB restriction: arrest_registry (opcional, para ver solo esta BD)
+Paso 4: Guardar y Conectar
+Clic en "Save" y deberías conectarte exitosamente.

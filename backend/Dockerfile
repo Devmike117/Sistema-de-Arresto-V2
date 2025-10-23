@@ -28,6 +28,7 @@ RUN addgroup --system nodejs && adduser --system --ingroup nodejs nodejs && \
 
 USER nodejs
 
+
 # Exponer puerto
 EXPOSE 5000
 
