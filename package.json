@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dotenv": "^17.2.3",
     "lucide-react": "^0.545.0",
     "multer": "^2.0.2",
     "pdfkit": "^0.17.2",

@@ -1,1 +1,33 @@
 # Dependencias Python
+fastapi          # Framework web asíncrono
+starlette        # Dependencia de FastAPI
+uvicorn          # Servidor ASGI
+pydantic         # Validación de datos
+
+# Dependencias para DeepFace y procesamiento de imágenes
+deepface        # Biblioteca de reconocimiento facial
+tensorflow      # Framework de machine learning
+opencv-python   # Procesamiento de imágenes
+pillow         # Manipulación de imágenes
+numpy           # Operaciones numéricas
+
+
+
+# Navegar a la carpeta del proyecto
+#cd ~/Sistema-de-Arresto-V2
+
+# Crear entorno virtual llamado 'venv'
+#python3 -m venv venv
+
+#2. Activar el entorno virtual:
+#source venv/bin/activate
+
+#3. Instalar las dependencias desde requirements.txt:
+#pip install -r requirements.txt
+
+#4. Desactivar el entorno virtual cuando hayas terminado:
+#deactivate
+
+#
+
+

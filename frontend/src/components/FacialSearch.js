@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import FacialCapture from "./FacialCapture";
+import API_BASE_URL from '../config';
 import ArrestModal from "./ArrestModal";
 
 export default function FacialSearch({ onMessage }) {
@@ -23,7 +24,7 @@ export default function FacialSearch({ onMessage }) {
       const formData = new FormData();
       formData.append("file", photoFile);
 
-      const res = await fetch("http://localhost:5000/api/search_face", {
+      const res = await fetch(`${API_BASE_URL}/api/search_face`, {
         method: "POST",
         body: formData,
       });
@@ -60,7 +61,7 @@ export default function FacialSearch({ onMessage }) {
     if (!result || !result.person) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/arrests", {
+      const res = await fetch(`${API_BASE_URL}/api/arrests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ person_id: result.person.id, ...arrestData }),
@@ -94,7 +95,7 @@ export default function FacialSearch({ onMessage }) {
 
   const handleSaveSentencia = async (arrestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}/sentencia`, {
+      const res = await fetch(`${API_BASE_URL}/api/arrests/${arrestId}/sentencia`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sentencia: sentenciaValues[arrestId] || "" }),
@@ -179,7 +180,7 @@ export default function FacialSearch({ onMessage }) {
                 <div style={styles.personCard}>
                   <div style={styles.photoContainer}>
                     <img
-                      src={`http://localhost:5000/${result.person.photo_path}`}
+                      src={`${API_BASE_URL}/${result.person.photo_path}`}
                       alt="Foto de la persona"
                       style={styles.photo}
                     />
