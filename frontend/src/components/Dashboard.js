@@ -4,6 +4,7 @@ import "chart.js/auto";
 import DashboardModal from "./DashboardModal";
 import PersonReport from "./PersonReport";
 import DashboardReport from "./DashboardReport"; // Importar el nuevo componente
+import API_BASE_URL from '../config'; // Importar configuración de API
 
 // Componente CustomSelect mejorado
 function CustomSelect({ value, options, onChange, placeholder }) {
@@ -239,10 +240,10 @@ export default function Dashboard({ onMessage }) {
     try {
       const queryParams = new URLSearchParams(filter).toString();
 
-      const statsRes = await fetch(`http://localhost:5000/api/dashboard/stats?${queryParams}`);
+      const statsRes = await fetch(`${API_BASE_URL}/api/dashboard/stats?${queryParams}`);
       const statsData = await statsRes.json();
 
-      const recentRes = await fetch(`http://localhost:5000/api/dashboard/recent-arrests?${queryParams}`);
+      const recentRes = await fetch(`${API_BASE_URL}/api/dashboard/recent-arrests?${queryParams}`);
       const recentData = await recentRes.json();
 
       if (!statsRes.ok || !recentRes.ok) {
@@ -284,7 +285,7 @@ export default function Dashboard({ onMessage }) {
       switch (type) {
         case "persons":
           title = "Personas Registradas";
-          const personsRes = await fetch("http://localhost:5000/api/dashboard/all-persons");
+          const personsRes = await fetch(`${API_BASE_URL}/api/dashboard/all-persons`);
           const personsData = await personsRes.json();
           data = personsData.persons;
           renderItem = (item, index) => (
@@ -294,7 +295,7 @@ export default function Dashboard({ onMessage }) {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(`http://localhost:5000/api/dashboard/privacy-notice/${item.id}`, '_blank');
+                    window.open(`${API_BASE_URL}/api/dashboard/privacy-notice/${item.id}`, '_blank');
                   }}
                   style={{ 
                     padding: '5px 10px', 
@@ -327,7 +328,7 @@ export default function Dashboard({ onMessage }) {
           break;
         case "arrests":
           title = "Todos los Arrestos";
-          const arrestsRes = await fetch("http://localhost:5000/api/dashboard/all-arrests");
+          const arrestsRes = await fetch(`${API_BASE_URL}/api/dashboard/all-arrests`);
           const arrestsData = await arrestsRes.json();
           data = arrestsData.arrests;
           renderItem = (item, index) => <span>{index + 1}. {item.first_name} {item.last_name} - {item.falta_administrativa} ({new Date(item.arrest_date).toLocaleDateString()})</span>;
@@ -363,7 +364,7 @@ export default function Dashboard({ onMessage }) {
 
   const handleGenerateReport = async (personId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/dashboard/person-report/${personId}`);
+      const res = await fetch(`${API_BASE_URL}/api/dashboard/person-report/${personId}`);
       if (!res.ok) throw new Error('No se pudo cargar el informe.');
       const data = await res.json();
       setReportData(data);
@@ -382,7 +383,7 @@ export default function Dashboard({ onMessage }) {
     setIsSearchingReport(true);
     setReportSearchResults([]);
     try {
-      const res = await fetch(`http://localhost:5000/api/search_face/by_name?q=${encodeURIComponent(reportSearchTerm)}`);
+      const res = await fetch(`${API_BASE_URL}/api/search_face/by_name?q=${encodeURIComponent(reportSearchTerm)}`);
       if (!res.ok) throw new Error('Error en la búsqueda');
       
       const data = await res.json();
@@ -400,13 +401,13 @@ export default function Dashboard({ onMessage }) {
   const openManageModal = async (type) => {
     try {
       if (type === 'arrests') {
-        const res = await fetch('http://localhost:5000/api/dashboard/all-arrests');
+        const res = await fetch(`${API_BASE_URL}/api/dashboard/all-arrests`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al cargar arrestos.');
         setAllArrests(data.arrests);
         setAllPersons([]); // Limpiar el otro estado
       } else if (type === 'persons') {
-        const res = await fetch('http://localhost:5000/api/dashboard/all-persons');
+        const res = await fetch(`${API_BASE_URL}/api/dashboard/all-persons`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al cargar personas.');
         setAllPersons(data.persons);
@@ -428,7 +429,7 @@ export default function Dashboard({ onMessage }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/arrests/${arrestId}`, {
         method: 'DELETE',
       });
 
@@ -453,7 +454,7 @@ export default function Dashboard({ onMessage }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/persons/${personId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/persons/${personId}`, {
         method: 'DELETE',
       });
 
@@ -635,7 +636,7 @@ export default function Dashboard({ onMessage }) {
               <div key={person.id} style={styles.reportResultItem}>
                 <div style={styles.reportResultInfo}>
                   <img 
-                    src={`http://localhost:5000/${person.photo_path}`} 
+                    src={`${API_BASE_URL}/${person.photo_path}`} 
                     alt="foto" 
                     style={styles.reportResultPhoto} 
                   />
@@ -646,7 +647,7 @@ export default function Dashboard({ onMessage }) {
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
-                    onClick={() => window.open(`http://localhost:5000/api/dashboard/privacy-notice/${person.id}`, '_blank')}
+                    onClick={() => window.open(`${API_BASE_URL}/api/dashboard/privacy-notice/${person.id}`, '_blank')}
                     style={{
                       ...styles.generateReportButton,
                       background: '#667eea',

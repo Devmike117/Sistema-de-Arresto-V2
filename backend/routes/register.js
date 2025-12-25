@@ -143,7 +143,7 @@ router.post(
           formData.append('file', fs.createReadStream(photoFile.path));
 
           const response = await axios.post(
-            'http://localhost:8001/generate_embedding/',
+            'http://127.0.0.1:8001/generate_embedding/',
             formData,
             { headers: { ...formData.getHeaders() } }
           );

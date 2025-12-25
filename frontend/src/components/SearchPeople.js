@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import ArrestModal from './ArrestModal';
 import HistoryArrestModal from './HistoryArrestModal';
+import API_BASE_URL from '../config';
 
 const SearchPeople = () => {
   const [firstName, setFirstName] = useState('');
@@ -28,7 +29,7 @@ const SearchPeople = () => {
 
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/search_face/by_name', {
+      const res = await axios.get(`${API_BASE_URL}/api/search_face/by_name`, {
         params: {
           first_name: firstName,
           last_name: lastName,
@@ -73,7 +74,7 @@ const SearchPeople = () => {
   const handleSaveArrest = async (arrestData) => {
     if (!selectedPerson) return;
     try {
-      await axios.post('http://localhost:5000/api/arrests', {
+      await axios.post(`${API_BASE_URL}/api/arrests`, {
         person_id: selectedPerson.id,
         ...arrestData,
       });
@@ -160,7 +161,7 @@ const SearchPeople = () => {
             {person.photo_path && (
               <div style={styles.photoContainer}>
                 <img
-                  src={`http://localhost:5000/${person.photo_path}`}
+                  src={`${API_BASE_URL}/${person.photo_path}`}
                   alt="Foto"
                   style={styles.photo}
                 />

@@ -1,0 +1,142 @@
+# Deployment del Backend Node.js
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: arresto-system
+  labels:
+    app: backend
+    tier: api
+spec:
+  replicas: 2  # Alta disponibilidad
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: api
+    spec:
+      initContainers:
+      # Esperar a que PostgreSQL esté listo
+      - name: wait-for-postgres
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;']
+      # Crear directorios en el volumen
+      - name: setup-uploads
+        image: busybox:1.35
+        command: ['sh', '-c', 'mkdir -p /uploads/photos /uploads/fingerprints /uploads/signatures /uploads/temp /uploads/privacy-notice && chmod -R 777 /uploads']
+        volumeMounts:
+        - name: uploads
+          mountPath: /uploads
+      containers:
+      - name: backend
+        image: arresto-backend:latest  # Imagen local
+        imagePullPolicy: Never  # No intentar descargar, usar imagen local
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_PORT
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_USER
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_NAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_PASSWORD
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: PORT
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: NODE_ENV
+        - name: DEEPFACE_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DEEPFACE_API_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: JWT_SECRET
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+          subPath: ""  # Montar el volumen pero preservar estructura
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: backend-uploads-pvc
+---
+# Service para Backend
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: arresto-system
+  labels:
+    app: backend
+spec:
+  type: NodePort  # Para acceso directo local si es necesario
+  clusterIP: 10.97.29.130  # IP fija interna del cluster
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 30525  # Puerto fijo para acceder desde localhost:30525
+    protocol: TCP
+    name: http
+  selector:
+    app: backend
+  sessionAffinity: ClientIP  # Mantener sesiones si es necesario

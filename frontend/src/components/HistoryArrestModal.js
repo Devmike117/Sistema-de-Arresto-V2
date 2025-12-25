@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import API_BASE_URL from '../config';
 
 export default function HistoryArrestModal({ 
   open, 
@@ -40,7 +41,7 @@ export default function HistoryArrestModal({
 
   const handleSaveSentencia = async (arrestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/arrests/${arrestId}/sentencia`, {
+      const res = await fetch(`${API_BASE_URL}/api/arrests/${arrestId}/sentencia`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sentencia: sentenciaValues[arrestId] || "" }),
